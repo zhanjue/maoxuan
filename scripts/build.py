@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=6">
+<link rel="stylesheet" href="%sassets/style.css?v=7">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -402,6 +402,8 @@ def build_pyramid_overview():
     apex = PYRAMID["apex"]
     branches = "".join(branch_card(b, True) for b in PYRAMID["branches"])
     base = '<div class="pyr-chips pyr-base-chips">%s</div>' % "".join(work_chip(w) for w in WORKS)
+    bu = PYRAMID["bottomup"]
+    bu_sums = "".join("<li><b>%s</b>%s</li>" % (esc(bu["acts"][k]), esc(bu["layers"][k + 1]["summary"][0])) for k in range(3))
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
 <p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>塔尖一句话，三根支柱，二十个概念节点，十七篇原文</b>。往下走有两种——自顶向下拆开它，自底向上归纳出它。</p>
@@ -422,15 +424,17 @@ def build_pyramid_overview():
 <div class="section" style="border-top:1px solid var(--line);margin-top:36px">
 <h2>两种走法</h2>
 <p class="desc">同一个金字塔，方向相反——演绎从塔尖拆到段落，归纳从段落归回塔尖。</p>
-<div class="entries">
-<a class="entry" href="pyramid-topdown.html"><div class="t">自顶向下 ↓</div><div class="d">%s</div></a>
-<a class="entry" href="pyramid-bottomup.html"><div class="t">自底向上 ↑</div><div class="d">%s</div></a>
+<div class="pyr-ways">
+<a class="pyr-way-td" href="pyramid-topdown.html"><div class="t">自顶向下 ↓</div><div class="d">演绎：从一句话拆到十七篇，四层拆开。</div></a>
+<div class="pyr-way-sum">
+<div class="hd"><span class="t">自底向上 ↑ · 归纳的三步</span><a class="more" href="pyramid-bottomup.html">进全页 →</a></div>
+<ol>%s</ol>
+</div>
 </div>
 </div>
 </div>""" % (esc(apex["label"]), esc(apex["statement"]), esc(apex["note"]),
              arrow("往下拆成三问"), branches, arrow("每根支柱落到概念与原文"),
-             base, esc(PYRAMID["topdown"]["title"] + "——" + PYRAMID["topdown"]["intro"]),
-             esc(PYRAMID["bottomup"]["title"] + "——" + PYRAMID["bottomup"]["intro"]))
+             base, bu_sums)
     write("pyramid.html", page("金字塔", body, 0, "pyramid"))
 
 def build_pyramid_topdown():
