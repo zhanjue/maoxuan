@@ -92,7 +92,7 @@ def page(title, body, depth, active=""):
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600&family=Wix+Madefor+Text:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="%sassets/style.css?v=4">
 </head>
 <body>
@@ -308,8 +308,8 @@ def build_tool():
 <p style="font-size:13.5px;color:var(--color-ink-2);margin:12px 0 4px;line-height:1.9">《矛盾论》第四节说：<b>复杂事物的发展过程中有许多的矛盾存在，其中必有一种是主要的</b>。捉住了主要矛盾，一切问题就迎刃而解。下面用第一卷第 68、69 段的结构，演示主要矛盾如何随阶段转化。</p>
 <div class="tool-legend">
 <span class="k"><span class="sw" style="background:var(--color-accent)"></span>主要矛盾（决定过程性质）</span>
-<span class="k"><span class="sw" style="background:var(--color-rule-2)"></span>次要矛盾（受主要矛盾规定和影响）</span>
-<span class="k"><span class="sw" style="background:var(--color-sheet);border:1px solid var(--color-accent)"></span>矛盾主要方面（决定事物性质的一面）</span>
+<span class="k"><span class="sw" style="background:var(--color-muted)"></span>次要矛盾（受主要矛盾规定和影响）</span>
+<span class="k"><span class="sw" style="background:var(--color-card);border:1px solid var(--color-accent)"></span>矛盾主要方面（决定事物性质的一面）</span>
 </div>
 <div class="tool-stage">
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap" id="tabs"></div>
@@ -422,18 +422,18 @@ APP_JS = r"""
     function render(i) {
       var s = scenes[i];
       tabs.innerHTML = scenes.map(function(x, j){
-        return '<button data-i="' + j + '" style="font-family:var(--font-body);font-size:13px;padding:6px 14px;border-radius:var(--radius-pill);border:1px solid ' + (j===i?'var(--color-accent)':'var(--color-rule-2)') + ';background:' + (j===i?'var(--color-paper-2)':'#fff') + ';color:' + (j===i?'var(--color-accent)':'var(--color-ink-2)') + ';cursor:pointer">' + x.name + '</button>';
+        return '<button data-i="' + j + '" style="font-family:var(--font-body);font-size:13px;padding:6px 14px;border-radius:var(--radius-pill);border:1px solid ' + (j===i?'var(--color-accent)':'var(--color-rule)') + ';background:' + (j===i?'var(--color-well-2)':'var(--color-card)') + ';color:' + (j===i?'var(--color-accent)':'var(--color-well-ink)') + ';cursor:pointer">' + x.name + '</button>';
       }).join('');
       tabs.querySelectorAll('button').forEach(function(b){
         b.addEventListener('click', function(){ render(+b.dataset.i); });
       });
       var sec = s.secondary.map(function(x){
-        return '<div style="padding:12px 16px;background:var(--color-paper-2);border:1px solid var(--color-rule);border-radius:var(--radius-pill);font-size:14px;color:var(--color-ink-2)">' + x + '</div>';
+        return '<div style="padding:12px 16px;background:var(--color-well-2);border:1px solid var(--color-rule);border-radius:var(--radius-pill);font-size:14px;color:var(--color-well-ink)">' + x + '</div>';
       }).join('');
       stage.innerHTML =
         '<div style="font-size:11px;color:var(--color-muted);letter-spacing:0;margin-bottom:10px">' + s.phase + '</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">' +
-          '<div style="flex:1 1 300px;padding:18px 20px;background:var(--color-paper-2);border:2px solid var(--color-accent);border-radius:var(--radius-pill)">' +
+          '<div style="flex:1 1 300px;padding:18px 20px;background:var(--color-card);border:2px solid var(--color-accent);border-radius:var(--radius-card)">' +
             '<div style="font-size:11px;color:var(--color-accent);letter-spacing:0">主要矛盾</div>' +
             '<div style="font-family:var(--font-display);font-size:20px;font-weight:700;margin-top:6px;color:var(--color-accent)">' + s.main + '</div>' +
             '<div style="font-size:12.5px;color:var(--color-ink-2);margin-top:8px">' + s.mainAspect + '</div>' +

@@ -59,18 +59,18 @@
     function render(i) {
       var s = scenes[i];
       tabs.innerHTML = scenes.map(function(x, j){
-        return '<button data-i="' + j + '" style="font-family:var(--font-body);font-size:13px;padding:6px 14px;border-radius:var(--radius-pill);border:1px solid ' + (j===i?'var(--color-accent)':'var(--color-rule-2)') + ';background:' + (j===i?'var(--color-paper-2)':'#fff') + ';color:' + (j===i?'var(--color-accent)':'var(--color-ink-2)') + ';cursor:pointer">' + x.name + '</button>';
+        return '<button data-i="' + j + '" style="font-family:var(--font-body);font-size:13px;padding:6px 14px;border-radius:var(--radius-pill);border:1px solid ' + (j===i?'var(--color-accent)':'var(--color-rule)') + ';background:' + (j===i?'var(--color-well-2)':'var(--color-card)') + ';color:' + (j===i?'var(--color-accent)':'var(--color-well-ink)') + ';cursor:pointer">' + x.name + '</button>';
       }).join('');
       tabs.querySelectorAll('button').forEach(function(b){
         b.addEventListener('click', function(){ render(+b.dataset.i); });
       });
       var sec = s.secondary.map(function(x){
-        return '<div style="padding:12px 16px;background:var(--color-paper-2);border:1px solid var(--color-rule);border-radius:var(--radius-pill);font-size:14px;color:var(--color-ink-2)">' + x + '</div>';
+        return '<div style="padding:12px 16px;background:var(--color-well-2);border:1px solid var(--color-rule);border-radius:var(--radius-pill);font-size:14px;color:var(--color-well-ink)">' + x + '</div>';
       }).join('');
       stage.innerHTML =
         '<div style="font-size:11px;color:var(--color-muted);letter-spacing:0;margin-bottom:10px">' + s.phase + '</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">' +
-          '<div style="flex:1 1 300px;padding:18px 20px;background:var(--color-paper-2);border:2px solid var(--color-accent);border-radius:var(--radius-pill)">' +
+          '<div style="flex:1 1 300px;padding:18px 20px;background:var(--color-card);border:2px solid var(--color-accent);border-radius:var(--radius-card)">' +
             '<div style="font-size:11px;color:var(--color-accent);letter-spacing:0">主要矛盾</div>' +
             '<div style="font-family:var(--font-display);font-size:20px;font-weight:700;margin-top:6px;color:var(--color-accent)">' + s.main + '</div>' +
             '<div style="font-size:12.5px;color:var(--color-ink-2);margin-top:8px">' + s.mainAspect + '</div>' +
