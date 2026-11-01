@@ -236,8 +236,8 @@ def build_concepts_index():
         blocks.append("""<div style="margin-bottom:34px"><div class="cat-head"><span class="pn">%s</span><span class="pr">%d 个节点</span></div><div class="concept-grid">%s</div></div>""" % (esc(cat), len(cs), items))
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">概念图谱</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">20 个概念节点，按 7 个领域归类。每个节点 = 一句话定义 + 核心要义 + 原话精选（逐字引文，精确到段）+ 演变时间线 + 自问自答。</p>
-%s</div>""" % "".join(blocks)
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">%d 个概念节点，按 %d 个领域归类。每个节点 = 一句话定义 + 核心要义 + 原话精选（逐字引文，精确到段）+ 演变时间线 + 自问自答。</p>
+%s</div>""" % (len(CONCEPTS), len(cats), "".join(blocks))
     write("concepts.html", page("概念图谱", body, 0, "concepts"))
 
 # ---------- 5. 概念页 ----------
@@ -448,16 +448,19 @@ def build_pyramid_topdown():
 %s</div>""" % (esc(td["title"]), esc(td["intro"]), "".join(blocks))
     write("pyramid-topdown.html", page("自顶向下", body, 0, "pyramid"))
 
+def summary_box(layer):
+    """本层归纳框——自底向上每一层都做一次归纳总结。"""
+    items = "".join("<li>%s</li>" % esc(s) for s in layer["summary"])
+    return """<div class="td-sum"><span class="td-sum-lb">%s</span><ul>%s</ul></div>""" % (esc(layer["summaryLabel"]), items)
+
 def build_pyramid_bottomup():
     bu = PYRAMID["bottomup"]
     blocks = []
     for i, L in enumerate(bu["layers"]):
         if L["a"] == "works":
-            inner = """<div class="pyr-chips pyr-base-chips">%s</div>
-<div class="td-note-inline">17 篇 · 两个时期 · 全部段落编号——段号即锚点。</div>""" % "".join(work_chip(w) for w in WORKS)
+            inner = """<div class="pyr-chips pyr-base-chips">%s</div>""" % "".join(work_chip(w) for w in WORKS)
         elif L["a"] == "concepts":
-            inner = """<div class="pyr-chips pyr-base-chips">%s</div>
-<div class="td-note-inline">20 个节点 · 每条都带逐字引文与出处段号。</div>""" % "".join(concept_chip(c["id"]) for c in CONCEPTS)
+            inner = """<div class="pyr-chips pyr-base-chips">%s</div>""" % "".join(concept_chip(c["id"]) for c in CONCEPTS)
         elif L["a"] == "groups":
             cols = []
             for b in PYRAMID["branches"]:
@@ -467,9 +470,9 @@ def build_pyramid_bottomup():
         else:  # apex
             inner = """<div class="pyr-apex pyr-apex-inline"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div><div class="pyr-note">%s</div></div>""" % (
                 esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["statement"]), esc(PYRAMID["apex"]["note"]))
-        blocks.append(layer_block(L["level"], L["q"], inner, L["note"]))
+        blocks.append(layer_block(L["level"], L["q"], inner + summary_box(L), L["note"]))
         if i < len(bu["layers"]) - 1:
-            blocks.append('<div class="td-conn"><span>归上一层</span></div>')
+            blocks.append('<div class="td-conn"><span>归纳%s · %s</span></div>' % ("一二三四"[i], esc(bu["acts"][i])))
     body = """<div class="narrow" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / <a href="pyramid.html" style="color:var(--ink-3);text-decoration:none">金字塔</a> / 自底向上</div>
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">%s</h1>

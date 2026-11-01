@@ -293,6 +293,11 @@ a.term:hover { border-bottom-color: var(--teal); }
 .td-q { font-family: var(--display); font-size: 22px; font-weight: 700; margin-top: 8px; }
 .td-a { margin-top: 16px; }
 .td-note { font-size: 12.5px; color: var(--ink-3); line-height: 1.85; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.td-sum { background: var(--paper-2); border-radius: 6px; padding: 16px 20px; margin-top: 18px; }
+.td-sum-lb { font-size: 11px; color: var(--teal); letter-spacing: 0.25em; font-weight: 600; }
+.td-sum ul { margin: 10px 0 0; padding-left: 18px; }
+.td-sum li { font-size: 13.5px; color: var(--ink); line-height: 1.9; margin-top: 6px; }
+.td-sum li:first-child { margin-top: 0; }
 .td-note-inline { font-size: 12.5px; color: var(--ink-3); line-height: 1.85; margin-top: 14px; }
 .td-conn { text-align: center; margin: 16px 0; position: relative; }
 .td-conn::before { content: ""; display: block; width: 1px; height: 20px; background: var(--line-2); margin: 0 auto 6px; }
