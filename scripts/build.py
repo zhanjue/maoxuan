@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=10">
+<link rel="stylesheet" href="%sassets/style.css?v=11">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -385,12 +385,14 @@ def branch_card(b, with_chips, stack=False):
 <div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span><div class="pyr-br-q">%s</div></div>
 <div class="pyr-br-body"><div class="pyr-br-claim">%s</div><div class="pyr-br-logic">%s</div>%s</div>
 </div>""" % (esc(b["key"]), esc(b["name"]), len(b["conceptIds"]), esc(b["question"]), esc(b["claim"]), esc(b["logic"]), chips)
+    chips = ('<div class="pyr-br-concepts"><div class="pyr-br-concepts-lb">%d 个概念</div><div class="pyr-chips">%s</div></div>'
+             % (len(b["conceptIds"]), "".join(concept_chip(cid) for cid in b["conceptIds"]))) if with_chips else ""
     return """<div class="pyr-br">
-<div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span></div>
+<div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span></div>
 <div class="pyr-br-q">%s</div>
 <div class="pyr-br-claim">%s</div>
 <div class="pyr-br-logic">%s</div>
-%s</div>""" % (esc(b["key"]), esc(b["name"]), len(b["conceptIds"]), esc(b["question"]), esc(b["claim"]), esc(b["logic"]), chips)
+%s</div>""" % (esc(b["key"]), esc(b["name"]), esc(b["question"]), esc(b["claim"]), esc(b["logic"]), chips)
 
 def arrow(label):
     return '<div class="pyr-arrow"><span>%s</span></div>' % esc(label)
@@ -411,13 +413,7 @@ def build_pyramid():
             inner = """<div class="pyr-apex"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div><div class="pyr-note">%s</div></div>""" % (
                 esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["statement"]), esc(PYRAMID["apex"]["note"]))
         elif L["a"] == "branches":
-            inner = '<div class="pyr-branches stack">%s</div>' % "".join(branch_card(b, False, True) for b in PYRAMID["branches"])
-        elif L["a"] == "concepts":
-            cols = []
-            for b in PYRAMID["branches"]:
-                cols.append("""<div class="pyr-br pyr-br-stack"><div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span></div><div class="pyr-chips">%s</div></div>""" % (
-                    esc(b["key"]), esc(b["name"]), len(b["conceptIds"]), "".join(concept_chip(cid) for cid in b["conceptIds"])))
-            inner = '<div class="pyr-branches stack">%s</div>' % "".join(cols)
+            inner = '<div class="pyr-branches">%s</div>' % "".join(branch_card(b, True) for b in PYRAMID["branches"])
         else:  # works
             quotes = "".join(anchor_quote_html(b) for b in PYRAMID["branches"])
             inner = """<div class="pyr-chips pyr-base-chips">%s</div>
@@ -425,7 +421,10 @@ def build_pyramid():
                 "".join(work_chip(w) for w in WORKS), quotes)
         blocks.append(layer_block(L["level"], L["q"], inner, L["note"]))
         if i < len(td["layers"]) - 1:
-            blocks.append('<div class="td-conn"><span>拆开下一层</span></div>')
+            if L["a"] == "branches":
+                blocks.append('<div class="td-merge"><span class="tm-line"></span><span class="tm-line"></span><span class="tm-line"></span><span class="tm-cap">三根支柱的概念汇成同一片地基</span></div>')
+            else:
+                blocks.append('<div class="td-conn"><span>拆开下一层</span></div>')
     body = """<div class="wrap" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 金字塔</div>
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
