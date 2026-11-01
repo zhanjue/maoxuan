@@ -86,7 +86,7 @@ body {
   margin-bottom: 6px; letter-spacing: 0.02em;
 }
 .section .desc { font-size: 13.5px; color: var(--ink-3); margin-bottom: 24px; }
-.entries { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.entries { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
 .entry {
   display: block; padding: 20px 18px; background: #fff;
   border: 1px solid var(--line); border-radius: 6px;
@@ -248,10 +248,61 @@ a.term:hover { border-bottom-color: var(--teal); }
 .result .rt em { font-style: normal; background: var(--teal-soft); color: var(--teal); }
 .result-empty { padding: 32px 0; color: var(--ink-3); font-size: 14px; }
 
+/* ---------- 金字塔（原理页） ---------- */
+.pyr { margin-top: 8px; }
+.pyr-apex {
+  max-width: 680px; margin: 0 auto; background: #fff;
+  border: 1.5px solid var(--teal); border-radius: 6px; padding: 24px 28px; text-align: center;
+}
+.pyr-tag { font-size: 11px; color: var(--teal); letter-spacing: 0.25em; font-weight: 600; }
+.pyr-apex-t { font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.95; margin-top: 12px; }
+.pyr-note { font-size: 12px; color: var(--ink-3); line-height: 1.8; margin-top: 14px; }
+.pyr-apex-inline { max-width: none; text-align: left; }
+.pyr-arrow { text-align: center; margin: 18px 0; position: relative; }
+.pyr-arrow::before {
+  content: ""; display: block; width: 1px; height: 22px;
+  background: var(--line-2); margin: 0 auto 8px;
+}
+.pyr-arrow span { font-size: 12px; color: var(--ink-3); letter-spacing: 0.1em; }
+.pyr-branches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.pyr-br { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
+.pyr-br-hd { display: flex; align-items: baseline; gap: 10px; }
+.pyr-key {
+  font-family: var(--display); font-size: 14px; font-weight: 700; color: var(--teal);
+  background: var(--teal-soft); border-radius: 4px; padding: 2px 9px; flex-shrink: 0;
+}
+.pyr-br-nm { font-family: var(--display); font-size: 16px; font-weight: 700; }
+.pyr-br-ct { font-size: 11.5px; color: var(--ink-3); margin-left: auto; flex-shrink: 0; }
+.pyr-br-q { font-size: 13px; color: var(--teal); margin-top: 12px; font-weight: 600; }
+.pyr-br-claim { font-size: 13.5px; color: var(--ink); line-height: 1.85; margin-top: 8px; }
+.pyr-br-logic { font-size: 12.5px; color: var(--ink-3); line-height: 1.8; margin-top: 8px; }
+.pyr-induce { font-size: 13px; color: var(--ink-2); line-height: 1.85; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.pyr-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.pyr-base { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
+.pyr-base-chips { margin-top: 0; }
+.chip {
+  display: inline-block; font-size: 12px; line-height: 1.6; padding: 4px 11px;
+  border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink-2);
+  text-decoration: none; background: #fff; transition: border-color .15s, color .15s;
+}
+.chip:hover { border-color: var(--teal); color: var(--teal); }
+
+/* 自顶向下 / 自底向上 分层 */
+.td-layer { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 26px 28px; }
+.td-lv { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.2em; }
+.td-q { font-family: var(--display); font-size: 22px; font-weight: 700; margin-top: 8px; }
+.td-a { margin-top: 16px; }
+.td-note { font-size: 12.5px; color: var(--ink-3); line-height: 1.85; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.td-note-inline { font-size: 12.5px; color: var(--ink-3); line-height: 1.85; margin-top: 14px; }
+.td-conn { text-align: center; margin: 16px 0; position: relative; }
+.td-conn::before { content: ""; display: block; width: 1px; height: 20px; background: var(--line-2); margin: 0 auto 6px; }
+.td-conn span { font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.15em; }
+
 /* ---------- 响应式 ---------- */
 @media (max-width: 860px) {
   .entries { grid-template-columns: repeat(2, 1fr); }
   .concept-grid { grid-template-columns: 1fr; }
+  .pyr-branches { grid-template-columns: 1fr; }
   .nav { display: none; }
   .hero { padding: 48px 0 32px; }
   .hero h1 { font-size: 32px; }
