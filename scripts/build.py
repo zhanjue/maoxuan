@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=8">
+<link rel="stylesheet" href="%sassets/style.css?v=9">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -378,8 +378,13 @@ def anchor_quote_html(branch):
 <div class="qm"><span>%s · %s · <a href="works/%s.html#p%d">第 %d 段 ↗</a></span><span>%s</span></div></div>""" % (
         quote_snippet(q["text"], q.get("keyword", ""), 64), esc(VOL), esc(q["work"]), w["id"], q["para"], q["para"], esc(q["note"]))
 
-def branch_card(b, with_chips):
+def branch_card(b, with_chips, stack=False):
     chips = '<div class="pyr-chips">%s</div>' % "".join(concept_chip(cid) for cid in b["conceptIds"]) if with_chips else ""
+    if stack:
+        return """<div class="pyr-br pyr-br-stack">
+<div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span><div class="pyr-br-q">%s</div></div>
+<div class="pyr-br-body"><div class="pyr-br-claim">%s</div><div class="pyr-br-logic">%s</div>%s</div>
+</div>""" % (esc(b["key"]), esc(b["name"]), len(b["conceptIds"]), esc(b["question"]), esc(b["claim"]), esc(b["logic"]), chips)
     return """<div class="pyr-br">
 <div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span></div>
 <div class="pyr-br-q">%s</div>
@@ -402,25 +407,9 @@ def build_pyramid_overview():
     apex = PYRAMID["apex"]
     branches = "".join(branch_card(b, True) for b in PYRAMID["branches"])
     base = '<div class="pyr-chips pyr-base-chips">%s</div>' % "".join(work_chip(w) for w in WORKS)
-    bu = PYRAMID["bottomup"]
-    acts = bu["acts"]
-    cnts = [len(b["conceptIds"]) for b in PYRAMID["branches"]]
-    flow = """<div class="pyr-flow">
-<span class="pf"><b>%d 篇</b><i>两个时期 · 全部段落</i></span>
-<span class="pa"><em>%s</em>→</span>
-<span class="pf"><b>%d 个</b><i>概念节点 · 逐字有出处</i></span>
-<span class="pa"><em>%s</em>→</span>
-<span class="pf"><b>%s</b><i>%s = %d · 不重不漏</i></span>
-<span class="pa"><em>%s</em>→</span>
-<span class="pf pf-apex"><b>塔尖一句话</b><i>论断被一步步论证出来</i></span>
-</div>
-<div class="pyr-flow-note">每一层只做一次收拢——走完这条路，塔尖那句话不是断言，是走出来的论证。</div>""" % (
-        len(WORKS), esc(acts[0]), len(CONCEPTS), esc(acts[1]),
-        esc(" · ".join(b["key"] for b in PYRAMID["branches"])),
-        esc(" + ".join(str(c) for c in cnts)), len(CONCEPTS), esc(acts[2]))
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>塔尖一句话，三根支柱，二十个概念节点，十七篇原文</b>。往下走有两种——自顶向下拆开它，自底向上归纳出它。</p>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>塔尖一句话，三根支柱，二十个概念节点，十七篇原文</b>。</p>
 <div class="pyr">
 <div class="pyr-apex">
 <div class="pyr-tag">%s</div>
@@ -436,19 +425,14 @@ def build_pyramid_overview():
 </div>
 </div>
 <div class="section" style="border-top:1px solid var(--line);margin-top:36px">
-<h2>两种走法</h2>
-<p class="desc">同一个金字塔，方向相反——演绎从塔尖拆到段落，归纳从段落归回塔尖。</p>
-<div class="pyr-ways">
-<a class="pyr-way-td" href="pyramid-topdown.html"><div class="t">自顶向下 ↓</div><div class="d">演绎：从一句话拆到十七篇，四层拆开。</div></a>
-<div class="pyr-way-sum">
-<div class="hd"><span class="t">自底向上 ↑ · 归纳成一句话</span><a class="more" href="pyramid-bottomup.html">进全页 →</a></div>
-%s
-</div>
-</div>
+<h2>拆开这座金字塔</h2>
+<p class="desc">从塔尖一句话拆到十七篇原文——四层走完，每一层只回答上一层的问题。</p>
+<a class="pyr-way-td pyr-way-solo" href="pyramid-topdown.html"><div class="t">自顶向下 ↓ · 从一句话到十七篇</div><div class="d">演绎读法：结论先行，再逐层拆开。三根支柱各答一问——凭什么对（道）、靠谁走（人）、怎么走（路）；看完四层，你就有了整卷的骨架。</div></a>
+<p class="pyr-way-alt">想反过来走：从十七篇归纳回一句话——<a href="pyramid-bottomup.html">自底向上 →</a></p>
 </div>
 </div>""" % (esc(apex["label"]), esc(apex["statement"]), esc(apex["note"]),
              arrow("往下拆成三问"), branches, arrow("每根支柱落到概念与原文"),
-             base, flow)
+             base)
     write("pyramid.html", page("金字塔", body, 0, "pyramid"))
 
 def build_pyramid_topdown():
@@ -459,13 +443,13 @@ def build_pyramid_topdown():
             inner = """<div class="pyr-apex pyr-apex-inline"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div></div>""" % (
                 esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["statement"]))
         elif L["a"] == "branches":
-            inner = '<div class="pyr-branches">%s</div>' % "".join(branch_card(b, False) for b in PYRAMID["branches"])
+            inner = '<div class="pyr-branches stack">%s</div>' % "".join(branch_card(b, False, True) for b in PYRAMID["branches"])
         elif L["a"] == "concepts":
             cols = []
             for b in PYRAMID["branches"]:
-                cols.append("""<div class="pyr-br"><div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span></div><div class="pyr-chips">%s</div></div>""" % (
+                cols.append("""<div class="pyr-br pyr-br-stack"><div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span></div><div class="pyr-chips">%s</div></div>""" % (
                     esc(b["key"]), esc(b["name"]), len(b["conceptIds"]), "".join(concept_chip(cid) for cid in b["conceptIds"])))
-            inner = '<div class="pyr-branches">%s</div>' % "".join(cols)
+            inner = '<div class="pyr-branches stack">%s</div>' % "".join(cols)
         else:  # works
             quotes = "".join(anchor_quote_html(b) for b in PYRAMID["branches"])
             inner = """<div class="pyr-chips pyr-base-chips">%s</div>

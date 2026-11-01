@@ -309,8 +309,7 @@ a.term:hover { border-bottom-color: var(--teal); }
 .pyr-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .pyr-base { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
 .pyr-base-chips { margin-top: 0; }
-/* 两种走法：自顶向下是小入口，自底向上的归纳总结放旁边 */
-.pyr-ways { display: grid; grid-template-columns: 240px 1fr; gap: 14px; align-items: stretch; }
+/* 拆开金字塔：只留自顶向下一张卡，自底向上降为一行小字 */
 .pyr-way-td {
   display: block; background: #fff; border: 1px solid var(--line); border-radius: 6px;
   padding: 18px 20px; text-decoration: none; transition: border-color .15s;
@@ -318,20 +317,21 @@ a.term:hover { border-bottom-color: var(--teal); }
 .pyr-way-td:hover { border-color: var(--teal); }
 .pyr-way-td .t { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--ink); }
 .pyr-way-td .d { font-size: 12.5px; color: var(--ink-3); line-height: 1.85; margin-top: 8px; }
-.pyr-way-sum { background: var(--paper-2); border: 1px solid var(--line); border-radius: 6px; padding: 18px 22px; }
-.pyr-way-sum .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-.pyr-way-sum .hd .t { font-family: var(--display); font-size: 16px; font-weight: 700; }
-.pyr-way-sum .more { font-size: 12.5px; color: var(--teal); text-decoration: none; white-space: nowrap; }
-/* 归纳链：三次收拢并成一条流程 */
-.pyr-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 12px; }
-.pf { background: #fff; border: 1px solid var(--line-2); border-radius: 6px; padding: 7px 13px; text-align: center; }
-.pf b { display: block; font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; }
-.pf i { display: block; font-style: normal; font-size: 10.5px; color: var(--ink-3); margin-top: 2px; white-space: nowrap; }
-.pf-apex { border-color: var(--teal); background: var(--teal-soft); }
-.pf-apex b { color: var(--teal); }
-.pa { display: inline-flex; flex-direction: column; align-items: center; color: var(--ink-3); font-size: 13px; line-height: 1; }
-.pa em { font-style: normal; font-size: 10px; color: var(--teal); letter-spacing: 0.05em; margin-bottom: 3px; white-space: nowrap; }
-.pyr-flow-note { font-size: 12.5px; color: var(--ink-3); line-height: 1.9; }
+.pyr-way-solo { padding: 22px 24px; }
+.pyr-way-solo .t { font-size: 18px; }
+.pyr-way-solo .d { font-size: 13px; }
+.pyr-way-alt { font-size: 12.5px; color: var(--ink-3); margin-top: 14px; }
+.pyr-way-alt a { color: var(--teal); text-decoration: none; }
+.pyr-way-alt a:hover { text-decoration: underline; }
+/* 自顶向下页：三根支柱拆成横带，不再三列并排 */
+.pyr-branches.stack { grid-template-columns: 1fr; }
+.pyr-br-stack { display: grid; grid-template-columns: 210px 1fr; column-gap: 28px; align-items: start; }
+.pyr-br-stack .pyr-br-hd { flex-direction: column; align-items: flex-start; gap: 4px; }
+.pyr-br-stack .pyr-br-ct { margin-left: 0; }
+.pyr-br-stack .pyr-br-q { margin-top: 10px; line-height: 1.75; }
+.pyr-br-stack .pyr-br-claim { font-size: 14.5px; line-height: 1.95; }
+.pyr-br-stack .pyr-br-logic { margin-top: 8px; }
+.pyr-br-stack .pyr-chips { margin-top: 12px; }
 .chip {
   display: inline-block; font-size: 12px; line-height: 1.6; padding: 4px 11px;
   border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink-2);
@@ -361,7 +361,7 @@ a.term:hover { border-bottom-color: var(--teal); }
   .concept-grid { grid-template-columns: 1fr; }
   .md-sec { grid-template-columns: 1fr; }
   .pyr-branches { grid-template-columns: 1fr; }
-  .pyr-ways { grid-template-columns: 1fr; }
+  .pyr-br-stack { grid-template-columns: 1fr; row-gap: 10px; }
   .nav { display: none; }
   .hero { padding: 48px 0 32px; }
   .hero h1 { font-size: 32px; }
