@@ -309,17 +309,7 @@ a.term:hover { border-bottom-color: var(--teal); }
 .pyr-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .pyr-base { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
 .pyr-base-chips { margin-top: 0; }
-/* 拆开金字塔：只留自顶向下一张卡，自底向上降为一行小字 */
-.pyr-way-td {
-  display: block; background: #fff; border: 1px solid var(--line); border-radius: 6px;
-  padding: 18px 20px; text-decoration: none; transition: border-color .15s;
-}
-.pyr-way-td:hover { border-color: var(--teal); }
-.pyr-way-td .t { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--ink); }
-.pyr-way-td .d { font-size: 12.5px; color: var(--ink-3); line-height: 1.85; margin-top: 8px; }
-.pyr-way-solo { padding: 22px 24px; }
-.pyr-way-solo .t { font-size: 18px; }
-.pyr-way-solo .d { font-size: 13px; }
+/* 金字塔页底：自底向上入口一行小字 */
 .pyr-way-alt { font-size: 12.5px; color: var(--ink-3); margin-top: 14px; }
 .pyr-way-alt a { color: var(--teal); text-decoration: none; }
 .pyr-way-alt a:hover { text-decoration: underline; }

@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=9">
+<link rel="stylesheet" href="%sassets/style.css?v=10">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -140,7 +140,7 @@ def build_index():
 <h2>从这里进</h2>
 <p class="desc">五种读法：用金字塔看全书结构、顺着时期读原文、按概念查、用工具理解、随机开一篇。</p>
 <div class="entries">
-<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">金字塔原理自顶向下与自底向上——一卷书读成一座三层结构</div></a>
+<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">塔尖一句话，三根支柱——从一句话四层拆到十七篇原文</div></a>
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 17 篇</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
@@ -403,45 +403,13 @@ def layer_block(level, q, inner, note):
 <div class="td-note">%s</div>
 </div>""" % (esc(level), esc(q), inner, esc(note))
 
-def build_pyramid_overview():
-    apex = PYRAMID["apex"]
-    branches = "".join(branch_card(b, True) for b in PYRAMID["branches"])
-    base = '<div class="pyr-chips pyr-base-chips">%s</div>' % "".join(work_chip(w) for w in WORKS)
-    body = """<div class="wrap" style="padding-top:40px">
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>塔尖一句话，三根支柱，二十个概念节点，十七篇原文</b>。</p>
-<div class="pyr">
-<div class="pyr-apex">
-<div class="pyr-tag">%s</div>
-<div class="pyr-apex-t">%s</div>
-<div class="pyr-note">%s</div>
-</div>
-%s
-<div class="pyr-branches">%s</div>
-%s
-<div class="pyr-base">
-<div class="pyr-tag">塔基 · 17 篇原文 · 1925—1937</div>
-%s
-</div>
-</div>
-<div class="section" style="border-top:1px solid var(--line);margin-top:36px">
-<h2>拆开这座金字塔</h2>
-<p class="desc">从塔尖一句话拆到十七篇原文——四层走完，每一层只回答上一层的问题。</p>
-<a class="pyr-way-td pyr-way-solo" href="pyramid-topdown.html"><div class="t">自顶向下 ↓ · 从一句话到十七篇</div><div class="d">演绎读法：结论先行，再逐层拆开。三根支柱各答一问——凭什么对（道）、靠谁走（人）、怎么走（路）；看完四层，你就有了整卷的骨架。</div></a>
-<p class="pyr-way-alt">想反过来走：从十七篇归纳回一句话——<a href="pyramid-bottomup.html">自底向上 →</a></p>
-</div>
-</div>""" % (esc(apex["label"]), esc(apex["statement"]), esc(apex["note"]),
-             arrow("往下拆成三问"), branches, arrow("每根支柱落到概念与原文"),
-             base)
-    write("pyramid.html", page("金字塔", body, 0, "pyramid"))
-
-def build_pyramid_topdown():
+def build_pyramid():
     td = PYRAMID["topdown"]
     blocks = []
     for i, L in enumerate(td["layers"]):
         if L["a"] == "apex":
-            inner = """<div class="pyr-apex pyr-apex-inline"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div></div>""" % (
-                esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["statement"]))
+            inner = """<div class="pyr-apex"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div><div class="pyr-note">%s</div></div>""" % (
+                esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["statement"]), esc(PYRAMID["apex"]["note"]))
         elif L["a"] == "branches":
             inner = '<div class="pyr-branches stack">%s</div>' % "".join(branch_card(b, False, True) for b in PYRAMID["branches"])
         elif L["a"] == "concepts":
@@ -458,12 +426,14 @@ def build_pyramid_topdown():
         blocks.append(layer_block(L["level"], L["q"], inner, L["note"]))
         if i < len(td["layers"]) - 1:
             blocks.append('<div class="td-conn"><span>拆开下一层</span></div>')
-    body = """<div class="narrow" style="padding-top:40px">
-<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / <a href="pyramid.html" style="color:var(--ink-3);text-decoration:none">金字塔</a> / 自顶向下</div>
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">%s</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">%s</p>
-%s</div>""" % (esc(td["title"]), esc(td["intro"]), "".join(blocks))
-    write("pyramid-topdown.html", page("自顶向下", body, 0, "pyramid"))
+    body = """<div class="wrap" style="padding-top:40px">
+<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 金字塔</div>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>塔尖一句话，三根支柱，二十个概念节点，十七篇原文</b>。%s</p>
+%s
+<p class="pyr-way-alt" style="margin-top:28px">想反过来走：从十七篇归纳回一句话——<a href="pyramid-bottomup.html">自底向上 →</a></p>
+</div>""" % (esc(td["intro"]), "".join(blocks))
+    write("pyramid.html", page("金字塔", body, 0, "pyramid"))
 
 def summary_box(layer):
     """本层归纳框——自底向上每一层都做一次归纳总结。"""
@@ -616,8 +586,7 @@ with open(os.path.join(SITE, "assets", "app.js"), "w", encoding="utf-8") as f:
 
 # ---------- 生成 ----------
 build_index()
-build_pyramid_overview()
-build_pyramid_topdown()
+build_pyramid()
 build_pyramid_bottomup()
 build_works()
 for w in WORKS:
