@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=5">
+<link rel="stylesheet" href="%sassets/style.css?v=6">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -307,14 +307,23 @@ def build_tool():
     body = """<div class="narrow" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 工具</div>
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">主要矛盾演示器</h1>
-<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">《矛盾论》第四节说：<b>复杂事物的发展过程中有许多的矛盾存在，其中必有一种是主要的</b>——捉住了主要矛盾，一切问题就迎刃而解。下面用第一卷第 68、69 段的结构，演示主要矛盾如何随阶段转化。</p>
+<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">「矛盾」在这里的意思是：一个事物内部互相拉扯、又互相依赖的两方——它们你进我退，推动整个事物变化。一个社会里同时存在好几对这样的矛盾，<b>其中必有一种是主要的</b>：捉住了它，其余问题就有了头绪。这一页用《矛盾论》的结构，演示主要矛盾如何随阶段转化。</p>
+<div class="tool-how">
+<div class="tool-how-hd">怎么看这一页</div>
+<ol>
+<li><b>点上方标签切换场景</b>——看每一个阶段，「说话算数」的是哪对矛盾。</li>
+<li><b>绿框是主要矛盾</b>：它规定这一阶段整个过程的性质；灰框是次要矛盾：被它规定、暂时让位。</li>
+<li><b>每对矛盾内部是两方</b>：主要矛盾卡里拆开给你看。哪一方占上风，就是「矛盾主要方面」——资本主义那个例子里是资产阶级。</li>
+</ol>
+</div>
+<div class="tool-quote">《矛盾论》第四节说：复杂事物的发展过程中有许多的矛盾存在，其中必有一种是主要的——捉住了主要矛盾，一切问题就迎刃而解。下面用第一卷的结构，演示主要矛盾如何随阶段转化。</div>
 <div class="tool-legend">
-<span class="k"><span class="sw" style="background:#0F766E"></span>主要矛盾（决定过程性质）</span>
-<span class="k"><span class="sw" style="background:#C8C5BB"></span>次要矛盾（受主要矛盾规定和影响）</span>
-<span class="k"><span class="sw" style="background:#fff;border:1px solid #0F766E"></span>矛盾主要方面（决定事物性质的一面）</span>
+<span class="k"><span class="sw" style="background:#0F766E"></span>主要矛盾 · 这一阶段谁说话算数</span>
+<span class="k"><span class="sw" style="background:#C8C5BB"></span>次要矛盾 · 被它规定、让位</span>
+<span class="k"><span class="sw" style="background:#fff;border:1px solid #0F766E"></span>矛盾主要方面 · 一对矛盾内部占上风的一方</span>
 </div>
 <div class="tool-stage">
-<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap" id="tabs"></div>
+<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center" id="tabs"></div>
 <div id="scene"></div>
 </div>
 <div class="tool-explain" id="explain"></div>
@@ -328,17 +337,23 @@ def build_tool():
     write("tool-maodun.html", page("主要矛盾演示器", body, 0, "tool"))
 
 TOOL_SCENES = [
-    {"key": "a", "name": "半殖民地的中国 · 1925—1931", "phase": "阶段一",
-     "main": "帝国主义和中华民族的矛盾", "mainAspect": "民族矛盾上升为矛盾主要方面",
+    {"key": "a", "name": "阶段一 · 半殖民地的中国", "group": "中国：主要矛盾的转化",
+     "phase": "阶段一",
+     "main": "帝国主义和中华民族的矛盾", "sides": ["帝国主义", "中华民族"], "aspectMain": "",
      "secondary": ["封建主义和人民大众的矛盾", "工人阶级和资产阶级的矛盾", "农民阶级和地主阶级的矛盾"],
+     "change": "起点：中国同时有好几对矛盾在拉扯。先看清这一堆里都有谁。",
      "note": "两大根本矛盾并存，民族矛盾居于主导——统一战线策略的总依据。"},
-    {"key": "b", "name": "抗日战争爆发 · 1931 九一八之后", "phase": "阶段二",
-     "main": "日本帝国主义和中华民族的矛盾", "mainAspect": "中日矛盾成为最主要的矛盾",
+    {"key": "b", "name": "阶段二 · 抗日战争爆发", "group": "中国：主要矛盾的转化",
+     "phase": "阶段二",
+     "main": "日本帝国主义和中华民族的矛盾", "sides": ["日本帝国主义", "中华民族"], "aspectMain": "",
      "secondary": ["国内阶级矛盾降为次要矛盾", "封建主义和人民大众的矛盾", "反动势力内部的矛盾"],
+     "change": "九一八之后：主要矛盾没有消失，但更尖锐——侵略者具体化为日本帝国主义；国内阶级矛盾降到次要和服从的地位，右边灰框的阵容跟着换。",
      "note": "当着日本帝国主义发动侵略，民族矛盾上升为主要矛盾，国内阶级矛盾降为次要和服从的地位——这正是《论反对日本帝国主义的策略》的形势判断。"},
-    {"key": "c", "name": "资本主义社会 · 《矛盾论》原例", "phase": "阶段对照",
-     "main": "无产阶级和资产阶级的矛盾", "mainAspect": "资产阶级在矛盾主要方面（资本主义社会性质）",
+    {"key": "c", "name": "对照例 · 资本主义社会", "group": "《矛盾论》原例（对照，不是中国的阶段）",
+     "phase": "阶段对照",
+     "main": "无产阶级和资产阶级的矛盾", "sides": ["资产阶级", "无产阶级"], "aspectMain": "资产阶级",
      "secondary": ["独占资本和自由资本的矛盾（帝国主义阶段新发生）", "宗主国和殖民地的矛盾", "生产社会化和占有私人性的矛盾"],
+     "change": "换一套参照系：资本主义社会里，主要矛盾是无产阶级和资产阶级的矛盾——资产阶级占矛盾主要方面，所以社会性质是资本主义的。",
      "note": "根本矛盾（性质）未变，但在不同阶段采取了逐渐激化的形式，并激化/发生新的大小矛盾——过程显出阶段性。"},
 ]
 
@@ -555,29 +570,39 @@ APP_JS = r"""
   // 矛盾论工具
   if (window.__TOOL__) {
     var scenes = window.__TOOL__, tabs = document.getElementById('tabs'), stage = document.getElementById('scene'), ex = document.getElementById('explain');
+    function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
     function render(i) {
-      var s = scenes[i];
-      tabs.innerHTML = scenes.map(function(x, j){
-        return '<button data-i="' + j + '" style="font-family:var(--text);font-size:13px;padding:6px 14px;border-radius:999px;border:1px solid ' + (j===i?'#0F766E':'var(--line-2)') + ';background:' + (j===i?'#E6F2F0':'#fff') + ';color:' + (j===i?'#0F766E':'var(--ink-2)') + ';cursor:pointer">' + x.name + '</button>';
-      }).join('');
-      tabs.querySelectorAll('button').forEach(function(b){
-        b.addEventListener('click', function(){ render(+b.dataset.i); });
+      var s = scenes[i], lastGroup = null, tb = [];
+      scenes.forEach(function(x, j){
+        if (lastGroup !== null && x.group !== lastGroup) tb.push('<span class="tool-tab-sep"></span>');
+        if (x.group !== lastGroup) tb.push('<span class="tool-tab-grp">' + esc(x.group) + '</span>');
+        tb.push('<button type="button" data-i="' + j + '" class="tool-tab' + (j === i ? ' on' : '') + '">' + esc(x.name) + '</button>');
+        lastGroup = x.group;
+      });
+      tabs.innerHTML = tb.join('');
+      Array.prototype.forEach.call(tabs.querySelectorAll('button'), function(b){
+        b.addEventListener('click', function(){ render(+b.getAttribute('data-i')); });
       });
       var sec = s.secondary.map(function(x){
-        return '<div style="padding:12px 16px;background:#F4F3EF;border:1px solid var(--line);border-radius:6px;font-size:14px;color:var(--ink-2)">' + x + '</div>';
+        return '<div class="md-sec-card">' + esc(x) + '</div>';
       }).join('');
+      var sideChips = s.sides.map(function(x){
+        var m = s.aspectMain && x === s.aspectMain;
+        return '<span class="md-chip' + (m ? ' md-chip-main' : '') + '">' + esc(x) + (m ? '<em>矛盾主要方面</em>' : '') + '</span>';
+      }).join('<span class="md-vs">对</span>');
       stage.innerHTML =
-        '<div style="font-size:11px;color:var(--ink-3);letter-spacing:0.2em;margin-bottom:10px">' + s.phase + '</div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">' +
-          '<div style="flex:1 1 300px;padding:18px 20px;background:#E6F2F0;border:2px solid #0F766E;border-radius:8px">' +
-            '<div style="font-size:11px;color:#0F766E;letter-spacing:0.2em">主要矛盾</div>' +
-            '<div style="font-family:var(--display);font-size:20px;font-weight:700;margin-top:6px;color:#0F766E">' + s.main + '</div>' +
-            '<div style="font-size:12.5px;color:var(--ink-2);margin-top:8px">' + s.mainAspect + '</div>' +
+        '<div class="md-phase">' + esc(s.phase) + '</div>' +
+        '<div class="md-grid">' +
+          '<div class="md-main">' +
+            '<div class="md-tag">主要矛盾 · 现阶段谁说话算数</div>' +
+            '<div class="md-title">' + esc(s.main) + '</div>' +
+            '<div class="md-sides">矛盾双方　' + sideChips + '</div>' +
           '</div>' +
-          '<div style="flex:2 1 340px;display:grid;grid-template-columns:1fr 1fr;gap:10px">' + sec + '</div>' +
+          '<div class="md-sec">' + sec + '</div>' +
         '</div>' +
-        '<div style="font-size:12px;color:var(--ink-3);margin-top:14px">次要矛盾 · 受主要矛盾规定和影响，随阶段相互转化</div>';
-      ex.innerHTML = '<b>读法</b>　' + s.note;
+        '<div class="md-sec-note">次要矛盾 · 被主要矛盾规定和影响，随阶段相互转化</div>' +
+        '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + '</div>';
+      ex.innerHTML = '<b>读法</b>　' + esc(s.note);
     }
     render(0);
   }

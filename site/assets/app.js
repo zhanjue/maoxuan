@@ -56,29 +56,39 @@
   // 矛盾论工具
   if (window.__TOOL__) {
     var scenes = window.__TOOL__, tabs = document.getElementById('tabs'), stage = document.getElementById('scene'), ex = document.getElementById('explain');
+    function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
     function render(i) {
-      var s = scenes[i];
-      tabs.innerHTML = scenes.map(function(x, j){
-        return '<button data-i="' + j + '" style="font-family:var(--text);font-size:13px;padding:6px 14px;border-radius:999px;border:1px solid ' + (j===i?'#0F766E':'var(--line-2)') + ';background:' + (j===i?'#E6F2F0':'#fff') + ';color:' + (j===i?'#0F766E':'var(--ink-2)') + ';cursor:pointer">' + x.name + '</button>';
-      }).join('');
-      tabs.querySelectorAll('button').forEach(function(b){
-        b.addEventListener('click', function(){ render(+b.dataset.i); });
+      var s = scenes[i], lastGroup = null, tb = [];
+      scenes.forEach(function(x, j){
+        if (lastGroup !== null && x.group !== lastGroup) tb.push('<span class="tool-tab-sep"></span>');
+        if (x.group !== lastGroup) tb.push('<span class="tool-tab-grp">' + esc(x.group) + '</span>');
+        tb.push('<button type="button" data-i="' + j + '" class="tool-tab' + (j === i ? ' on' : '') + '">' + esc(x.name) + '</button>');
+        lastGroup = x.group;
+      });
+      tabs.innerHTML = tb.join('');
+      Array.prototype.forEach.call(tabs.querySelectorAll('button'), function(b){
+        b.addEventListener('click', function(){ render(+b.getAttribute('data-i')); });
       });
       var sec = s.secondary.map(function(x){
-        return '<div style="padding:12px 16px;background:#F4F3EF;border:1px solid var(--line);border-radius:6px;font-size:14px;color:var(--ink-2)">' + x + '</div>';
+        return '<div class="md-sec-card">' + esc(x) + '</div>';
       }).join('');
+      var sideChips = s.sides.map(function(x){
+        var m = s.aspectMain && x === s.aspectMain;
+        return '<span class="md-chip' + (m ? ' md-chip-main' : '') + '">' + esc(x) + (m ? '<em>矛盾主要方面</em>' : '') + '</span>';
+      }).join('<span class="md-vs">对</span>');
       stage.innerHTML =
-        '<div style="font-size:11px;color:var(--ink-3);letter-spacing:0.2em;margin-bottom:10px">' + s.phase + '</div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">' +
-          '<div style="flex:1 1 300px;padding:18px 20px;background:#E6F2F0;border:2px solid #0F766E;border-radius:8px">' +
-            '<div style="font-size:11px;color:#0F766E;letter-spacing:0.2em">主要矛盾</div>' +
-            '<div style="font-family:var(--display);font-size:20px;font-weight:700;margin-top:6px;color:#0F766E">' + s.main + '</div>' +
-            '<div style="font-size:12.5px;color:var(--ink-2);margin-top:8px">' + s.mainAspect + '</div>' +
+        '<div class="md-phase">' + esc(s.phase) + '</div>' +
+        '<div class="md-grid">' +
+          '<div class="md-main">' +
+            '<div class="md-tag">主要矛盾 · 现阶段谁说话算数</div>' +
+            '<div class="md-title">' + esc(s.main) + '</div>' +
+            '<div class="md-sides">矛盾双方　' + sideChips + '</div>' +
           '</div>' +
-          '<div style="flex:2 1 340px;display:grid;grid-template-columns:1fr 1fr;gap:10px">' + sec + '</div>' +
+          '<div class="md-sec">' + sec + '</div>' +
         '</div>' +
-        '<div style="font-size:12px;color:var(--ink-3);margin-top:14px">次要矛盾 · 受主要矛盾规定和影响，随阶段相互转化</div>';
-      ex.innerHTML = '<b>读法</b>　' + s.note;
+        '<div class="md-sec-note">次要矛盾 · 被主要矛盾规定和影响，随阶段相互转化</div>' +
+        '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + '</div>';
+      ex.innerHTML = '<b>读法</b>　' + esc(s.note);
     }
     render(0);
   }
