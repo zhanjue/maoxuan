@@ -167,7 +167,9 @@ a.term:hover { border-bottom-color: var(--teal); }
 .notes-body { padding: 16px 4px 0; }
 .note-item { font-size: 13px; color: var(--ink-2); line-height: 1.9; padding: 6px 0; border-bottom: 1px dashed var(--line); }
 .note-item:last-child { border-bottom: none; }
-.read-foot { display: flex; justify-content: space-between; gap: 16px; padding: 24px 0 56px; border-top: 1px solid var(--line); }
+/* 分割线在边框上沿：margin-top 把线推离上方内容（padding-top 只推线下的文字，
+   曾因漏 margin-top 导致线贴在「本篇涉及的概念」chip 底边上） */
+.read-foot { display: flex; justify-content: space-between; gap: 16px; margin-top: 28px; padding: 18px 0 56px; border-top: 1px solid var(--line); }
 .read-foot a { font-size: 13.5px; color: var(--ink-2); text-decoration: none; max-width: 45%; }
 .read-foot a:hover { color: var(--teal); }
 .read-foot .next { text-align: right; margin-left: auto; }
