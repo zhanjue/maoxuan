@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=7">
+<link rel="stylesheet" href="%sassets/style.css?v=8">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -403,7 +403,21 @@ def build_pyramid_overview():
     branches = "".join(branch_card(b, True) for b in PYRAMID["branches"])
     base = '<div class="pyr-chips pyr-base-chips">%s</div>' % "".join(work_chip(w) for w in WORKS)
     bu = PYRAMID["bottomup"]
-    bu_sums = "".join("<li><b>%s</b>%s</li>" % (esc(bu["acts"][k]), esc(bu["layers"][k + 1]["summary"][0])) for k in range(3))
+    acts = bu["acts"]
+    cnts = [len(b["conceptIds"]) for b in PYRAMID["branches"]]
+    flow = """<div class="pyr-flow">
+<span class="pf"><b>%d 篇</b><i>两个时期 · 全部段落</i></span>
+<span class="pa"><em>%s</em>→</span>
+<span class="pf"><b>%d 个</b><i>概念节点 · 逐字有出处</i></span>
+<span class="pa"><em>%s</em>→</span>
+<span class="pf"><b>%s</b><i>%s = %d · 不重不漏</i></span>
+<span class="pa"><em>%s</em>→</span>
+<span class="pf pf-apex"><b>塔尖一句话</b><i>论断被一步步论证出来</i></span>
+</div>
+<div class="pyr-flow-note">每一层只做一次收拢——走完这条路，塔尖那句话不是断言，是走出来的论证。</div>""" % (
+        len(WORKS), esc(acts[0]), len(CONCEPTS), esc(acts[1]),
+        esc(" · ".join(b["key"] for b in PYRAMID["branches"])),
+        esc(" + ".join(str(c) for c in cnts)), len(CONCEPTS), esc(acts[2]))
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
 <p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>塔尖一句话，三根支柱，二十个概念节点，十七篇原文</b>。往下走有两种——自顶向下拆开它，自底向上归纳出它。</p>
@@ -427,14 +441,14 @@ def build_pyramid_overview():
 <div class="pyr-ways">
 <a class="pyr-way-td" href="pyramid-topdown.html"><div class="t">自顶向下 ↓</div><div class="d">演绎：从一句话拆到十七篇，四层拆开。</div></a>
 <div class="pyr-way-sum">
-<div class="hd"><span class="t">自底向上 ↑ · 归纳的三步</span><a class="more" href="pyramid-bottomup.html">进全页 →</a></div>
-<ol>%s</ol>
+<div class="hd"><span class="t">自底向上 ↑ · 归纳成一句话</span><a class="more" href="pyramid-bottomup.html">进全页 →</a></div>
+%s
 </div>
 </div>
 </div>
 </div>""" % (esc(apex["label"]), esc(apex["statement"]), esc(apex["note"]),
              arrow("往下拆成三问"), branches, arrow("每根支柱落到概念与原文"),
-             base, bu_sums)
+             base, flow)
     write("pyramid.html", page("金字塔", body, 0, "pyramid"))
 
 def build_pyramid_topdown():

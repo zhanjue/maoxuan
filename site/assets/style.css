@@ -322,9 +322,16 @@ a.term:hover { border-bottom-color: var(--teal); }
 .pyr-way-sum .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .pyr-way-sum .hd .t { font-family: var(--display); font-size: 16px; font-weight: 700; }
 .pyr-way-sum .more { font-size: 12.5px; color: var(--teal); text-decoration: none; white-space: nowrap; }
-.pyr-way-sum ol { margin: 0; padding-left: 20px; }
-.pyr-way-sum li { font-size: 13px; color: var(--ink-2); line-height: 2.0; }
-.pyr-way-sum li b { color: var(--teal); margin-right: 8px; }
+/* 归纳链：三次收拢并成一条流程 */
+.pyr-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 12px; }
+.pf { background: #fff; border: 1px solid var(--line-2); border-radius: 6px; padding: 7px 13px; text-align: center; }
+.pf b { display: block; font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.pf i { display: block; font-style: normal; font-size: 10.5px; color: var(--ink-3); margin-top: 2px; white-space: nowrap; }
+.pf-apex { border-color: var(--teal); background: var(--teal-soft); }
+.pf-apex b { color: var(--teal); }
+.pa { display: inline-flex; flex-direction: column; align-items: center; color: var(--ink-3); font-size: 13px; line-height: 1; }
+.pa em { font-style: normal; font-size: 10px; color: var(--teal); letter-spacing: 0.05em; margin-bottom: 3px; white-space: nowrap; }
+.pyr-flow-note { font-size: 12.5px; color: var(--ink-3); line-height: 1.9; }
 .chip {
   display: inline-block; font-size: 12px; line-height: 1.6; padding: 4px 11px;
   border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink-2);
