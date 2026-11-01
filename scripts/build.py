@@ -208,8 +208,8 @@ def build_work(w):
     if w["notes"]:
         items = "".join('<div class="note-item">%s</div>' % esc(n) for n in w["notes"])
         notes = '<details class="notes-toggle"><summary>注释 %d 条</summary><div class="notes-body">%s</div></details>' % (len(w["notes"]), items)
-    prev_html = '<a href="../%s.html">← 上一篇 · %s</a>' % (prev_w["id"], esc(prev_w["title"])) if prev_w else "<span></span>"
-    next_html = '<a class="next" href="../%s.html">下一篇 · %s →</a>' % (next_w["id"], esc(next_w["title"])) if next_w else "<span></span>"
+    prev_html = '<a href="%s.html">← 上一篇 · %s</a>' % (prev_w["id"], esc(prev_w["title"])) if prev_w else "<span></span>"
+    next_html = '<a class="next" href="%s.html">下一篇 · %s →</a>' % (next_w["id"], esc(next_w["title"])) if next_w else "<span></span>"
     body = """<div class="narrow">
 <div class="read-head">
 <div class="crumb"><a href="../index.html">首页</a> / <a href="../works.html">篇目库</a> / %s · %s</div>
