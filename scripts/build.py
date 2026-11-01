@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""知行录 · 毛泽东著作知识库 MVP – 静态站生成器。
+"""知行录 · 毛泽东著作知识库 MVP — 静态站生成器。
 读 data/works.json + data/concepts.json → 生成 site/ 下全站。
 设计约束：数据全部内联（file:// 双击可用，无 fetch 依赖）；Ink 纸白主题；
 溯源单元 = 卷/篇/段；段号为本库对求是网电子文本的编号，非纸质版页码。
@@ -90,20 +90,17 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600&family=Wix+Madefor+Text:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="%sassets/style.css?v=4">
+<link rel="stylesheet" href="%sassets/style.css?v=3">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
-<a class="brand" href="%sindex.html">知行录<small>毛泽东著作 · 第一卷</small></a>
+<a class="brand" href="%sindex.html">知行录<small>MAO WORKS · VOL.1</small></a>
 <nav class="nav">%s</nav>
-<div class="searchbox"><input id="q" type="search" placeholder="检索全文…" autocomplete="off"><span style="font-size:11px;color:var(--color-muted)">↵</span></div>
+<div class="searchbox"><input id="q" type="search" placeholder="检索全文…" autocomplete="off"><span style="font-size:11px;color:var(--ink-3)">↵</span></div>
 </div></header>
 %s
 <footer class="footer"><div class="wrap"><div class="bd">
-<p><b>知行录</b>：文献检索与阅读工具。语料仅采自%s，经求是网（qstheory.cn，官方渠道）电子文本整理，逐字收录，未作任何改写。</p>
+<p><b>知行录</b>——文献检索与阅读工具。语料仅采自%s，经求是网（qstheory.cn，官方渠道）电子文本整理，逐字收录，未作任何改写。</p>
 <p>本站只作阅读与检索之用，不作历史评价与政治表达。文中「段号」为本库对电子文本的段落编号，非纸质版页码；引文均可点击出处跳转核对。</p>
 </div></div></footer>
 <script src="%sassets/app.js"></script>
@@ -125,7 +122,7 @@ def build_index():
     body = """
 <div class="wrap"><section class="hero">
 <h1>把《毛选》第一卷<br>读成一座可检索的图书馆</h1>
-<p class="sub">17 篇正式出版文本，20 个概念节点，46 条溯源引文。<b>每一个判断都挂回原话</b>。点开任何一条引文，都能跳到它在某卷某篇某段的位置。</p>
+<p class="sub">17 篇正式出版文本，20 个概念节点，46 条溯源引文。<b>每一个判断都挂回原话</b>——点开任何一条引文，都能跳到它在某卷某篇某段的位置。</p>
 <div class="stats">
 <div class="stat"><div class="n">17</div><div class="l">篇目（第一卷全量）</div></div>
 <div class="stat"><div class="n">%s</div><div class="l">字正文</div></div>
@@ -140,21 +137,21 @@ def build_index():
 <p class="desc">四种读法：顺着时期读原文、按概念查、用工具理解、随机开一篇。</p>
 <div class="entries">
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 17 篇</div></a>
-<a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">从实践、矛盾到调查研究、工农武装割据，每个概念都有出处和演变</div></a>
-<a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化，把「读」变成「用」</div></a>
+<a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
+<a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
 <a class="entry" href="search.html"><div class="t">全文检索</div><div class="d">段落级检索，命中直接跳到段</div></a>
 </div>
 </section>
 
 <section class="section">
 <h2>今日一篇</h2>
-<p class="desc">每次打开随机开一篇，像翻一本书那样翻完 17 篇。</p>
+<p class="desc">每次打开随机开一篇——像翻一本书那样翻完 17 篇。</p>
 <div class="today" id="today"></div>
 </section>
 
 <section class="section">
 <h2>概念精选</h2>
-<p class="desc">20 个概念节点中的 6 个。<a href="concepts.html" style="color:var(--color-accent)">看全部</a></p>
+<p class="desc">20 个概念节点中的 6 个。<a href="concepts.html" style="color:var(--teal)">看全部 →</a></p>
 <div class="concept-grid">%s</div>
 </section>
 </div>""" % ("{:,}".format(TOTAL_CHARS), len(CONCEPTS), TOTAL_QUOTES, sum(len(w["notes"]) for w in WORKS), "".join(cats))
@@ -174,12 +171,12 @@ def build_works():
         for w in ws:
             rows.append("""<a class="work-row" href="works/%s.html"><span class="no">%03d</span><span class="tt">%s</span><span class="dt">%s</span><span class="ct">%s 字</span></a>""" % (
                 w["id"], w["order"], esc(w["title"]), esc(date_disp(w)), "{:,}".format(w["charCount"])))
-        span = "%s 至 %s" % (ws[0]["dateKey"], ws[-1]["dateKey"])
-        groups.append("""<div class="period-group"><div class="period-head"><span class="pn">%s</span><span class="pr">%s，%d 篇</span></div>%s</div>""" % (
+        span = "%s — %s" % (ws[0]["dateKey"], ws[-1]["dateKey"])
+        groups.append("""<div class="period-group"><div class="period-head"><span class="pn">%s</span><span class="pr">%s · %d 篇</span></div>%s</div>""" % (
             esc(period), span, len(ws), "".join(rows)))
     body = """<div class="wrap" style="padding-top:40px">
-<h1 style="font-family:var(--font-display);font-size:30px;font-weight:700">篇目库 · 第一卷全量</h1>
-<p style="font-size:13.5px;color:var(--color-muted);margin:10px 0 28px">按写作时间排序。点击篇名进入阅读页，正文段落全部编号，段号即锚点。</p>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">篇目库 · 第一卷全量</h1>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">按写作时间排序。点击篇名进入阅读页——正文段落全部编号，段号即锚点。</p>
 %s</div>""" % "".join(groups)
     write("works.html", page("篇目库", body, 0, "works"))
 
@@ -206,21 +203,21 @@ def build_work(w):
     if w["notes"]:
         items = "".join('<div class="note-item">%s</div>' % esc(n) for n in w["notes"])
         notes = '<details class="notes-toggle"><summary>注释 %d 条</summary><div class="notes-body">%s</div></details>' % (len(w["notes"]), items)
-    prev_html = '<a href="../%s.html">上一篇：%s</a>' % (prev_w["id"], esc(prev_w["title"])) if prev_w else "<span></span>"
-    next_html = '<a class="next" href="../%s.html">下一篇：%s</a>' % (next_w["id"], esc(next_w["title"])) if next_w else "<span></span>"
+    prev_html = '<a href="../%s.html">← 上一篇 · %s</a>' % (prev_w["id"], esc(prev_w["title"])) if prev_w else "<span></span>"
+    next_html = '<a class="next" href="../%s.html">下一篇 · %s →</a>' % (next_w["id"], esc(next_w["title"])) if next_w else "<span></span>"
     body = """<div class="narrow">
 <div class="read-head">
-<div class="crumb"><a href="../index.html">首页</a> / <a href="../works.html">篇目库</a> / %s：%s</div>
+<div class="crumb"><a href="../index.html">首页</a> / <a href="../works.html">篇目库</a> / %s · %s</div>
 <h1>%s</h1>
 <div class="read-meta"><span>%s</span><span>%d 段</span><span>%s 字</span><span>源：求是网</span></div>
 %s
 </div>
 <article class="article">%s</article>
 %s
-<div style="margin-top:8px"><div style="font-size:12px;color:var(--color-muted);letter-spacing:0">本篇涉及的概念</div><div class="related-concepts">%s</div></div>
+<div style="margin-top:8px"><div style="font-size:12px;color:var(--ink-3);letter-spacing:0.2em">本篇涉及的概念</div><div class="related-concepts">%s</div></div>
 <div class="read-foot">%s%s</div>
 </div>""" % (esc(VOL), esc(w["period"] or ""), esc(w["title"]), esc(date_disp(w)),
-             len(w["paragraphs"]), "{:,}".format(w["charCount"]), intro, "".join(paras), notes, rel_tags or "<span style='font-size:13px;color:var(--color-muted)'>暂无</span>", prev_html, next_html)
+             len(w["paragraphs"]), "{:,}".format(w["charCount"]), intro, "".join(paras), notes, rel_tags or "<span style='font-size:13px;color:var(--ink-3)'>暂无</span>", prev_html, next_html)
     write("works/%s.html" % w["id"], page(w["title"], body, 1, "works"))
 
 # ---------- 4. 概念索引 ----------
@@ -233,8 +230,8 @@ def build_concepts_index():
         items = "".join("""<a class="cc" href="concepts/%s.html"><div class="nm">%s</div><div class="one">%s</div></a>""" % (c["id"], esc(c["name"]), esc(c["oneliner"])) for c in cs)
         blocks.append("""<div style="margin-bottom:34px"><div class="period-head"><span class="pn" style="font-size:17px">%s</span><span class="pr">%d 个节点</span></div><div class="concept-grid">%s</div></div>""" % (esc(cat), len(cs), items))
     body = """<div class="wrap" style="padding-top:40px">
-<h1 style="font-family:var(--font-display);font-size:30px;font-weight:700">概念图谱</h1>
-<p style="font-size:13.5px;color:var(--color-muted);margin:10px 0 28px">20 个概念节点，按 7 个领域归类。每个节点 = 一句话定义 + 核心要义 + 原话精选（逐字引文，精确到段）+ 演变时间线 + 自问自答。</p>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">概念图谱</h1>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">20 个概念节点，按 7 个领域归类。每个节点 = 一句话定义 + 核心要义 + 原话精选（逐字引文，精确到段）+ 演变时间线 + 自问自答。</p>
 %s</div>""" % "".join(blocks)
     write("concepts.html", page("概念图谱", body, 0, "concepts"))
 
@@ -244,7 +241,7 @@ def build_concept(c):
     for q in c["quotes"]:
         w = [x for x in WORKS if x["title"] == q["work"]][0]
         quotes.append("""<div class="quote"><div class="qt">%s</div>
-<div class="qm"><span>%s %s <a href="../works/%s.html#p%d">第 %d 段</a></span><span>%s</span></div></div>""" % (
+<div class="qm"><span>%s · %s · <a href="../works/%s.html#p%d">第 %d 段 ↗</a></span><span>%s</span></div></div>""" % (
             quote_snippet(q["text"], q.get("keyword", ""), 64), esc(VOL), esc(q["work"]), w["id"], q["para"], q["para"], esc(q["note"])))
     essence = "".join("<li>%s</li>" % esc(e) for e in c["essence"])
     evo = []
@@ -278,9 +275,9 @@ def build_timeline():
         evos = [e for c in CONCEPTS for e in c["evolution"] if e["work"] == w["title"] and not e.get("outside")]
         tag = ""
         if evos:
-            tag = " " + "、".join(sorted({e["dateKey"] for e in evos})) + " 概念演变"
-        items.append("""<div class="tl-item"><div class="d">%s</div><div class="t"><a href="works/%s.html">%s</a></div><div class="s">%s %s 字%s</div></div>""" % (
-            esc(w["dateKey"] or "日期不详"), w["id"], esc(w["title"]), esc(w["period"] or ""), "{:,}".format(w["charCount"]), tag))
+            tag = " · " + "、".join(sorted({e["dateKey"] for e in evos})) + " 概念演变"
+        items.append("""<div class="tl-item"><div class="d">%s</div><div class="t"><a href="works/%s.html">%s</a></div><div class="s">%s · %s 字%s</div></div>""" % (
+            esc(w["dateKey"] or "—"), w["id"], esc(w["title"]), esc(w["period"] or ""), "{:,}".format(w["charCount"]), tag))
     # 概念演变汇总
     evo_rows = []
     for c in CONCEPTS:
@@ -289,12 +286,12 @@ def build_timeline():
             evo_rows.append('<div class="evo-item"><span class="dt">%d 节点</span><span class="wk"><a href="concepts/%s.html">%s</a></span><span class="nt">%s</span></div>' % (
                 len(c["evolution"]), c["id"], esc(c["name"]), esc(chain)))
     body = """<div class="wrap" style="padding-top:40px">
-<h1 style="font-family:var(--font-display);font-size:30px;font-weight:700">时期轴</h1>
-<p style="font-size:13.5px;color:var(--color-muted);margin:10px 0 12px">第一卷 17 篇按写作时间排列，从 1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，横跨第一次国内革命战争与第二次国内革命战争两个时期。</p>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">时期轴</h1>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 12px">第一卷 17 篇按写作时间排列——1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，横跨第一次国内革命战争与第二次国内革命战争两个时期。</p>
 <div class="tl">%s</div>
-<div class="section" style="border-top:1px solid var(--color-rule);margin-top:24px">
+<div class="section" style="border-top:1px solid var(--line);margin-top:24px">
 <h2>概念演变链</h2>
-<p class="desc">同一个概念在不同时期的表述变化。这是 AI 聊天给不了的深度，也是本库对标 learnbuffett「思想演变时间线」的核心资产。</p>
+<p class="desc">同一个概念在不同时期的表述变化——这是 AI 聊天给不了的深度，也是本库对标 learnbuffett「思想演变时间线」的核心资产。</p>
 <div class="evo">%s</div>
 </div>
 </div>""" % ("".join(items), "".join(evo_rows))
@@ -303,22 +300,22 @@ def build_timeline():
 # ---------- 7. 矛盾论工具 ----------
 def build_tool():
     body = """<div class="narrow" style="padding-top:40px">
-<div class="crumb" style="font-size:12px;color:var(--color-muted)"><a href="index.html" style="color:var(--color-muted);text-decoration:none">首页</a> / 工具</div>
-<h1 style="font-family:var(--font-display);font-size:30px;font-weight:700">主要矛盾演示器</h1>
-<p style="font-size:13.5px;color:var(--color-ink-2);margin:12px 0 4px;line-height:1.9">《矛盾论》第四节说：<b>复杂事物的发展过程中有许多的矛盾存在，其中必有一种是主要的</b>。捉住了主要矛盾，一切问题就迎刃而解。下面用第一卷第 68、69 段的结构，演示主要矛盾如何随阶段转化。</p>
+<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 工具</div>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">主要矛盾演示器</h1>
+<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">《矛盾论》第四节说：<b>复杂事物的发展过程中有许多的矛盾存在，其中必有一种是主要的</b>——捉住了主要矛盾，一切问题就迎刃而解。下面用第一卷第 68、69 段的结构，演示主要矛盾如何随阶段转化。</p>
 <div class="tool-legend">
-<span class="k"><span class="sw" style="background:var(--color-accent)"></span>主要矛盾（决定过程性质）</span>
-<span class="k"><span class="sw" style="background:var(--color-muted)"></span>次要矛盾（受主要矛盾规定和影响）</span>
-<span class="k"><span class="sw" style="background:var(--color-card);border:1px solid var(--color-accent)"></span>矛盾主要方面（决定事物性质的一面）</span>
+<span class="k"><span class="sw" style="background:#0F766E"></span>主要矛盾（决定过程性质）</span>
+<span class="k"><span class="sw" style="background:#C8C5BB"></span>次要矛盾（受主要矛盾规定和影响）</span>
+<span class="k"><span class="sw" style="background:#fff;border:1px solid #0F766E"></span>矛盾主要方面（决定事物性质的一面）</span>
 </div>
 <div class="tool-stage">
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap" id="tabs"></div>
 <div id="scene"></div>
 </div>
 <div class="tool-explain" id="explain"></div>
-<div class="section" style="border-top:1px solid var(--color-rule);margin-top:36px">
+<div class="section" style="border-top:1px solid var(--line);margin-top:36px">
 <h2>语料依据</h2>
-<p class="desc">工具中的结构判断均可在《矛盾论》第一卷第 68 至 72 段核对。</p>
+<p class="desc">工具中的结构判断均可在《矛盾论》第一卷第 68—72 段核对。</p>
 %s
 </div>
 </div>""" % TOOL_QUOTES_HTML
@@ -326,21 +323,21 @@ def build_tool():
     write("tool-maodun.html", page("主要矛盾演示器", body, 0, "tool"))
 
 TOOL_SCENES = [
-    {"key": "a", "name": "半殖民地的中国，1925 至 1931", "phase": "阶段一",
+    {"key": "a", "name": "半殖民地的中国 · 1925—1931", "phase": "阶段一",
      "main": "帝国主义和中华民族的矛盾", "mainAspect": "民族矛盾上升为矛盾主要方面",
      "secondary": ["封建主义和人民大众的矛盾", "工人阶级和资产阶级的矛盾", "农民阶级和地主阶级的矛盾"],
-     "note": "两大根本矛盾并存，民族矛盾居于主导，统一战线策略的总依据。"},
-    {"key": "b", "name": "抗日战争爆发，1931 九一八之后", "phase": "阶段二",
+     "note": "两大根本矛盾并存，民族矛盾居于主导——统一战线策略的总依据。"},
+    {"key": "b", "name": "抗日战争爆发 · 1931 九一八之后", "phase": "阶段二",
      "main": "日本帝国主义和中华民族的矛盾", "mainAspect": "中日矛盾成为最主要的矛盾",
      "secondary": ["国内阶级矛盾降为次要矛盾", "封建主义和人民大众的矛盾", "反动势力内部的矛盾"],
-     "note": "当着日本帝国主义发动侵略，民族矛盾上升为主要矛盾，国内阶级矛盾降为次要和服从的地位，这正是《论反对日本帝国主义的策略》的形势判断。"},
-    {"key": "c", "name": "资本主义社会，《矛盾论》原例", "phase": "阶段对照",
+     "note": "当着日本帝国主义发动侵略，民族矛盾上升为主要矛盾，国内阶级矛盾降为次要和服从的地位——这正是《论反对日本帝国主义的策略》的形势判断。"},
+    {"key": "c", "name": "资本主义社会 · 《矛盾论》原例", "phase": "阶段对照",
      "main": "无产阶级和资产阶级的矛盾", "mainAspect": "资产阶级在矛盾主要方面（资本主义社会性质）",
      "secondary": ["独占资本和自由资本的矛盾（帝国主义阶段新发生）", "宗主国和殖民地的矛盾", "生产社会化和占有私人性的矛盾"],
-     "note": "根本矛盾（性质）未变，但在不同阶段采取了逐渐激化的形式，并激化/发生新的大小矛盾，过程显出阶段性。"},
+     "note": "根本矛盾（性质）未变，但在不同阶段采取了逐渐激化的形式，并激化/发生新的大小矛盾——过程显出阶段性。"},
 ]
 
-TOOL_QUOTES_HTML = "".join("""<div class="quote"><div class="qt">%s</div><div class="qm"><span>卷一 矛盾论 <a href="works/%s.html#p%d">第 %d 段</a></span><span>%s</span></div></div>""" % (
+TOOL_QUOTES_HTML = "".join("""<div class="quote"><div class="qt">%s</div><div class="qm"><span>卷一 · 矛盾论 · <a href="works/%s.html#p%d">第 %d 段 ↗</a></span><span>%s</span></div></div>""" % (
     quote_snippet(q["text"], q.get("keyword", ""), 60), [x for x in WORKS if x["title"] == "矛盾论"][0]["id"], q["para"], q["para"], esc(q["note"]))
     for q in [c for c in CONCEPTS if c["id"] == "zhuyaomaodun"][0]["quotes"])
 
@@ -351,8 +348,8 @@ def build_search():
         for i, p in enumerate(w["paragraphs"], 1):
             index.append({"w": w["title"], "p": i, "u": "works/%s.html#p%d" % (w["id"], i), "t": p})
     body = """<div class="narrow" style="padding-top:40px">
-<h1 style="font-family:var(--font-display);font-size:30px;font-weight:700">全文检索</h1>
-<p style="font-size:13.5px;color:var(--color-muted);margin:10px 0 4px">段落级检索，命中直接跳到段。全部 %s 个段落、%s 字。</p>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">全文检索</h1>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 4px">段落级检索——命中直接跳到段。全部 %s 个段落、%s 字。</p>
 <input class="search-input" id="sq" type="search" placeholder="输入关键词，如：实践、矛盾、调查、集中兵力……" autofocus>
 <div class="search-hint" id="hint">支持词片段匹配；点击结果跳转到阅读页对应段落。</div>
 <div id="results"></div>
@@ -413,7 +410,7 @@ APP_JS = r"""
         var at = h.snip.indexOf(kw);
         if (at >= 0) snip = esc(h.snip.slice(0, at)) + '<em>' + mk + '</em>' + esc(h.snip.slice(at + kw.length));
         return '<a class="result" href="' + h.u + '"><div class="rw">' + esc(h.w) + ' · 第 ' + h.p + ' 段</div><div class="rt">' + snip + '</div></a>';
-      }).join('') || '<div class="result-empty">没有命中。换个词试试，或去<a href="concepts.html" style="color:var(--color-accent)">概念图谱</a>按主题浏览。</div>';
+      }).join('') || '<div class="result-empty">没有命中。换个词试试——或去<a href="concepts.html" style="color:var(--teal)">概念图谱</a>按主题浏览。</div>';
     }
   }
   // 矛盾论工具
@@ -422,25 +419,25 @@ APP_JS = r"""
     function render(i) {
       var s = scenes[i];
       tabs.innerHTML = scenes.map(function(x, j){
-        return '<button data-i="' + j + '" style="font-family:var(--font-body);font-size:13px;padding:6px 14px;border-radius:var(--radius-pill);border:1px solid ' + (j===i?'var(--color-accent)':'var(--color-rule)') + ';background:' + (j===i?'var(--color-well-2)':'var(--color-card)') + ';color:' + (j===i?'var(--color-accent)':'var(--color-well-ink)') + ';cursor:pointer">' + x.name + '</button>';
+        return '<button data-i="' + j + '" style="font-family:var(--text);font-size:13px;padding:6px 14px;border-radius:999px;border:1px solid ' + (j===i?'#0F766E':'var(--line-2)') + ';background:' + (j===i?'#E6F2F0':'#fff') + ';color:' + (j===i?'#0F766E':'var(--ink-2)') + ';cursor:pointer">' + x.name + '</button>';
       }).join('');
       tabs.querySelectorAll('button').forEach(function(b){
         b.addEventListener('click', function(){ render(+b.dataset.i); });
       });
       var sec = s.secondary.map(function(x){
-        return '<div style="padding:12px 16px;background:var(--color-well-2);border:1px solid var(--color-rule);border-radius:var(--radius-pill);font-size:14px;color:var(--color-well-ink)">' + x + '</div>';
+        return '<div style="padding:12px 16px;background:#F4F3EF;border:1px solid var(--line);border-radius:6px;font-size:14px;color:var(--ink-2)">' + x + '</div>';
       }).join('');
       stage.innerHTML =
-        '<div style="font-size:11px;color:var(--color-muted);letter-spacing:0;margin-bottom:10px">' + s.phase + '</div>' +
+        '<div style="font-size:11px;color:var(--ink-3);letter-spacing:0.2em;margin-bottom:10px">' + s.phase + '</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">' +
-          '<div style="flex:1 1 300px;padding:18px 20px;background:var(--color-card);border:2px solid var(--color-accent);border-radius:var(--radius-card)">' +
-            '<div style="font-size:11px;color:var(--color-accent);letter-spacing:0">主要矛盾</div>' +
-            '<div style="font-family:var(--font-display);font-size:20px;font-weight:700;margin-top:6px;color:var(--color-accent)">' + s.main + '</div>' +
-            '<div style="font-size:12.5px;color:var(--color-ink-2);margin-top:8px">' + s.mainAspect + '</div>' +
+          '<div style="flex:1 1 300px;padding:18px 20px;background:#E6F2F0;border:2px solid #0F766E;border-radius:8px">' +
+            '<div style="font-size:11px;color:#0F766E;letter-spacing:0.2em">主要矛盾</div>' +
+            '<div style="font-family:var(--display);font-size:20px;font-weight:700;margin-top:6px;color:#0F766E">' + s.main + '</div>' +
+            '<div style="font-size:12.5px;color:var(--ink-2);margin-top:8px">' + s.mainAspect + '</div>' +
           '</div>' +
           '<div style="flex:2 1 340px;display:grid;grid-template-columns:1fr 1fr;gap:10px">' + sec + '</div>' +
         '</div>' +
-        '<div style="font-size:12px;color:var(--color-muted);margin-top:14px">次要矛盾 · 受主要矛盾规定和影响，随阶段相互转化</div>';
+        '<div style="font-size:12px;color:var(--ink-3);margin-top:14px">次要矛盾 · 受主要矛盾规定和影响，随阶段相互转化</div>';
       ex.innerHTML = '<b>读法</b>　' + s.note;
     }
     render(0);
