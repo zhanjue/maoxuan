@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=15">
+<link rel="stylesheet" href="%sassets/style.css?v=16">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -104,8 +104,8 @@ def page(title, body, depth, active=""):
 </div></header>
 %s
 <footer class="footer"><div class="wrap"><div class="bd">
-<p><b>知行录</b>——文献检索与阅读工具。语料仅采自%s，经求是网（qstheory.cn，官方渠道）电子文本整理，逐字收录，未作任何改写。</p>
-<p>本站只作阅读与检索之用，不作历史评价与政治表达。文中「段号」为本库对电子文本的段落编号，非纸质版页码；引文均可点击出处跳转核对。</p>
+<p><b>知行录</b>——文献检索与阅读工具。语料仅采自%s，经求是网（qstheory.cn）电子文本整理，逐字收录，未作改写。</p>
+<p>只作阅读与检索之用，不作历史评价与政治表达。文中「段号」为本库段落编号，非纸质版页码；引文可点出处核对。</p>
 </div></div></footer>
 <script src="%sassets/app.js"></script>
 </body>
