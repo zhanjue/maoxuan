@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=12">
+<link rel="stylesheet" href="%sassets/style.css?v=13">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -140,7 +140,7 @@ def build_index():
 <h2>从这里进</h2>
 <p class="desc">五种读法：用金字塔看全书结构、顺着时期读原文、按概念查、用工具理解、随机开一篇。</p>
 <div class="entries">
-<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">塔尖一句话，三根支柱——从一句话四层拆到十七篇原文</div></a>
+<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">先问，再答，再看三根支柱——二十个概念节点各归其位</div></a>
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 17 篇</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
@@ -361,30 +361,12 @@ TOOL_QUOTES_HTML = "".join("""<div class="quote"><div class="qt">%s</div><div cl
     quote_snippet(q["text"], q.get("keyword", ""), 60), [x for x in WORKS if x["title"] == "矛盾论"][0]["id"], q["para"], q["para"], esc(q["note"]))
     for q in [c for c in CONCEPTS if c["id"] == "zhuyaomaodun"][0]["quotes"])
 
-# ---------- 7.5 金字塔（原理：自顶向下 / 自底向上） ----------
+# ---------- 7.5 金字塔（先问，再答，三根支柱） ----------
 def concept_chip(cid):
     c = CONCEPT_BY_ID[cid]
     return '<a class="chip" href="concepts/%s.html">%s</a>' % (cid, esc(c["name"]))
 
-def work_chip(w):
-    return '<a class="chip" href="works/%s.html">%s</a>' % (w["id"], esc(w["title"]))
-
-def anchor_quote_html(branch):
-    """分支锚点引文——逐字取自 concepts.json，rendered 成与概念页一致的 quote 框。"""
-    c = CONCEPT_BY_ID[branch["anchor"]["conceptId"]]
-    q = c["quotes"][branch["anchor"]["quoteIndex"]]
-    w = WORK_BY_TITLE[q["work"]]
-    return """<div class="quote"><div class="qt">%s</div>
-<div class="qm"><span>%s · %s · <a href="works/%s.html#p%d">第 %d 段 ↗</a></span><span>%s</span></div></div>""" % (
-        quote_snippet(q["text"], q.get("keyword", ""), 64), esc(VOL), esc(q["work"]), w["id"], q["para"], q["para"], esc(q["note"]))
-
-def branch_card(b, with_chips, stack=False):
-    chips = '<div class="pyr-chips">%s</div>' % "".join(concept_chip(cid) for cid in b["conceptIds"]) if with_chips else ""
-    if stack:
-        return """<div class="pyr-br pyr-br-stack">
-<div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span><div class="pyr-br-q">%s</div></div>
-<div class="pyr-br-body"><div class="pyr-br-claim">%s</div><div class="pyr-br-logic">%s</div>%s</div>
-</div>""" % (esc(b["key"]), esc(b["name"]), len(b["conceptIds"]), esc(b["question"]), esc(b["claim"]), esc(b["logic"]), chips)
+def branch_card(b, with_chips):
     chips = ('<div class="pyr-br-concepts"><div class="pyr-br-concepts-lb">%d 个概念</div><div class="pyr-chips">%s</div></div>'
              % (len(b["conceptIds"]), "".join(concept_chip(cid) for cid in b["conceptIds"]))) if with_chips else ""
     return """<div class="pyr-br">
@@ -394,77 +376,46 @@ def branch_card(b, with_chips, stack=False):
 <div class="pyr-br-logic">%s</div>
 %s</div>""" % (esc(b["key"]), esc(b["name"]), esc(b["question"]), esc(b["claim"]), esc(b["logic"]), chips)
 
-def arrow(label):
-    return '<div class="pyr-arrow"><span>%s</span></div>' % esc(label)
-
 def layer_block(level, q, inner, note):
+    q_html = '<div class="td-q">%s</div>' % esc(q) if q else ""
+    n_html = '<div class="td-note">%s</div>' % esc(note) if note else ""
     return """<div class="td-layer">
 <div class="td-lv">%s</div>
-<div class="td-q">%s</div>
+%s
 <div class="td-a">%s</div>
-<div class="td-note">%s</div>
-</div>""" % (esc(level), esc(q), inner, esc(note))
+%s
+</div>""" % (esc(level), q_html, inner, n_html)
 
 def build_pyramid():
     td = PYRAMID["topdown"]
     blocks = []
     for i, L in enumerate(td["layers"]):
-        if L["a"] == "apex":
-            inner = """<div class="pyr-apex"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div><div class="pyr-note">%s</div></div>""" % (
-                esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["statement"]), esc(PYRAMID["apex"]["note"]))
-        elif L["a"] == "branches":
-            inner = '<div class="pyr-branches">%s</div>' % "".join(branch_card(b, True) for b in PYRAMID["branches"])
-        else:  # works
-            quotes = "".join(anchor_quote_html(b) for b in PYRAMID["branches"])
-            inner = """<div class="pyr-chips pyr-base-chips">%s</div>
-<div class="section" style="margin-top:20px"><h2>三根支柱各取一句原话</h2><p class="desc">逐字引文，点击出处跳到原文段落核对。</p>%s</div>""" % (
-                "".join(work_chip(w) for w in WORKS), quotes)
-        blocks.append(layer_block(L["level"], L["q"], inner, L["note"]))
+        if L["a"] == "question":
+            blocks.append("""<div class="td-layer">
+<div class="td-lv">%s</div>
+<div class="td-q">%s</div>
+<div class="td-note">%s</div>
+</div>""" % (esc(L["level"]), esc(PYRAMID["apex"]["question"]), esc(L["note"])))
+        elif L["a"] == "answer":
+            inner = """<div class="pyr-apex"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div></div>""" % (
+                esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["answer"]))
+            blocks.append(layer_block(L["level"], "", inner, PYRAMID["apex"]["note"]))
+        else:  # branches——不用大白卡罩住三张卡：层题与注释放页面上，三张卡独立并排
+            blocks.append("""<div class="td-layer-open">
+<div class="td-lv">%s</div>
+<div class="td-q">%s</div>
+<div class="pyr-branches">%s</div>
+<div class="td-note">%s</div>
+</div>""" % (esc(L["level"]), esc(L["q"]), "".join(branch_card(b, True) for b in PYRAMID["branches"]), esc(L["note"])))
         if i < len(td["layers"]) - 1:
-            if L["a"] == "branches":
-                blocks.append('<div class="td-merge"><span class="tm-line"></span><span class="tm-line"></span><span class="tm-line"></span><span class="tm-cap">三根支柱的概念汇成同一片地基</span></div>')
-            else:
-                blocks.append('<div class="td-conn"><span>拆开下一层</span></div>')
+            blocks.append('<div class="td-conn"><span>%s</span></div>' % esc(L.get("conn", "拆开下一层")))
     body = """<div class="wrap" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 金字塔</div>
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>塔尖一句话，三根支柱，二十个概念节点，十七篇原文</b>。%s</p>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>先问，再答，再看三根支柱——二十个概念节点各归其位</b>。%s</p>
 %s
-<p class="pyr-way-alt" style="margin-top:28px">想反过来走：从十七篇归纳回一句话——<a href="pyramid-bottomup.html">自底向上 →</a></p>
 </div>""" % (esc(td["intro"]), "".join(blocks))
     write("pyramid.html", page("金字塔", body, 0, "pyramid"))
-
-def summary_box(layer):
-    """本层归纳框——自底向上每一层都做一次归纳总结。"""
-    items = "".join("<li>%s</li>" % esc(s) for s in layer["summary"])
-    return """<div class="td-sum"><span class="td-sum-lb">%s</span><ul>%s</ul></div>""" % (esc(layer["summaryLabel"]), items)
-
-def build_pyramid_bottomup():
-    bu = PYRAMID["bottomup"]
-    blocks = []
-    for i, L in enumerate(bu["layers"]):
-        if L["a"] == "works":
-            inner = """<div class="pyr-chips pyr-base-chips">%s</div>""" % "".join(work_chip(w) for w in WORKS)
-        elif L["a"] == "concepts":
-            inner = """<div class="pyr-chips pyr-base-chips">%s</div>""" % "".join(concept_chip(c["id"]) for c in CONCEPTS)
-        elif L["a"] == "groups":
-            cols = []
-            for b in PYRAMID["branches"]:
-                cols.append("""<div class="pyr-br"><div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span><span class="pyr-br-ct">%d 个概念</span></div><div class="pyr-induce">%s</div><div class="pyr-chips">%s</div></div>""" % (
-                    esc(b["key"]), esc(b["name"]), len(b["conceptIds"]), esc(b["induce"]), "".join(concept_chip(cid) for cid in b["conceptIds"])))
-            inner = '<div class="pyr-branches">%s</div>' % "".join(cols)
-        else:  # apex
-            inner = """<div class="pyr-apex pyr-apex-inline"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div><div class="pyr-note">%s</div></div>""" % (
-                esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["statement"]), esc(PYRAMID["apex"]["note"]))
-        blocks.append(layer_block(L["level"], L["q"], inner + summary_box(L), L["note"]))
-        if i < len(bu["layers"]) - 1:
-            blocks.append('<div class="td-conn"><span>归纳%s · %s</span></div>' % ("一二三四"[i], esc(bu["acts"][i])))
-    body = """<div class="narrow" style="padding-top:40px">
-<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / <a href="pyramid.html" style="color:var(--ink-3);text-decoration:none">金字塔</a> / 自底向上</div>
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">%s</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">%s</p>
-%s</div>""" % (esc(bu["title"]), esc(bu["intro"]), "".join(blocks))
-    write("pyramid-bottomup.html", page("自底向上", body, 0, "pyramid"))
 
 # ---------- 8. 检索页 ----------
 def build_search():
@@ -586,7 +537,6 @@ with open(os.path.join(SITE, "assets", "app.js"), "w", encoding="utf-8") as f:
 # ---------- 生成 ----------
 build_index()
 build_pyramid()
-build_pyramid_bottomup()
 build_works()
 for w in WORKS:
     build_work(w)
