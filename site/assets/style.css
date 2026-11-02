@@ -291,14 +291,15 @@ a.term:hover { border-bottom-color: var(--teal); }
 .pyr-tag { font-size: 11px; color: var(--teal); letter-spacing: 0.25em; font-weight: 600; }
 .pyr-apex-t { font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.95; margin-top: 12px; }
 .pyr-branches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.pyr-br-hd { display: flex; align-items: baseline; gap: 10px; }
+/* 支柱卡：问句当头（读者先看懂这张卡在答什么），道/人/路退为副标题 */
+.pyr-br-q { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.5; margin: 0 0 10px; }
+.pyr-br-hd { display: flex; align-items: baseline; gap: 8px; }
 .pyr-key {
-  font-family: var(--display); font-size: 14px; font-weight: 700; color: var(--teal);
-  background: var(--teal-soft); border-radius: 4px; padding: 2px 9px; flex-shrink: 0;
+  font-family: var(--display); font-size: 12px; font-weight: 700; color: var(--teal);
+  background: var(--teal-soft); border-radius: 4px; padding: 1px 7px; flex-shrink: 0;
 }
-.pyr-br-nm { font-family: var(--display); font-size: 16px; font-weight: 700; }
-.pyr-br-q { font-size: 13px; color: var(--teal); margin-top: 12px; font-weight: 600; }
-.pyr-br-claim { font-size: 13.5px; color: var(--ink); line-height: 1.85; margin-top: 8px; }
+.pyr-br-nm { font-size: 12px; color: var(--ink-3); letter-spacing: 0.05em; }
+.pyr-br-claim { font-size: 13.5px; color: var(--ink); line-height: 1.85; margin-top: 10px; }
 .pyr-br-logic { font-size: 12.5px; color: var(--ink-3); line-height: 1.8; margin-top: 8px; }
 .pyr-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 /* 第二层三根支柱：三列并排，概念框贴卡片底部（三列框底对齐） */

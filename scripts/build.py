@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=14">
+<link rel="stylesheet" href="%sassets/style.css?v=15">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -370,11 +370,11 @@ def branch_card(b, with_chips):
     chips = ('<div class="pyr-br-concepts"><div class="pyr-br-concepts-lb">%d 个概念</div><div class="pyr-chips">%s</div></div>'
              % (len(b["conceptIds"]), "".join(concept_chip(cid) for cid in b["conceptIds"]))) if with_chips else ""
     return """<div class="pyr-br">
-<div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span></div>
 <div class="pyr-br-q">%s</div>
+<div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span></div>
 <div class="pyr-br-claim">%s</div>
 <div class="pyr-br-logic">%s</div>
-%s</div>""" % (esc(b["key"]), esc(b["name"]), esc(b["question"]), esc(b["claim"]), esc(b["logic"]), chips)
+%s</div>""" % (esc(b["question"]), esc(b["key"]), esc(b["name"]), esc(b["claim"]), esc(b["logic"]), chips)
 
 def layer_block(level, q, inner, note):
     q_html = '<div class="td-q">%s</div>' % esc(q) if q else ""
@@ -401,12 +401,12 @@ def build_pyramid():
                 esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["answer"]))
             blocks.append(layer_block(L["level"], "", inner, PYRAMID["apex"]["note"]))
         else:  # branches——不用大白卡罩住三张卡：层题与注释放页面上，三张卡独立并排
+            # 不设层标题问句：三张卡各自的问句已经在回答上一层的「凭什么成立」，再来一行总问句是重复
             blocks.append("""<div class="td-layer-open">
 <div class="td-lv">%s</div>
-<div class="td-q">%s</div>
 <div class="pyr-branches">%s</div>
 <div class="td-note">%s</div>
-</div>""" % (esc(L["level"]), esc(L["q"]), "".join(branch_card(b, True) for b in PYRAMID["branches"]), esc(L["note"])))
+</div>""" % (esc("第三层"), "".join(branch_card(b, True) for b in PYRAMID["branches"]), esc(L["note"])))
         if i < len(td["layers"]) - 1:
             blocks.append('<div class="td-conn"><span>%s</span></div>' % esc(L.get("conn", "拆开下一层")))
     body = """<div class="wrap" style="padding-top:40px">
