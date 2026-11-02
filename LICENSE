@@ -1,0 +1,79 @@
+# 版权与使用说明
+
+本仓库内容分三类，使用规则各不相同。**请按类别分别处理**。
+
+---
+
+## 一、原文文本（《毛泽东选集》第一卷）
+
+- 毛泽东本人著作的著作权财产权保护期已届满，其**文字本身**属公有领域，可自由使用。
+- 本库收录的电子文本核自**求是网（qstheory.cn）**，标点与分段依该电子文本。
+  转载原文时请**注明出处**、**不得改动文字**。
+- 本库对原文**未作任何改写、删节或拼接**；段号为本库自行编号，不是人民出版社纸质版页码。
+
+**引用本库原文时，请同时标注：** 篇名 + 段落，例如「《反对本本主义》第 1 段」，
+并说明电子文本依据。不要只写「网上流传的说法」。
+
+---
+
+## 二、本站原创内容（保留所有权利）
+
+以下内容由本仓库作者创作，**未经许可不得转载、改编或用于训练商业模型**：
+
+- 知识库的**结构设计**：金字塔三层、概念图谱、时期轴、主要矛盾演示器、语录页的选取与编排
+- `data/concepts.json`、`data/pyramid.json`、`data/quotes.json` 中的**概念定义、导语、说明文字**
+- 各页面上的**解说文字**（凡不是引文的、用中文写的解释性段落）
+- 语料处理与校验流程：`scripts/` 下的解析、抽取、逐字校验逻辑
+
+如需转载上述内容，请先联系作者取得书面许可。
+
+## 三、代码（MIT）
+
+`scripts/` 目录下的构建与数据处理脚本，以及 `site/assets/` 下的 `app.js`、`style.css`，
+按 **MIT 许可证**授权，可自由使用、修改、分发，包括商业用途。保留版权声明即可。
+
+```
+MIT License
+
+Copyright (c) 2026 知行录 / zhanjue
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+---
+
+## 四、本库的定位（也是使用边界）
+
+这是一个**文献检索与阅读工具**，只做三件事：收录原文、组织检索、注明出处。
+
+它**不做**：历史的重新评价、政治的立场表达、原文的立场改写。
+
+因此：
+
+- 不要把本库的内容截取出来当作**论战材料**单独传播。**脱离语境的句子，其含义常与原意不同**——
+  这也是语录页每条都保留「第 N 段」链接的原因。
+- 本库作者不对第三方引用本库内容时的再解读负责。
+- 若发现本库收录的文字与权威纸质版有出入，**以人民出版社纸质版为准**，并请告知更正。
+
+---
+
+## 五、免责
+
+本库为个人整理的文献工程，与任何机构、组织无隶属关系。
+内容如涉权利问题，请联系作者，将及时处理。

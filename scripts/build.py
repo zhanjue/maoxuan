@@ -11,6 +11,7 @@ SITE = os.path.join(ROOT, "site")
 WORKS = json.load(open(os.path.join(ROOT, "data", "works.json"), encoding="utf-8"))
 CONCEPTS = json.load(open(os.path.join(ROOT, "data", "concepts.json"), encoding="utf-8"))
 PYRAMID = json.load(open(os.path.join(ROOT, "data", "pyramid.json"), encoding="utf-8"))
+QUOTES = json.load(open(os.path.join(ROOT, "data", "quotes.json"), encoding="utf-8"))
 CONCEPT_BY_ID = {c["id"]: c for c in CONCEPTS}
 WORK_BY_TITLE = {w["title"]: w for w in WORKS}
 
@@ -77,6 +78,7 @@ NAV = [
     ("works.html", "篇目", 0),
     ("concepts.html", "概念图谱", 0),
     ("timeline.html", "时期轴", 0),
+    ("quotes.html", "语录", 0),
     ("tool-maodun.html", "矛盾论工具", 0),
     ("search.html", "检索", 0),
 ]
@@ -94,7 +96,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=24">
+<link rel="stylesheet" href="%sassets/style.css?v=25">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -104,8 +106,8 @@ def page(title, body, depth, active=""):
 </div></header>
 %s
 <footer class="footer"><div class="wrap"><div class="bd">
-<p><b>知行录</b>——文献检索与阅读工具。语料仅采自%s，经求是网（qstheory.cn）电子文本整理，逐字收录，未作改写。</p>
-<p>只作阅读与检索之用，不作历史评价与政治表达。文中「段号」为本库段落编号，非纸质版页码；引文可点出处核对。</p>
+<p><b>知行录</b>——文献检索与阅读工具。文本依据%s，电子文本核自求是网（qstheory.cn）。逐字收录，未作改写，仅供阅读与检索。</p>
+<p>不作历史评价与政治表达。文中「段号」为本库段落编号，非纸质版页码；引文可点出处核对原文。</p>
 </div></div></footer>
 <script src="%sassets/app.js"></script>
 </body>
@@ -138,12 +140,13 @@ def build_index():
 
 <section class="section">
 <h2>从这里进</h2>
-<p class="desc">五种读法：用金字塔看全书结构、顺着时期读原文、按概念查、用工具理解、随机开一篇。</p>
+<p class="desc">六种读法：用金字塔看全书结构、顺着时期读原文、按概念查、看语录、用工具理解、检索全文。</p>
 <div class="entries">
 <a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">先问，再答，再看三根支柱——二十个概念节点各归其位</div></a>
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 17 篇</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
+<a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">8 句原文，一字未改，每条都能点回去看上下文</div></a>
 <a class="entry" href="search.html"><div class="t">全文检索</div><div class="d">段落级检索，命中直接跳到段</div></a>
 </div>
 </section>
@@ -408,7 +411,29 @@ def build_pyramid():
 </div>""" % (esc(td["intro"]), "".join(blocks))
     write("pyramid.html", page("金字塔", body, 0, "pyramid"))
 
-# ---------- 8. 检索页 ----------
+# ---------- 8. 经典语录 ----------
+def build_quotes():
+    """语录页：只做原文短句的呈现与溯源，不加解读、不排名、不配图评点。
+    每条的 text 由 scripts/gen_quotes.py 从 works.json 逐字截取并断言校验，
+    这里只负责排版，不写死任何引文。"""
+    cards = []
+    for q in QUOTES["items"]:
+        cards.append("""<figure class="qt">
+<div class="qt-tag">%s</div>
+<blockquote class="qt-t">%s</blockquote>
+<figcaption class="qt-src">《%s》 · <a href="works/%s.html#p%d">第 %d 段 ↗</a></figcaption>
+</figure>""" % (
+            esc(q["tag"]), esc(q["text"]), esc(q["work"]), q["wid"], q["para"], q["para"]))
+    body = """<div class="narrow" style="padding-top:40px">
+<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 语录</div>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">经典语录</h1>
+<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 6px;line-height:1.9">以下 %d 条，全部从《毛泽东选集》第一卷原文中<b>按句截取</b>，一字未改，也没有拼接不同段落。每条后面的「第 N 段」可以点回原文，看它前后在说什么——孤立的一句和放回上下文的同一句，常常不是一回事。</p>
+<p style="font-size:12.5px;color:var(--ink-3);margin:0 0 26px;line-height:1.9">按卷内篇目顺序排列，不作高下之分。</p>
+<div class="qt-list">%s</div>
+</div>""" % (len(QUOTES["items"]), "".join(cards))
+    write("quotes.html", page("经典语录", body, 0, "quotes"))
+
+# ---------- 9. 检索页 ----------
 def build_search():
     index = []
     for w in WORKS:
@@ -547,6 +572,7 @@ for c in CONCEPTS:
     build_concept(c)
 build_timeline()
 build_tool()
+build_quotes()
 build_search()
 
 n = 0

@@ -88,7 +88,8 @@ body {
   margin-bottom: 6px; letter-spacing: 0.02em;
 }
 .section .desc { font-size: 13.5px; color: var(--ink-3); margin-bottom: 24px; }
-.entries { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+/* 6 个入口：定死 3 列，排成 3+3。用 auto-fit 会出现 4+1，右下留一块空。 */
+.entries { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .entry {
   display: block; padding: 20px 18px; background: #fff;
   border: 1px solid var(--line); border-radius: 6px;
@@ -108,6 +109,17 @@ body {
 .cc .cat { font-size: 11px; color: var(--teal); letter-spacing: 0.1em; }
 .cc .nm { font-family: var(--display); font-size: 18px; font-weight: 700; margin-top: 6px; }
 .cc .one { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* 语录页：每条＝标签 + 引文 + 出处。不加解读，所以排版尽量素，
+   靠左侧竖线区分条目，引文用衬线字，和正文（黑体）拉开距离。 */
+.qt-list { display: flex; flex-direction: column; gap: 0; }
+.qt { margin: 0; padding: 26px 0 26px 20px; border-left: 2px solid var(--line-2); }
+.qt + .qt { border-top: 1px solid var(--line); }
+.qt-tag { display: inline-block; font-size: 11px; color: var(--teal); letter-spacing: 0.1em; margin-bottom: 10px; }
+.qt-t { margin: 0; font-family: var(--display); font-size: 18px; line-height: 1.95; color: var(--ink); font-weight: 400; }
+.qt-src { margin-top: 12px; font-size: 12px; color: var(--ink-3); }
+.qt-src a { color: var(--ink-3); text-decoration: none; border-bottom: 1px solid var(--line-2); }
+.qt-src a:hover { color: var(--teal); border-bottom-color: var(--teal); }
+
 .footer { padding: 36px 0 48px; color: var(--ink-3); font-size: 12.5px; line-height: 1.9; }
 .footer .bd { border-top: 1px solid var(--line); padding-top: 24px; max-width: 1000px; }
 
