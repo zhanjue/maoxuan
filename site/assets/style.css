@@ -229,18 +229,15 @@ a.term:hover { border-bottom-color: var(--teal); }
 
 /* ---------- 工具页 ---------- */
 .tool-stage { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 28px; margin: 20px 0; }
-.tool-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 18px; }
-.tool-legend .k { display: inline-flex; align-items: center; gap: 6px; }
-.tool-legend .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+/* 图例＝三条阅读规则：色块是图上的记号，右字说明它代表什么、为什么这么画 */
+.tool-legend { display: flex; flex-direction: column; gap: 9px; font-size: 13px; color: var(--ink-2); margin: 20px 0 22px; padding: 16px 20px; background: var(--paper-2); border-radius: 8px; }
+.tool-legend .k { display: flex; align-items: baseline; gap: 10px; line-height: 1.75; }
+.tool-legend .sw { width: 13px; height: 13px; border-radius: 3px; display: inline-block; flex-shrink: 0; position: relative; top: 1px; }
+.tool-legend b { color: var(--ink); font-weight: 700; }
 .tool-explain { font-size: 14px; color: var(--ink-2); background: var(--paper-2); border-radius: 6px; padding: 16px 18px; margin-top: 16px; line-height: 1.95; }
 .tool-explain b { color: var(--teal); }
 /* 怎么看这一页 */
-.tool-how { background: var(--paper-2); border: 1px solid var(--line); border-radius: 8px; padding: 18px 22px 18px 0; margin: 18px 0 20px; }
-.tool-how-hd { font-size: 12px; color: var(--teal); letter-spacing: 0.15em; margin: 0 0 10px 22px; font-weight: 600; }
-.tool-how ol { margin: 0; padding-left: 42px; }
-.tool-how li { font-size: 13.5px; color: var(--ink-2); line-height: 2.0; }
-.tool-how b { color: var(--ink); }
-.tool-quote { font-size: 13px; color: var(--ink-3); line-height: 1.9; margin: 6px 0 16px; padding-left: 12px; border-left: 2px solid var(--line-2); }
+.tool-quote { font-size: 13px; color: var(--ink-3); line-height: 1.9; margin: 22px 0 0; padding-left: 12px; border-left: 2px solid var(--line-2); }
 /* 标签分组 */
 .tool-tab { font-family: var(--text); font-size: 13px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: #fff; color: var(--ink-2); cursor: pointer; }
 .tool-tab:hover { border-color: #0F766E; color: #0F766E; }

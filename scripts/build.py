@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=18">
+<link rel="stylesheet" href="%sassets/style.css?v=19">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -307,26 +307,18 @@ def build_tool():
     body = """<div class="narrow" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 工具</div>
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">主要矛盾演示器</h1>
-<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">「矛盾」在这里的意思是：一个事物内部互相拉扯、又互相依赖的两方——它们你进我退，推动整个事物变化。一个社会里同时存在好几对这样的矛盾，<b>其中必有一种是主要的</b>：捉住了它，其余问题就有了头绪。这一页用《矛盾论》的结构，演示主要矛盾如何随阶段转化。</p>
-<div class="tool-how">
-<div class="tool-how-hd">怎么看这一页</div>
-<ol>
-<li><b>点上方标签切换场景</b>——看每一个阶段，「说话算数」的是哪对矛盾。</li>
-<li><b>绿框是主要矛盾</b>：它规定这一阶段整个过程的性质；灰框是次要矛盾：被它规定、暂时让位。</li>
-<li><b>每对矛盾内部是两方</b>：主要矛盾卡里拆开给你看。哪一方占上风，就是「矛盾主要方面」——资本主义那个例子里是资产阶级。</li>
-</ol>
-</div>
-<div class="tool-quote">《矛盾论》第四节说：复杂事物的发展过程中有许多的矛盾存在，其中必有一种是主要的——捉住了主要矛盾，一切问题就迎刃而解。下面用第一卷的结构，演示主要矛盾如何随阶段转化。</div>
+<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">「矛盾」在这里的意思是：一个事物内部互相拉扯、又互相依赖的两方——它们你进我退，推动整个事物变化。一个社会里同时存在好几对这样的矛盾，<b>其中必有一种是主要的</b>：捉住了它，其余问题就有了头绪。</p>
 <div class="tool-legend">
-<span class="k"><span class="sw" style="background:#0F766E"></span>主要矛盾 · 这一阶段谁说话算数</span>
-<span class="k"><span class="sw" style="background:#C8C5BB"></span>次要矛盾 · 被它规定、让位</span>
-<span class="k"><span class="sw" style="background:#fff;border:1px solid #0F766E"></span>矛盾主要方面 · 一对矛盾内部占上风的一方</span>
+<span class="k"><span class="sw" style="background:#0F766E"></span><b>主要矛盾</b>　它规定这一阶段整个过程的性质，谁说话算数看它</span>
+<span class="k"><span class="sw" style="background:#C8C5BB"></span><b>次要矛盾</b>　被主要矛盾规定，暂时让位</span>
+<span class="k"><span class="sw" style="background:#fff;border:1px solid #0F766E"></span><b>矛盾主要方面</b>　一对矛盾内部占上风的那一方</span>
 </div>
 <div class="tool-stage">
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center" id="tabs"></div>
 <div id="scene"></div>
 </div>
 <div class="tool-explain" id="explain"></div>
+<div class="tool-quote">《矛盾论》第四节：「任何过程如果有多数矛盾存在的话，其中必定有一种是主要的，起着领导的、决定的作用，其他则处于次要和服从的地位。」<a href="works/v1-017.html#p68" style="color:var(--teal);text-decoration:none">第 68 段 ↗</a>　下面三个场景演示：主要矛盾怎么随阶段换人。</div>
 <div class="section" style="border-top:1px solid var(--line);margin-top:36px">
 <h2>语料依据</h2>
 <p class="desc">工具中的结构判断均可在《矛盾论》第一卷第 68—72 段核对。</p>
