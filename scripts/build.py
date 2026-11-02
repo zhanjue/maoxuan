@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=22">
+<link rel="stylesheet" href="%sassets/style.css?v=24">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -314,7 +314,7 @@ def build_tool():
 <span class="k"><span class="sw" style="background:#fff;border:1px solid #0F766E"></span><b>矛盾主要方面</b>　一对矛盾内部占上风的那一方</span>
 </div>
 <div class="tool-stage">
-<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center" id="tabs"></div>
+<div class="tool-tabs" id="tabs"></div>
 <div id="scene"></div>
 </div>
 <div class="tool-explain" id="explain"></div>
@@ -485,12 +485,19 @@ APP_JS = r"""
     var scenes = window.__TOOL__, tabs = document.getElementById('tabs'), stage = document.getElementById('scene'), ex = document.getElementById('explain');
     function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
     function render(i) {
-      var s = scenes[i], lastGroup = null, tb = [];
+      var s = scenes[i];
+      // 按 group 分块：每块＝组名 + 该组按钮。之前把组名与按钮平铺在同一层，
+      // flex 折行时组名会和上一组按钮混排（「《矛盾论》原例」飘到中国阶段按钮右边）
+      var groups = [], idx = {}, tb = [];
       scenes.forEach(function(x, j){
-        if (lastGroup !== null && x.group !== lastGroup) tb.push('<span class="tool-tab-sep"></span>');
-        if (x.group !== lastGroup) tb.push('<span class="tool-tab-grp">' + esc(x.group) + '</span>');
-        tb.push('<button type="button" data-i="' + j + '" class="tool-tab' + (j === i ? ' on' : '') + '">' + esc(x.name) + '</button>');
-        lastGroup = x.group;
+        if (!(x.group in idx)) { idx[x.group] = groups.length; groups.push({ name: x.group, items: [] }); }
+        groups[idx[x.group]].items.push({ scene: x, i: j });
+      });
+      tb = groups.map(function(g){
+        return '<span class="tool-tab-group"><span class="tool-tab-grp">' + esc(g.name) + '</span>'
+          + g.items.map(function(o){
+              return '<button type="button" data-i="' + o.i + '" class="tool-tab' + (o.i === i ? ' on' : '') + '">' + esc(o.scene.name) + '</button>';
+            }).join('') + '</span>';
       });
       tabs.innerHTML = tb.join('');
       Array.prototype.forEach.call(tabs.querySelectorAll('button'), function(b){

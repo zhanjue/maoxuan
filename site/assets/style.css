@@ -243,12 +243,14 @@ a.term:hover { border-bottom-color: var(--teal); }
 .tool-explain b { color: var(--teal); }
 /* 怎么看这一页 */
 .tool-quote { font-size: 13px; color: var(--ink-3); line-height: 1.9; margin: 22px 0 0; padding-left: 12px; border-left: 2px solid var(--line-2); }
-/* 标签分组 */
-.tool-tab { font-family: var(--text); font-size: 13px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: #fff; color: var(--ink-2); cursor: pointer; }
+/* 场景切换：每组独占一行（组名在上、该组按钮在下），不靠 flex 折行碰运气——
+   横向挤不下时只会让组内的按钮折行，绝不会把下一组的组名甩到上一组按钮右边 */
+.tool-tabs { display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+.tool-tab-group { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; row-gap: 8px; }
+.tool-tab-grp { flex: 0 0 auto; font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; padding-right: 12px; border-right: 1px solid var(--line); }
+.tool-tab { font-family: var(--text); font-size: 13px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: #fff; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
 .tool-tab:hover { border-color: #0F766E; color: #0F766E; }
 .tool-tab.on { border-color: #0F766E; background: #E6F2F0; color: #0F766E; }
-.tool-tab-grp { font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; }
-.tool-tab-sep { width: 1px; align-self: stretch; background: var(--line); margin: 2px 6px; }
 /* 场景 */
 .md-phase { font-size: 11px; color: var(--ink-3); letter-spacing: 0.2em; margin-bottom: 12px; }
 /* stretch 会把主矛盾卡拉高去填右列的总高，造出一大片空白——
