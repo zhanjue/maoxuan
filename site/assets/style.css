@@ -281,9 +281,12 @@ a.term:hover { border-bottom-color: var(--teal); }
 
 /* ---------- 金字塔（原理页） ---------- */
 .pyr { margin-top: 8px; }
+/* 塔尖白卡，无边框（曾用 1.5px teal 边框，与外层层卡叠成双层框）；
+   去掉边框后白卡与层卡白底会糊成一片，故给浅纸色底+细投影把卡托起来 */
 .pyr-apex {
-  max-width: 680px; margin: 0 auto; background: #fff;
-  border: 1.5px solid var(--teal); border-radius: 6px; padding: 24px 28px; text-align: center;
+  max-width: 680px; margin: 0 auto; background: var(--paper-2);
+  border-radius: 6px; padding: 24px 28px; text-align: center;
+  box-shadow: 0 1px 3px rgba(16, 51, 58, 0.06);
 }
 .pyr-tag { font-size: 11px; color: var(--teal); letter-spacing: 0.25em; font-weight: 600; }
 .pyr-apex-t { font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.95; margin-top: 12px; }
