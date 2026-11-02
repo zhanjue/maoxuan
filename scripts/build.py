@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=19">
+<link rel="stylesheet" href="%sassets/style.css?v=22">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -304,7 +304,7 @@ def build_timeline():
 
 # ---------- 7. 矛盾论工具 ----------
 def build_tool():
-    body = """<div class="narrow" style="padding-top:40px">
+    body = """<div class="narrow tool-wide" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 工具</div>
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">主要矛盾演示器</h1>
 <p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">「矛盾」在这里的意思是：一个事物内部互相拉扯、又互相依赖的两方——它们你进我退，推动整个事物变化。一个社会里同时存在好几对这样的矛盾，<b>其中必有一种是主要的</b>：捉住了它，其余问题就有了头绪。</p>
@@ -517,7 +517,11 @@ APP_JS = r"""
         '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + '</div>';
       ex.innerHTML = '<b>读法</b>　' + esc(s.note);
     }
-    render(0);
+    var start = 0, hashKey = (location.hash || '').replace('#', '');
+    if (hashKey) {
+      scenes.forEach(function(x, j){ if (x.key === hashKey) start = j; });
+    }
+    render(start);
   }
 })();
 """

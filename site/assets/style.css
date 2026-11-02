@@ -65,6 +65,8 @@ body {
 /* ---------- 布局 ---------- */
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 .narrow { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+/* 演示器页放宽：主矛盾卡与三张次要矛盾卡并排需要宽度，760px 装不下会折成上下两行 */
+.narrow.tool-wide { max-width: 960px; }
 
 /* ---------- 首页 ---------- */
 .hero { padding: 72px 0 40px; border-bottom: 1px solid var(--line); }
@@ -228,7 +230,10 @@ a.term:hover { border-bottom-color: var(--teal); }
 .tl-item .s { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
 
 /* ---------- 工具页 ---------- */
-.tool-stage { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 28px; margin: 20px 0; }
+/* min-width:0 让 stage 在窄屏可以压到比内容更窄，否则内部弹性布局撑破页面 */
+.tool-stage { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 28px; margin: 20px 0; min-width: 0; }
+/* 标签行在窄屏要能换行（nowrap 的 chip 会顶出右边界） */
+.md-sides { min-width: 0; }
 /* 图例＝三条阅读规则：色块是图上的记号，右字说明它代表什么、为什么这么画 */
 .tool-legend { display: flex; flex-direction: column; gap: 9px; font-size: 13px; color: var(--ink-2); margin: 20px 0 22px; padding: 16px 20px; background: var(--paper-2); border-radius: 8px; }
 .tool-legend .k { display: flex; align-items: baseline; gap: 10px; line-height: 1.75; }
@@ -246,16 +251,21 @@ a.term:hover { border-bottom-color: var(--teal); }
 .tool-tab-sep { width: 1px; align-self: stretch; background: var(--line); margin: 2px 6px; }
 /* 场景 */
 .md-phase { font-size: 11px; color: var(--ink-3); letter-spacing: 0.2em; margin-bottom: 12px; }
-.md-grid { display: flex; flex-wrap: wrap; gap: 14px; align-items: stretch; }
-.md-main { flex: 1 1 300px; padding: 18px 20px; background: #E6F2F0; border: 2px solid #0F766E; border-radius: 8px; }
+/* stretch 会把主矛盾卡拉高去填右列的总高，造出一大片空白——
+   改 flex-start 让两张卡各按自己的内容定高 */
+.md-grid { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; min-width: 0; }
+/* 主卡与右侧三卡并排：basis 给足「A 对 B」标签不折行，但允许收缩，不与三卡抢到折行 */
+.md-main { flex: 0 1 480px; padding: 18px 20px; background: #E6F2F0; border: 2px solid #0F766E; border-radius: 8px; }
 .md-tag { font-size: 11px; color: #0F766E; letter-spacing: 0.2em; }
 .md-title { font-family: var(--display); font-size: 20px; font-weight: 700; margin-top: 6px; color: #0F766E; line-height: 1.5; }
+/* 标签行：给标签本身留足宽度，避免「日本帝国主义 对 中华民族」被挤成两行 */
 .md-sides { font-size: 12.5px; color: var(--ink-3); margin-top: 16px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.md-chip { display: inline-flex; align-items: center; gap: 7px; background: #fff; border: 1px solid #0F766E; border-radius: 999px; padding: 3px 12px; font-size: 13px; color: var(--ink); }
+.md-chip { display: inline-flex; align-items: center; gap: 7px; background: #fff; border: 1px solid #0F766E; border-radius: 999px; padding: 3px 12px; font-size: 13px; color: var(--ink); white-space: nowrap; }
 .md-chip-main { border-width: 2px; font-weight: 600; }
 .md-chip em { font-style: normal; font-size: 10px; color: #fff; background: #0F766E; border-radius: 999px; padding: 1px 7px; letter-spacing: 0.05em; }
 .md-vs { color: var(--ink-3); font-size: 12px; }
-.md-sec { flex: 2 1 340px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* align-content:start——否则三张卡（两列网格里落单一张）会被平均拉伸，各自高得离谱 */
+.md-sec { flex: 1 1 320px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
 .md-sec-card { padding: 12px 16px; background: #F4F3EF; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; color: var(--ink-2); }
 .md-sec-note { font-size: 12px; color: var(--ink-3); margin-top: 14px; }
 .tool-change { font-size: 13.5px; color: var(--ink-2); line-height: 1.9; margin-top: 14px; padding: 12px 16px; background: #fff; border: 1px dashed var(--line-2); border-radius: 6px; }
@@ -328,8 +338,26 @@ a.term:hover { border-bottom-color: var(--teal); }
   .entries { grid-template-columns: repeat(2, 1fr); }
   .concept-grid { grid-template-columns: 1fr; }
   .md-sec { grid-template-columns: 1fr; }
+  /* 窄屏：主卡的 480px basis 会顶破屏幕，改成撑满即可 */
+  .md-main { flex: 1 1 100%; }
+  .md-sides { gap: 6px; }
+  .md-chip { padding: 3px 9px; font-size: 12.5px; white-space: normal; }
+  .md-title { font-size: 17px; word-break: break-all; }
+  .tool-stage { padding: 18px 16px; }
+  .tool-tab { font-size: 12px; padding: 5px 11px; }
+  /* 窄屏兜底：标签组与图例允许断行，防止长中文标签撑破视口 */
+  .tool-tab-grp, .tool-legend .k, .md-sec-note { word-break: break-word; }
+  .tool-legend { padding: 14px 16px; }
   .pyr-branches { grid-template-columns: 1fr; }
   .nav { display: none; }
+  /* 窄屏顶栏：品牌英文副标 + 固定 150px 检索框把顶栏撑出视口，连带整页横向溢出。
+     副标收起、检索框缩宽（聚焦时也不再撑大），顶栏不再溢出 */
+  .brand small { display: none; }
+  .topbar-in { gap: 12px; padding: 0 16px; }
+  .searchbox { margin-left: auto; min-width: 0; }
+  .searchbox input { width: 118px; }
+  .searchbox input:focus { width: 150px; }
+  .wrap, .narrow { padding: 0 16px; }
   .hero { padding: 48px 0 32px; }
   .hero h1 { font-size: 32px; }
   .work-row .ct { display: none; }

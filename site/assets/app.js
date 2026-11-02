@@ -90,6 +90,10 @@
         '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + '</div>';
       ex.innerHTML = '<b>读法</b>　' + esc(s.note);
     }
-    render(0);
+    var start = 0, hashKey = (location.hash || '').replace('#', '');
+    if (hashKey) {
+      scenes.forEach(function(x, j){ if (x.key === hashKey) start = j; });
+    }
+    render(start);
   }
 })();
