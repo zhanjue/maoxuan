@@ -1,0 +1,5 @@
+# 统一换行符：shell 脚本必须 LF，否则在 Linux / CI 里报 "$'\r': command not found"
+* text=auto
+*.sh text eol=lf
+*.yml text eol=lf
+*.py text eol=lf

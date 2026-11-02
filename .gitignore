@@ -1,3 +1,15 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# 本地临时验证产物
+_verify/
+_shot.py
+_measure.js
+_cap.js
+_check_links.py
+_t.html
+
+# 编辑器
+.vscode/
+.idea/
