@@ -17,9 +17,12 @@ bash deploy-cf.sh                # 需要时另外推一份到 Cloudflare Pages
 
 ### 一次性配置
 
-1. 建仓库（建议私有或公开都行，Pages 用 Actions 发布不受仓库可见性限制）
+1. 建仓库（免费账号用 Pages 建议公开仓库）
 2. 推送 `main` 分支
-3. 仓库 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**
+3. **仓库 Settings → Pages → Build and deployment → Source 选 GitHub Actions**
+   —— 这一步必须在网页上点一次，没有 API 可替代。**没做的表现**：工作流在
+   `Setup Pages` 那一步失败（`Get Pages site failed / Not Found`），后面的
+   Upload、Deploy 全被跳过。点完再在 Actions 里 `Re-run all jobs` 即可。
 4. 之后每次 push 到 `main` 且 `site/` 有变化，`.github/workflows/pages.yml` 会自动发布
 
 ### 地址
@@ -27,7 +30,7 @@ bash deploy-cf.sh                # 需要时另外推一份到 Cloudflare Pages
 | 仓库名 | 访问地址 |
 |---|---|
 | `<用户名>.github.io` | `https://<用户名>.github.io/` |
-| 其他名字（如 `mao-kb`） | `https://<用户名>.github.io/mao-kb/` |
+| 其他名字（如 `maoxuan1`） | `https://<用户名>.github.io/maoxuan1/` |
 
 **本站所有链接都是相对路径**，放在子路径下也能正常工作，不需要改配置。
 
