@@ -281,16 +281,16 @@ a.term:hover { border-bottom-color: var(--teal); }
 
 /* ---------- 金字塔（原理页） ---------- */
 .pyr { margin-top: 8px; }
-/* 塔尖白卡，无边框（曾用 1.5px teal 边框，与外层层卡叠成双层框）；
-   去掉边框后白卡与层卡白底会糊成一片，故给浅纸色底+细投影把卡托起来 */
+/* 塔尖卡，无边框（曾用 1.5px teal 边框，与外层层卡叠成双层框）；去掉边框后白卡会溶进层卡白底，
+   故给浅纸色底+细投影把卡托起。「塔尖 · 本库总括」标签已删——术语标签对读者无信息量 */
 .pyr-apex {
   max-width: 680px; margin: 0 auto; background: var(--paper-2);
-  border-radius: 6px; padding: 24px 28px; text-align: center;
+  border-radius: 6px; padding: 26px 30px; text-align: center;
   box-shadow: 0 1px 3px rgba(16, 51, 58, 0.06);
 }
-.pyr-tag { font-size: 11px; color: var(--teal); letter-spacing: 0.25em; font-weight: 600; }
-.pyr-apex-t { font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.95; margin-top: 12px; }
+.pyr-apex-t { font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.95; }
 .pyr-branches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
 /* 支柱卡：问句当头（读者先看懂这张卡在答什么），道/人/路退为副标题 */
 .pyr-br-q { font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.5; margin: 0 0 10px; }
 .pyr-br-hd { display: flex; align-items: baseline; gap: 8px; }

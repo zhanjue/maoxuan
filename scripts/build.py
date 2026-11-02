@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=16">
+<link rel="stylesheet" href="%sassets/style.css?v=17">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -397,8 +397,7 @@ def build_pyramid():
 <div class="td-note">%s</div>
 </div>""" % (esc(L["level"]), esc(PYRAMID["apex"]["question"]), esc(L["note"])))
         elif L["a"] == "answer":
-            inner = """<div class="pyr-apex"><div class="pyr-tag">%s</div><div class="pyr-apex-t">%s</div></div>""" % (
-                esc(PYRAMID["apex"]["label"]), esc(PYRAMID["apex"]["answer"]))
+            inner = """<div class="pyr-apex"><div class="pyr-apex-t">%s</div></div>""" % esc(PYRAMID["apex"]["answer"])
             blocks.append(layer_block(L["level"], "", inner, PYRAMID["apex"]["note"]))
         else:  # branches——不用大白卡罩住三张卡：层题与注释放页面上，三张卡独立并排
             # 不设层标题问句：三张卡各自的问句已经在回答上一层的「凭什么成立」，再来一行总问句是重复
