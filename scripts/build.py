@@ -94,7 +94,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=17">
+<link rel="stylesheet" href="%sassets/style.css?v=18">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -126,7 +126,7 @@ def build_index():
     body = """
 <div class="wrap"><section class="hero">
 <h1>把《毛选》第一卷<br>读成一座可检索的图书馆</h1>
-<p class="sub">17 篇正式出版文本，20 个概念节点，46 条溯源引文。<b>每一个判断都挂回原话</b>——点开任何一条引文，都能跳到它在某卷某篇某段的位置。</p>
+<p class="sub">17 篇正式出版文本，20 个概念节点，46 条溯源引文。<br><b>每一个判断都挂回原话</b>——点开任何一条引文，都能跳到它在某卷某篇某段的位置。</p>
 <div class="stats">
 <div class="stat"><div class="n">17</div><div class="l">篇目（第一卷全量）</div></div>
 <div class="stat"><div class="n">%s</div><div class="l">字正文</div></div>
