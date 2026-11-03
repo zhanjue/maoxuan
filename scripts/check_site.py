@@ -134,10 +134,37 @@ for w in works:
         if "上一页" in t or "下一页" in t or t.strip() == w["title"].strip():
             errors.append("%s p%d 仍有采集残留：%s" % (w["id"], i, t[:30]))
 
+# ---------- 8. 语录：段号 / 原文子串 / 收藏钩子 ----------
+# 语录曾经整体错位过一段：gen_quotes 用 0 基下标取段落，又把下标当段号输出，
+# 页面上「第 N 段」比实际少 1，点过去落在上一段（死链检查查不出来，因为 id 存在）。
+# 所以这里必须验「该段真的含这句话」，而不是「锚点存在」。
+QUOTES = json.load(open(os.path.join(ROOT, "data", "quotes.json"), encoding="utf-8"))["items"]
+qmap = {w["id"]: w for w in works}
+qh = open(os.path.join(SITE, "quotes.html"), encoding="utf-8").read()
+n_q2 = 0
+for q in QUOTES:
+    n_q2 += 1
+    w = qmap.get(q["wid"])
+    if not w:
+        errors.append("语录 %s 指向不存在的篇目" % q["id"])
+        continue
+    n = q["para"]
+    if not (0 < n <= len(w["paragraphs"])):
+        errors.append("语录 %s 段号越界 p%d" % (q["id"], n))
+    elif q["text"] not in w["paragraphs"][n - 1]:
+        errors.append("语录 %s 不在第 %d 段原文里（段号可能整体位移）" % (q["id"], n))
+    if 'data-id="%s"' % q["id"] not in qh:
+        errors.append("语录 %s 没出现在页面上" % q["id"])
+n_card = qh.count('class="qt" data-id')
+if n_card != len(QUOTES):
+    errors.append("语录页面卡片 %d 个，数据 %d 条" % (n_card, len(QUOTES)))
+if qh.count('class="fav"') != len(QUOTES):
+    errors.append("语录收藏按钮 %d 个，数据 %d 条" % (qh.count('class="fav"'), len(QUOTES)))
+
 print("页面 %d 个 | 链接 %d 条 | CSS v%s" % (len(pages), checked, css_ver))
 print("注释：正文上标 %d、注释条目 %d、回链 %d" % (n_ref, n_item, n_back))
-print("导读：%d 篇、%d 个问题 | 概念引文 %d 条" % (
-    len([w for w in works if w["id"] in reading]), n_q, n_quote))
+print("导读：%d 篇、%d 个问题 | 概念引文 %d 条 | 语录 %d 条" % (
+    len([w for w in works if w["id"] in reading]), n_q, n_quote, n_q2))
 if warns:
     print("\n提示：")
     for x in warns:

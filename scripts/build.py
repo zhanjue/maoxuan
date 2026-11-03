@@ -148,7 +148,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=26">
+<link rel="stylesheet" href="%sassets/style.css?v=29">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -198,7 +198,7 @@ def build_index():
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 17 篇</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
-<a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">8 句原文，一字未改，每条都能点回去看上下文</div></a>
+<a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">%d 句原文，一字未改，每条都能点回去看上下文，也能收藏</div></a>
 <a class="entry" href="search.html"><div class="t">全文检索</div><div class="d">段落级检索，命中直接跳到段</div></a>
 </div>
 </section>
@@ -214,7 +214,7 @@ def build_index():
 <p class="desc">20 个概念节点中的 6 个。<a href="concepts.html" style="color:var(--teal)">看全部 →</a></p>
 <div class="concept-grid">%s</div>
 </section>
-</div>""" % ("{:,}".format(TOTAL_CHARS), len(CONCEPTS), TOTAL_QUOTES, sum(len(w["notes"]) for w in WORKS), "".join(cats))
+</div>""" % ("{:,}".format(TOTAL_CHARS), len(CONCEPTS), TOTAL_QUOTES, sum(len(w["notes"]) for w in WORKS), len(QUOTES["items"]), "".join(cats))
     # 今日一篇数据内联
     brief = [{"t": w["title"], "d": date_disp(w), "c": w["charCount"], "u": "works/%s.html" % w["id"]} for w in WORKS]
     body += '<script>window.__TODAY__=%s;</script>' % json.dumps(brief, ensure_ascii=False)
@@ -511,24 +511,38 @@ def build_pyramid():
 
 # ---------- 8. 经典语录 ----------
 def build_quotes():
-    """语录页：只做原文短句的呈现与溯源，不加解读、不排名、不配图评点。
-    每条的 text 由 scripts/gen_quotes.py 从 works.json 逐字截取并断言校验，
-    这里只负责排版，不写死任何引文。"""
+    """语录页：原文短句的呈现、溯源与本地收藏。
+    每条的 text 由 scripts/gen_quotes.py 从 works.json 逐字截取并断言校验，这里只排版。
+    para 是 1 基段号（与阅读页 div#pN 一致）；cue 是该段必含的原文片段，
+    构建时逐条核对——段号会随数据清理位移，锚词不会，配不上就报错退出。"""
+    wmap = {w["id"]: w for w in WORKS}
     cards = []
     for q in QUOTES["items"]:
-        cards.append("""<figure class="qt">
+        paras = wmap[q["wid"]]["paragraphs"]
+        n = q["para"]
+        if not (0 < n <= len(paras)) or q["cue"] not in paras[n - 1]:
+            raise SystemExit("语录锚词失配 %s 第%d段：期望含「%s」，实际「%s」"
+                             % (q["wid"], n, q["cue"], (paras[n - 1] if 0 < n <= len(paras) else "")[:40]))
+        cards.append("""<figure class="qt" data-id="%s">
+<button class="fav" type="button" data-id="%s" aria-pressed="false" aria-label="收藏这条语录"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M5.5 3.5h9v13l-4.5-3.2-4.5 3.2z"/></svg></button>
 <div class="qt-tag">%s</div>
 <blockquote class="qt-t">%s</blockquote>
 <figcaption class="qt-src">《%s》 · <a href="works/%s.html#p%d">第 %d 段 ↗</a></figcaption>
-</figure>""" % (
-            esc(q["tag"]), esc(q["text"]), esc(q["work"]), q["wid"], q["para"], q["para"]))
+</figure>""" % (q["id"], q["id"], esc(q["tag"]), esc(q["text"]), esc(q["work"]), q["wid"], n, n))
     body = """<div class="narrow" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 语录</div>
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">经典语录</h1>
-<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 6px;line-height:1.9">以下 %d 条，全部从《毛泽东选集》第一卷原文中<b>按句截取</b>，一字未改，也没有拼接不同段落。每条后面的「第 N 段」可以点回原文，看它前后在说什么——孤立的一句和放回上下文的同一句，常常不是一回事。</p>
-<p style="font-size:12.5px;color:var(--ink-3);margin:0 0 26px;line-height:1.9">按卷内篇目顺序排列，不作高下之分。</p>
-<div class="qt-list">%s</div>
-</div>""" % (len(QUOTES["items"]), "".join(cards))
+<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 6px;line-height:1.9">以下 %d 句，全部从《毛泽东选集》第一卷原文中<b>按句截取</b>，一字未改，也没有拼接不同段落。每条后面的「第 N 段」可以点回原文，看它前后在说什么——孤立的一句和放回上下文的同一句，常常不是一回事。</p>
+<p style="font-size:12.5px;color:var(--ink-3);margin:0 0 22px;line-height:1.9">按卷内篇目顺序排列，不作高下之分。点右上角书签可留下你常想起的那几句。</p>
+<div class="qt-bar">
+<button class="qv on" type="button" data-v="all">全部 <span>%d</span></button>
+<button class="qv" type="button" data-v="fav">收藏 <span id="favn">0</span></button>
+<button class="qcopy" type="button" id="qcopy">复制收藏</button>
+</div>
+<div class="qt-list" id="qtlist">%s</div>
+<div class="qt-empty" id="qtempty" hidden>还没有收藏。点每句话右上角的书签，这里就会留下它。</div>
+<p class="qt-note">收藏只存在这台设备的浏览器里，不上传、不统计，换台设备就没了；要带走就点「复制收藏」。</p>
+</div>""" % (len(QUOTES["items"]), len(QUOTES["items"]), "".join(cards))
     write("quotes.html", page("经典语录", body, 0, "quotes"))
 
 # ---------- 9. 检索页 ----------
@@ -695,6 +709,95 @@ APP_JS = r"""
     });
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
     window.addEventListener('scroll', close, { passive: true });
+  })();
+
+  // 经典语录：本地收藏。只存 id，不存原文；localStorage 不可用时只在本次会话内有效。
+  (function(){
+    var list = document.getElementById('qtlist');
+    if (!list) return;
+    var KEY = 'maokb.fav.v1';
+    var btns = [].slice.call(document.querySelectorAll('.fav'));
+    var tabs = [].slice.call(document.querySelectorAll('.qv'));
+    var countEl = document.getElementById('favn');
+    var copyBtn = document.getElementById('qcopy');
+    var emptyEl = document.getElementById('qtempty');
+    var tab = 'all';
+
+    var favs = (function(){
+      try {
+        var s = JSON.parse(localStorage.getItem(KEY) || '[]');
+        return Array.isArray(s) ? s : [];
+      } catch (e) { return []; }
+    })();
+
+    function save(){
+      try { localStorage.setItem(KEY, JSON.stringify(favs)); } catch (e) {}
+    }
+
+    function paint(){
+      btns.forEach(function(b){
+        var on = favs.indexOf(b.getAttribute('data-id')) >= 0;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (b.parentNode) b.parentNode.classList.toggle('on', on);
+      });
+      if (countEl) countEl.textContent = favs.length;
+      if (copyBtn) copyBtn.disabled = favs.length === 0;
+      list.classList.toggle('only-fav', tab === 'fav');
+      if (emptyEl) emptyEl.hidden = !(tab === 'fav' && favs.length === 0);
+    }
+
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){
+        tab = t.getAttribute('data-v');
+        tabs.forEach(function(x){ x.classList.toggle('on', x === t); });
+        paint();
+      });
+    });
+
+    list.addEventListener('click', function(e){
+      var b = e.target && e.target.closest ? e.target.closest('.fav') : null;
+      if (!b) return;
+      var id = b.getAttribute('data-id');
+      var i = favs.indexOf(id);
+      if (i >= 0) favs.splice(i, 1); else favs.push(id);
+      save();
+      paint();
+    });
+
+    // 收藏要能带走：拼成纯文本，附上可点的原文链接
+    if (copyBtn) copyBtn.addEventListener('click', function(){
+      var out = [];
+      favs.forEach(function(id){
+        var fig = list.querySelector('.qt[data-id="' + id + '"]');
+        if (!fig) return;
+        var t = fig.querySelector('.qt-t');
+        var src = fig.querySelector('.qt-src');
+        var a = src ? src.querySelector('a') : null;
+        var meta = src ? src.textContent.replace(/↗/g, '').replace(/\s+/g, ' ').trim() : '';
+        out.push('「' + (t ? t.textContent.trim() : '') + '」\n——' + meta + (a ? '\n' + a.href : ''));
+      });
+      var text = out.join('\n\n');
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+      function done(){
+        var old = copyBtn.textContent;
+        copyBtn.textContent = '已复制 ' + favs.length + ' 句';
+        setTimeout(function(){ copyBtn.textContent = old; }, 1800);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
+    });
+
+    paint();
   })();
 })();
 """

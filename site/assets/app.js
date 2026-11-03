@@ -146,4 +146,93 @@
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
     window.addEventListener('scroll', close, { passive: true });
   })();
+
+  // 经典语录：本地收藏。只存 id，不存原文；localStorage 不可用时只在本次会话内有效。
+  (function(){
+    var list = document.getElementById('qtlist');
+    if (!list) return;
+    var KEY = 'maokb.fav.v1';
+    var btns = [].slice.call(document.querySelectorAll('.fav'));
+    var tabs = [].slice.call(document.querySelectorAll('.qv'));
+    var countEl = document.getElementById('favn');
+    var copyBtn = document.getElementById('qcopy');
+    var emptyEl = document.getElementById('qtempty');
+    var tab = 'all';
+
+    var favs = (function(){
+      try {
+        var s = JSON.parse(localStorage.getItem(KEY) || '[]');
+        return Array.isArray(s) ? s : [];
+      } catch (e) { return []; }
+    })();
+
+    function save(){
+      try { localStorage.setItem(KEY, JSON.stringify(favs)); } catch (e) {}
+    }
+
+    function paint(){
+      btns.forEach(function(b){
+        var on = favs.indexOf(b.getAttribute('data-id')) >= 0;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (b.parentNode) b.parentNode.classList.toggle('on', on);
+      });
+      if (countEl) countEl.textContent = favs.length;
+      if (copyBtn) copyBtn.disabled = favs.length === 0;
+      list.classList.toggle('only-fav', tab === 'fav');
+      if (emptyEl) emptyEl.hidden = !(tab === 'fav' && favs.length === 0);
+    }
+
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){
+        tab = t.getAttribute('data-v');
+        tabs.forEach(function(x){ x.classList.toggle('on', x === t); });
+        paint();
+      });
+    });
+
+    list.addEventListener('click', function(e){
+      var b = e.target && e.target.closest ? e.target.closest('.fav') : null;
+      if (!b) return;
+      var id = b.getAttribute('data-id');
+      var i = favs.indexOf(id);
+      if (i >= 0) favs.splice(i, 1); else favs.push(id);
+      save();
+      paint();
+    });
+
+    // 收藏要能带走：拼成纯文本，附上可点的原文链接
+    if (copyBtn) copyBtn.addEventListener('click', function(){
+      var out = [];
+      favs.forEach(function(id){
+        var fig = list.querySelector('.qt[data-id="' + id + '"]');
+        if (!fig) return;
+        var t = fig.querySelector('.qt-t');
+        var src = fig.querySelector('.qt-src');
+        var a = src ? src.querySelector('a') : null;
+        var meta = src ? src.textContent.replace(/↗/g, '').replace(/\s+/g, ' ').trim() : '';
+        out.push('「' + (t ? t.textContent.trim() : '') + '」\n——' + meta + (a ? '\n' + a.href : ''));
+      });
+      var text = out.join('\n\n');
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+      function done(){
+        var old = copyBtn.textContent;
+        copyBtn.textContent = '已复制 ' + favs.length + ' 句';
+        setTimeout(function(){ copyBtn.textContent = old; }, 1800);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
+    });
+
+    paint();
+  })();
 })();
