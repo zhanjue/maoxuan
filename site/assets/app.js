@@ -103,4 +103,47 @@
     }
     render(start);
   }
+
+  // 原版注释：点正文里的〔N〕就地展开那条注释，不跳页底。
+  // 不用 href 的原因：注释区默认折叠，跳过去也可能是收着的；就地弹更好读。
+  (function(){
+    var pop = null;
+    function close(){ if (pop) { pop.parentNode.removeChild(pop); pop = null; } }
+    document.addEventListener('click', function(e){
+      var a = e.target && e.target.closest ? e.target.closest('.nref a') : null;
+      if (!a) { close(); return; }
+      e.preventDefault();
+      var src = document.getElementById(a.getAttribute('data-note') || '');
+      if (!src) return;
+      var tx = src.querySelector('.note-tx');
+      if (!tx) return;
+      close();
+      var box = document.createElement('div');
+      box.className = 'note-pop';
+      var head = document.createElement('b');
+      head.textContent = '注释 ' + a.textContent;
+      var bodyT = document.createElement('div');
+      bodyT.textContent = tx.textContent;
+      box.appendChild(head);
+      box.appendChild(bodyT);
+      document.body.appendChild(box);
+      pop = box;
+
+      var r = a.getBoundingClientRect();
+      var w = Math.min(380, window.innerWidth - 32);
+      box.style.width = w + 'px';
+      // fixed 定位，全部用视口坐标；滚动即关闭，不必换算 scrollY
+      var left = r.left - 16;
+      if (left + w > window.innerWidth - 16) left = window.innerWidth - w - 16;
+      box.style.left = Math.max(12, left) + 'px';
+      if (r.bottom + 240 > window.innerHeight) {
+        box.style.top = 'auto';
+        box.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+      } else {
+        box.style.top = (r.bottom + 8) + 'px';
+      }
+    });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+    window.addEventListener('scroll', close, { passive: true });
+  })();
 })();

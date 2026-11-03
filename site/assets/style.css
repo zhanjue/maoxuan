@@ -181,6 +181,47 @@ a.term:hover { border-bottom-color: var(--teal); }
 .notes-body { padding: 16px 4px 0; }
 .note-item { font-size: 13px; color: var(--ink-2); line-height: 1.9; padding: 6px 0; border-bottom: 1px dashed var(--line); }
 .note-item:last-child { border-bottom: none; }
+/* 原版注释：正文里的〔N〕变成可点的上标，点开就地问，不跳页底 */
+.nref { line-height: 0; }
+.nref a {
+  display: inline-block; font-family: var(--mono); font-size: 10px; line-height: 1;
+  padding: 2px 3px; margin: 0 1px; border-radius: 3px; text-decoration: none;
+  color: var(--teal); background: var(--teal-soft); border: 1px solid transparent;
+  cursor: pointer;
+}
+.nref a:hover { border-color: var(--teal); }
+.note-pop {
+  position: fixed; z-index: 90; max-height: 46vh; overflow: auto;
+  background: #fff; border: 1px solid var(--line-2); border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(20, 30, 28, 0.16);
+  padding: 12px 14px; font-size: 12.5px; line-height: 1.85; color: var(--ink-2);
+}
+.note-pop b {
+  display: block; font-family: var(--mono); font-size: 11px; color: var(--teal);
+  letter-spacing: 0.06em; margin-bottom: 6px; font-weight: 600;
+}
+/* 注释列表：编号在左，回链在右，回正文时知道点的是哪条 */
+.note-item { display: flex; gap: 10px; align-items: baseline; }
+/* 编号定宽右对齐：两位数（10 以后）不能把正文起点顶出去 */
+.note-no { flex: 0 0 24px; text-align: right; font-family: var(--mono); font-size: 11px; color: var(--teal); }
+.note-tx { flex: 1 1 auto; min-width: 0; }
+.note-back { flex: 0 0 auto; color: var(--ink-3); text-decoration: none; font-size: 12px; }
+.note-back:hover { color: var(--teal); }
+/* 篇内导读：读之前摆问题（不给位置），读完了回头核对（给段号） */
+.guide { margin: 0 0 30px; padding: 18px 20px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-2); }
+.guide-hd { font-family: var(--display); font-size: 14.5px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
+.guide-lb {
+  font-family: var(--text); font-size: 10.5px; font-weight: 400; letter-spacing: 0.18em;
+  color: var(--teal); background: #fff; border: 1px solid var(--line-2);
+  border-radius: 3px; padding: 2px 6px; margin-right: 8px;
+}
+.guide-list { margin: 0; padding-left: 20px; }
+.guide-list li { font-size: 14px; color: var(--ink-2); line-height: 1.95; }
+.guide-list li::marker { color: var(--teal); font-family: var(--mono); font-size: 12px; }
+.guide-at { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 4px; white-space: nowrap; }
+.guide-at a { color: var(--teal); text-decoration: none; border-bottom: 1px dotted var(--teal); }
+.guide-ft { margin-top: 10px; font-size: 11.5px; color: var(--ink-3); }
+.guide-after { background: #fff; border-style: dashed; }
 /* 分割线在边框上沿：margin-top 把线推离上方内容（padding-top 只推线下的文字，
    曾因漏 margin-top 导致线贴在「本篇涉及的概念」chip 底边上） */
 .read-foot { display: flex; justify-content: space-between; gap: 16px; margin-top: 28px; padding: 18px 0 56px; border-top: 1px solid var(--line); }
@@ -380,6 +421,11 @@ a.term:hover { border-bottom-color: var(--teal); }
   .evo-item .wk { width: auto; }
   .para { padding-right: 40px; }
   .stat { flex-basis: 45%; border-bottom: 1px solid var(--line); }
+  /* 导读卡在窄屏要收窄内边距，否则清单缩进后每行只剩几个字 */
+  .guide { padding: 15px 14px 13px; margin-bottom: 24px; }
+  .guide-list { padding-left: 18px; }
+  .guide-list li { font-size: 13.5px; line-height: 1.85; }
+  .note-pop { width: auto !important; left: 12px !important; right: 12px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }

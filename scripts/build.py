@@ -12,11 +12,13 @@ WORKS = json.load(open(os.path.join(ROOT, "data", "works.json"), encoding="utf-8
 CONCEPTS = json.load(open(os.path.join(ROOT, "data", "concepts.json"), encoding="utf-8"))
 PYRAMID = json.load(open(os.path.join(ROOT, "data", "pyramid.json"), encoding="utf-8"))
 QUOTES = json.load(open(os.path.join(ROOT, "data", "quotes.json"), encoding="utf-8"))
+_reading_path = os.path.join(ROOT, "data", "reading.json")
+READING = json.load(open(_reading_path, encoding="utf-8")) if os.path.exists(_reading_path) else {}
 CONCEPT_BY_ID = {c["id"]: c for c in CONCEPTS}
 WORK_BY_TITLE = {w["title"]: w for w in WORKS}
 
 VOL = "卷一"
-SRC = "人民出版社《毛泽东选集》第一卷（求是网电子文本）"
+SRC = "人民出版社《毛泽东选集》第一卷"
 TOTAL_CHARS = sum(w["charCount"] for w in WORKS)
 TOTAL_QUOTES = sum(len(c["quotes"]) for c in CONCEPTS)
 
@@ -48,6 +50,56 @@ def link_terms(text, depth):
     for tok, tag in marks:
         t = t.replace(tok, tag)
     return t
+
+# ---------- 原版注释：编号解析 + 正文锚点 ----------
+# 原文正文里的注释标记是〔N〕，注释正文也以〔N〕开头。编号一律以注释文本自带的为准。
+NOTE_PAT = __import__("re").compile(r"〔(\d+)〕")
+
+
+def parse_notes(raw_notes):
+    """解析原版注释为 {编号: 正文}。
+
+    编号取自注释文本自带的〔N〕，**不依赖数组下标**：注释条数与正文标记数并不相等
+    （《中国革命战争的战略问题》53 条注释／52 处标记，《中国共产党在抗日时期的任务》
+    36 条／25 处），按下标配对会整体错位。
+    少数注释没有编号（题解类），排在最大编号之后，保证一条都不丢。
+    """
+    out = {}
+    plain = []
+    for n in raw_notes or []:
+        t = (n or "").strip()
+        if not t:
+            continue
+        m = NOTE_PAT.match(t)
+        if m:
+            out[int(m.group(1))] = t[m.end():].strip()
+        else:
+            plain.append(t)
+    nxt = (max(out) if out else 0) + 1
+    for t in plain:
+        out[nxt] = t
+        nxt += 1
+    return out
+
+
+def add_note_refs(html, notemap):
+    """把正文里的〔N〕换成可点的上标。
+
+    只有该编号的注释确实存在时才加，否则原样保留——有标记无注释时
+    生成一个点不开的死锚点，比不加更糟。
+    """
+    if not notemap:
+        return html
+
+    def rep(m):
+        n = int(m.group(1))
+        if n not in notemap:
+            return m.group(0)
+        return ('<sup class="nref" id="r%d"><a href="#n%d" data-note="n%d"'
+                ' title="注释 %d">%d</a></sup>') % (n, n, n, n, n)
+
+    return NOTE_PAT.sub(rep, html)
+
 
 def date_disp(w):
     return (w["date"] or "").strip("（）") or "日期待考"
@@ -96,7 +148,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=25">
+<link rel="stylesheet" href="%sassets/style.css?v=26">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -196,6 +248,12 @@ def build_work(w):
     # 关联概念：quotes 命中本篇的概念
     rel = [c for c in CONCEPTS if any(q["work"] == w["title"] for q in c["quotes"])]
     rel_tags = "".join('<a href="../concepts/%s.html">%s</a>' % (c["id"], esc(c["name"])) for c in rel)
+    # 原版注释：编号 → 正文。正文里的〔N〕点开就是它
+    notemap = parse_notes(w.get("notes"))
+    used_notes = set()
+    for p in w["paragraphs"]:
+        for m in NOTE_PAT.findall(p):
+            used_notes.add(int(m))
     # 正文
     paras = []
     import re as _re
@@ -203,14 +261,50 @@ def build_work(w):
         is_sec = bool(_re.match(r"^[一二三四五六七八九十]+　|^第[一二三四五六七八九十]+章", p)) or (len(p) < 20 and p.endswith(("的问题", "失败", "策略")))
         cls = "para sec" if is_sec else "para"
         paras.append('<div class="%s" id="p%d">%s<a class="pno" href="#p%d">%d</a></div>' % (
-            cls, i, link_terms(p, 1), i, i))
+            cls, i, add_note_refs(link_terms(p, 1), notemap), i, i))
     intro = ""
     if w.get("intro"):
         intro = '<div class="intro-box"><span class="lb">题解</span>%s</div>' % esc(w["intro"])
+    # 注释列表：只有正文里真的出现过这个编号，才给回链——否则是死锚点
     notes = ""
-    if w["notes"]:
-        items = "".join('<div class="note-item">%s</div>' % esc(n) for n in w["notes"])
-        notes = '<details class="notes-toggle"><summary>注释 %d 条</summary><div class="notes-body">%s</div></details>' % (len(w["notes"]), items)
+    if notemap:
+        items = "".join(
+            '<div class="note-item" id="n%d">'
+            '<span class="note-no">%d</span>'
+            '<span class="note-tx">%s</span>%s</div>' % (
+                k, k, esc(v),
+                ' <a class="note-back" href="#r%d" title="回到正文">↩</a>' % k if k in used_notes else "")
+            for k, v in sorted(notemap.items()))
+        notes = ('<details class="notes-toggle"><summary>原版注释 %d 条</summary>'
+                 '<div class="notes-body">%s</div></details>') % (len(notemap), items)
+
+    # 篇内导读：读之前摆问题（不给位置），读完了回头核对（给段落）
+    rd = READING.get(w["id"]) or {}
+    guide_before = guide_after = ""
+    if rd.get("before"):
+        gi = "".join("<li>%s</li>" % esc(q) for q in rd["before"])
+        guide_before = ('<div class="guide guide-before">'
+                        '<div class="guide-hd"><span class="guide-lb">读之前</span>先摆着这几个问题</div>'
+                        '<ol class="guide-list">%s</ol>'
+                        '<div class="guide-ft">答案在正文里，这里不给位置。</div></div>') % gi
+    if rd.get("after"):
+        # 段号会随数据清理位移（清网页分页残留时整体前移过），cue 不会。
+        # 逐条核对锚词，失配当场报错退出——导读指向错误段落比没有导读更糟。
+        for _x in rd["after"]:
+            for _n, _cue in zip(_x.get("paras", []), _x.get("cue", [])):
+                _p = w["paragraphs"][_n - 1] if 0 < _n <= len(w["paragraphs"]) else ""
+                if _cue not in _p:
+                    raise SystemExit("导读锚词失配 %s 第%d段：期望含「%s」，实际「%s」"
+                                     % (w["id"], _n, _cue, _p[:40].replace("\n", " ")))
+        gi = "".join(
+            '<li>%s <span class="guide-at">%s</span></li>' % (
+                esc(x["q"]),
+                " · ".join('<a href="#p%d">第 %d 段</a>' % (n, n) for n in x.get("paras", [])))
+            for x in rd["after"])
+        guide_after = ('<div class="guide guide-after">'
+                       '<div class="guide-hd"><span class="guide-lb">读完了</span>回头核对这几件事</div>'
+                       '<ol class="guide-list">%s</ol>'
+                       '<div class="guide-ft">只指位置，不给答案。</div></div>') % gi
     prev_html = '<a href="%s.html">← 上一篇 · %s</a>' % (prev_w["id"], esc(prev_w["title"])) if prev_w else "<span></span>"
     next_html = '<a class="next" href="%s.html">下一篇 · %s →</a>' % (next_w["id"], esc(next_w["title"])) if next_w else "<span></span>"
     body = """<div class="narrow">
@@ -219,13 +313,17 @@ def build_work(w):
 <h1>%s</h1>
 <div class="read-meta"><span>%s</span><span>%d 段</span><span>%s 字</span><span>源：求是网</span></div>
 %s
+%s
 </div>
 <article class="article">%s</article>
+%s
 %s
 <div style="margin-top:8px"><div style="font-size:12px;color:var(--ink-3);letter-spacing:0.2em">本篇涉及的概念</div><div class="related-concepts">%s</div></div>
 <div class="read-foot">%s%s</div>
 </div>""" % (esc(VOL), esc(w["period"] or ""), esc(w["title"]), esc(date_disp(w)),
-             len(w["paragraphs"]), "{:,}".format(w["charCount"]), intro, "".join(paras), notes, rel_tags or "<span style='font-size:13px;color:var(--ink-3)'>暂无</span>", prev_html, next_html)
+             len(w["paragraphs"]), "{:,}".format(w["charCount"]), intro, guide_before,
+             "".join(paras), guide_after, notes,
+             rel_tags or "<span style='font-size:13px;color:var(--ink-3)'>暂无</span>", prev_html, next_html)
     write("works/%s.html" % w["id"], page(w["title"], body, 1, "works"))
 
 # ---------- 4. 概念索引 ----------
@@ -555,6 +653,49 @@ APP_JS = r"""
     }
     render(start);
   }
+
+  // 原版注释：点正文里的〔N〕就地展开那条注释，不跳页底。
+  // 不用 href 的原因：注释区默认折叠，跳过去也可能是收着的；就地弹更好读。
+  (function(){
+    var pop = null;
+    function close(){ if (pop) { pop.parentNode.removeChild(pop); pop = null; } }
+    document.addEventListener('click', function(e){
+      var a = e.target && e.target.closest ? e.target.closest('.nref a') : null;
+      if (!a) { close(); return; }
+      e.preventDefault();
+      var src = document.getElementById(a.getAttribute('data-note') || '');
+      if (!src) return;
+      var tx = src.querySelector('.note-tx');
+      if (!tx) return;
+      close();
+      var box = document.createElement('div');
+      box.className = 'note-pop';
+      var head = document.createElement('b');
+      head.textContent = '注释 ' + a.textContent;
+      var bodyT = document.createElement('div');
+      bodyT.textContent = tx.textContent;
+      box.appendChild(head);
+      box.appendChild(bodyT);
+      document.body.appendChild(box);
+      pop = box;
+
+      var r = a.getBoundingClientRect();
+      var w = Math.min(380, window.innerWidth - 32);
+      box.style.width = w + 'px';
+      // fixed 定位，全部用视口坐标；滚动即关闭，不必换算 scrollY
+      var left = r.left - 16;
+      if (left + w > window.innerWidth - 16) left = window.innerWidth - w - 16;
+      box.style.left = Math.max(12, left) + 'px';
+      if (r.bottom + 240 > window.innerHeight) {
+        box.style.top = 'auto';
+        box.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+      } else {
+        box.style.top = (r.bottom + 8) + 'px';
+      }
+    });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+    window.addEventListener('scroll', close, { passive: true });
+  })();
 })();
 """
 os.makedirs(os.path.join(SITE, "assets"), exist_ok=True)
