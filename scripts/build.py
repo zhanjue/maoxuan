@@ -194,7 +194,7 @@ def build_index():
 <h2>从这里进</h2>
 <p class="desc">六种读法：用金字塔看全书结构、顺着时期读原文、按概念查、看语录、用工具理解、检索全文。</p>
 <div class="entries">
-<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">先问，再答，再看三根支柱——二十个概念节点各归其位</div></a>
+<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">塔尖一句答案，向下拆成三根支柱，二十个概念挂在其下</div></a>
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 17 篇</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
