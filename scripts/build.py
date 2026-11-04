@@ -617,7 +617,7 @@ def build_timeline():
 <div class="tl">%s</div>
 <div class="section" style="border-top:1px solid var(--line);margin-top:24px">
 <h2>概念演变链</h2>
-<p class="desc">同一个概念在不同时期的表述变化——这是 AI 聊天给不了的深度，也是本库对标 learnbuffett「思想演变时间线」的核心资产。</p>
+<p class="desc">同一个概念在不同时期的表述变化——这是 AI 聊天给不了的深度。</p>
 <div class="evo">%s</div>
 </div>
 </div>""" % ("".join(items), "".join(evo_rows))
