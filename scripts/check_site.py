@@ -215,6 +215,52 @@ elif int(_shown[0]) != _total:
 if _foreign and "%d 条注释" % _foreign not in nb:
     warns.append("有 %d 条外篇注释未在附录里交代（应从〔1〕重来的那批）" % _foreign)
 
+# ---------- 10. 金字塔页末「四篇读通全书」（自下而上那一面） ----------
+# 这一节的引文直接决定读者点进去看到的是不是同一句话；段号会随数据清理位移，
+# 而锚点照样存在、死链检查查不出来。所以必须验「这一段真的含这句话」。
+py = json.load(open(os.path.join(ROOT, "data", "pyramid.json"), encoding="utf-8"))
+route = py.get("route") or {}
+sts = route.get("stations") or []
+if len(sts) < 4:
+    errors.append("金字塔页导读只剩 %d 站（预期 4 站）" % len(sts))
+keys = [b["key"] for b in py["branches"]]
+slugs = [b.get("slug") for b in py["branches"]]
+if None in slugs:
+    errors.append("金字塔分支缺 slug，页内锚点 #b-* 会拼不出来")
+cids = {c["id"] for c in concepts}
+ph = open(os.path.join(SITE, "pyramid.html"), encoding="utf-8").read()
+pids = set(re.findall(r'id="([^"]+)"', ph))
+for s in sts:
+    w = qmap.get(s.get("wid"))
+    if not w:
+        errors.append("导读 %s 指向不存在的篇目 %s" % (s.get("no"), s.get("wid")))
+        continue
+    if s.get("branch") not in keys:
+        errors.append("导读 %s 的支柱「%s」在金字塔三根支柱里找不到" % (s.get("no"), s.get("branch")))
+    if s.get("concept") and s["concept"] not in cids:
+        errors.append("导读 %s 的概念链接指向不存在的节点 %s" % (s.get("no"), s.get("concept")))
+    for q in s.get("quote") or []:
+        n = q.get("para")
+        if not isinstance(n, int) or not (0 < n <= len(w["paragraphs"])):
+            errors.append("导读 %s 段号越界 p%s" % (s.get("no"), n))
+            continue
+        if q.get("text") not in w["paragraphs"][n - 1]:
+            errors.append("导读 %s 引文不在 %s 第 %d 段原文里" % (s.get("no"), s["wid"], n))
+        if q.get("cue") not in w["paragraphs"][n - 1]:
+            errors.append("导读 %s 锚词失配 %s p%d" % (s.get("no"), s["wid"], n))
+    if ("r-%s" % s.get("no")) not in pids:
+        errors.append("金字塔页缺导读站锚点 #r-%s" % s.get("no"))
+for b in py["branches"]:
+    if ("b-%s" % b.get("slug")) not in pids:
+        errors.append("金字塔页缺支柱锚点 #b-%s" % b.get("slug"))
+if ph.count('class="rt-stop"') != len(sts):
+    errors.append("金字塔页渲染了 %d 站，数据 %d 站" % (ph.count('class="rt-stop"'), len(sts)))
+if ph.count('class="pyr-br-from"') != len(keys):
+    errors.append("支柱卡反向链接 %d 条，三根支柱应有 3 条" % ph.count('class="pyr-br-from"'))
+for href in re.findall(r'href="#([^"]+)"', ph):
+    if href not in pids:
+        errors.append("金字塔页页内锚点 #%s 找不到目标" % href)
+
 print("页面 %d 个 | 链接 %d 条 | CSS v%s" % (len(pages), checked, css_ver))
 print("注释：正文上标 %d、注释条目 %d、回链 %d" % (n_ref, n_item, n_back))
 print("导读：%d 篇、%d 个问题 | 概念引文 %d 条 | 语录 %d 条" % (

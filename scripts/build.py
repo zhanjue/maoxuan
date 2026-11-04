@@ -170,7 +170,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=31">
+<link rel="stylesheet" href="%sassets/style.css?v=32">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -216,7 +216,7 @@ def build_index():
 <h2>从这里进</h2>
 <p class="desc">六种读法：用金字塔看全书结构、顺着时期读原文、按概念查、看语录、用工具理解、检索全文。</p>
 <div class="entries">
-<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">塔尖一句答案，向下拆成三根支柱，二十个概念挂在其下</div></a>
+<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">塔尖一句答案，向下拆成三根支柱；页末反过来，四篇按年份把塔立起来</div></a>
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 17 篇</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
@@ -673,15 +673,16 @@ def concept_chip(cid):
     c = CONCEPT_BY_ID[cid]
     return '<a class="chip" href="concepts/%s.html">%s</a>' % (cid, esc(c["name"]))
 
-def branch_card(b, with_chips):
+def branch_card(b, with_chips, from_link=""):
     chips = ('<div class="pyr-br-concepts"><div class="pyr-br-concepts-lb">%d 个概念</div><div class="pyr-chips">%s</div></div>'
              % (len(b["conceptIds"]), "".join(concept_chip(cid) for cid in b["conceptIds"]))) if with_chips else ""
-    return """<div class="pyr-br">
+    return """<div class="pyr-br" id="b-%s">
 <div class="pyr-br-q">%s</div>
 <div class="pyr-br-hd"><span class="pyr-key">%s</span><span class="pyr-br-nm">%s</span></div>
 <div class="pyr-br-claim">%s</div>
 <div class="pyr-br-logic">%s</div>
-%s</div>""" % (esc(b["question"]), esc(b["key"]), esc(b["name"]), esc(b["claim"]), esc(b["logic"]), chips)
+%s%s</div>""" % (b["slug"], esc(b["question"]), esc(b["key"]), esc(b["name"]),
+                 esc(b["claim"]), esc(b["logic"]), chips, from_link)
 
 def layer_block(level, q, inner, note):
     q_html = '<div class="td-q">%s</div>' % esc(q) if q else ""
@@ -692,6 +693,96 @@ def layer_block(level, q, inner, note):
 <div class="td-a">%s</div>
 %s
 </div>""" % (esc(level), q_html, inner, n_html)
+
+def route_from_link(b):
+    """支柱卡底部一行「这一根是哪篇立起来的」，指向页末那一站。
+    自上而下与自下而上互设锚点，读者才看得出这是同一座塔的两面，
+    而不是两篇各讲一套的文章。"""
+    sts = [s for s in (PYRAMID.get("route") or {}).get("stations", []) if s["branch"] == b["key"]]
+    if not sts:
+        return ""
+    year = sts[0]["date"].split(".")[0]
+    if len(sts) == 1:
+        t = "%s 年《%s》立起这一根" % (year, sts[0]["title"])
+    else:
+        t = "%s 年《%s》《%s》先后立起这一根" % (year, sts[0]["title"], sts[1]["title"])
+    # 站号是两位字符串（r-01），不能转 int 再拼，否则 #r-1 配不上 id
+    return '<a class="pyr-br-from" href="#r-%s">↓ %s</a>' % (sts[0]["no"], esc(t))
+
+
+def route_section():
+    """页末：自下而上。四篇按年份站成一列，每一站标明它撑的是哪根支柱。
+    数据在 pyramid.json 的 route 段；引文逐字，段号 1 基，cue 逐条核对。"""
+    R = PYRAMID.get("route")
+    if not R:
+        return ""
+    wmap = {w["id"]: w for w in WORKS}
+    cmap = {c["id"]: c["name"] for c in CONCEPTS}
+    br = {b["key"]: b for b in PYRAMID["branches"]}
+    out = []
+    for s in R["stations"]:
+        w = wmap.get(s["wid"])
+        if not w:
+            raise SystemExit("导读站 %s 指向不存在的篇目 %s" % (s["no"], s["wid"]))
+        paras = w["paragraphs"]
+        qs = []
+        for k, q in enumerate(s["quote"]):
+            n = q["para"]
+            if not (0 < n <= len(paras)):
+                raise SystemExit("导读 %s 段号越界 p%d" % (s["no"], n))
+            if q["text"] not in paras[n - 1]:
+                raise SystemExit("导读 %s 引文不在第 %d 段原文里（段号可能位移）" % (s["no"], n))
+            if q["cue"] not in paras[n - 1]:
+                raise SystemExit("导读 %s 锚词失配 p%d（期望含「%s」）" % (s["no"], n, q["cue"]))
+            # 分两段引就要交代中间省了多少：本站的底线是「省略也算改动」，
+            # 所以不写含糊的省略号，直接告诉读者省了几个字。
+            gap = ""
+            if k:
+                pv, p = s["quote"][k - 1], paras[n - 1]
+                if pv["para"] == n:
+                    a = p.find(pv["text"]) + len(pv["text"])
+                    b = p.find(q["text"])
+                    if b > a >= len(pv["text"]):
+                        gap = '<p class="rt-gap">（此处省略原文 %d 字）</p>' % (b - a)
+                else:
+                    gap = '<p class="rt-gap">（原文另起一段，中间略去若干句）</p>'
+            qs.append(gap + "<p>%s</p>" % esc(q["text"]))
+        pn = s["quote"][0]["para"]
+        b = br[s["branch"]]
+        out.append("""<div class="rt-stop" id="r-%s">
+<div class="rt-meta"><span class="rt-date">%s</span><a class="rt-br" href="#b-%s">↑ 这根支柱：%s · %s</a><span>%s 字 · %s</span></div>
+<h3>%s</h3>
+<p class="rt-q"><span class="rt-qlab">问</span>%s</p>
+<blockquote class="rt-quote">%s</blockquote>
+<p class="rt-take"><b>读完带走</b>%s</p>
+<div class="rt-links"><a href="works/%s.html#p%d">第 %d 段 ↗</a><a href="works/%s.html">读全文 ↗</a><a href="concepts/%s.html">%s ↗</a></div>
+</div>""" % (s["no"], esc(s["date"]), b["slug"], esc(b["key"]), esc(b["name"]),
+             "{:,}".format(s["chars"]), esc(s["mins"]),
+             esc(s["title"]), esc(s["q"]), "".join(qs), esc(s["take"]),
+             s["wid"], pn, pn, s["wid"], s["concept"], esc(cmap.get(s["concept"], ""))))
+        if s.get("bridge"):
+            out.append('<p class="rt-bridge">%s</p>' % esc(s["bridge"]))
+    chars = sum(s["chars"] for s in R["stations"])
+    mins = sum(int("".join(ch for ch in s["mins"] if ch.isdigit())) for s in R["stations"])
+    body = """<div class="td-flip"><span>自下而上 · 从 %s 年读起</span></div>
+<section class="rt" id="route">
+<div class="rt-kind">%s</div>
+<h2>%s</h2>
+<p class="rt-intro">%s</p>
+<p class="rt-note">%s</p>
+<p class="rt-stat">四篇合计 %s 字，占全卷 %.0f%%，读完约 %d 小时。</p>
+<div class="rt-list">%s</div>
+<div class="rt-end">
+<h3>%s</h3>
+<p>%s</p>
+<a href="#top-down">↑ 回到塔尖，自上而下再看一遍</a>
+</div>
+</section>""" % (R["stations"][0]["date"].split(".")[0], esc(R["kicker"]), esc(R["title"]),
+                 esc(R["intro"]), esc(R["note"]),
+                 "{:,}".format(chars), chars / TOTAL_CHARS * 100, max(1, round(mins / 60)),
+                 "".join(out), esc(R["end_title"]), esc(R["end_text"]))
+    return body
+
 
 def build_pyramid():
     td = PYRAMID["topdown"]
@@ -712,15 +803,20 @@ def build_pyramid():
 <div class="td-lv">%s</div>
 <div class="pyr-branches">%s</div>
 <div class="td-note">%s</div>
-</div>""" % (esc("第三层"), "".join(branch_card(b, True) for b in PYRAMID["branches"]), esc(L["note"])))
+</div>""" % (esc("第三层"), "".join(branch_card(b, True, route_from_link(b)) for b in PYRAMID["branches"]), esc(L["note"])))
         if i < len(td["layers"]) - 1:
             blocks.append('<div class="td-conn"><span>%s</span></div>' % esc(L.get("conn", "拆开下一层")))
     body = """<div class="wrap" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 金字塔</div>
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">用金字塔原理把第一卷立起来：<b>先问，再答，再看三根支柱——二十个概念节点各归其位</b>。%s</p>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 20px">用金字塔原理把第一卷立起来：<b>先问，再答，再看三根支柱——二十个概念节点各归其位</b>。%s</p>
+<div class="pyr-dirs">
+<a class="on" href="#top-down">自上而下 · 先看结构</a>
+<a href="#route">自下而上 · 四篇读通全书</a>
+</div>
+<div id="top-down">%s</div>
 %s
-</div>""" % (esc(td["intro"]), "".join(blocks))
+</div>""" % (esc(td["intro"]), "".join(blocks), route_section())
     write("pyramid.html", page("金字塔", body, 0, "pyramid"))
 
 # ---------- 8. 经典语录 ----------

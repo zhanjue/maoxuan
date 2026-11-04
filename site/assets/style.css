@@ -446,6 +446,69 @@ a.term:hover { border-bottom-color: var(--teal); }
 .nb-tm > div span { color: var(--ink-3); font-size: 11.5px; display: block; margin-top: 3px; }
 .nb-tm-h { font-family: var(--display); font-size: 13px; font-weight: 700; color: var(--ink); display: block; margin-bottom: 3px; }
 
+/* ---------- 金字塔页的第二个方向：自下而上·四篇读通全书 ----------
+   它原来是独立一页（_demo-four），并进金字塔页后不再是「另一篇」，
+   而是同一座塔的倒着看：上半页拆结论，下半页按年份看支柱怎么立起来。
+   两侧互设锚点（.pyr-br-from ↔ .rt-br），所以用的是同一条竖线、同一个 teal。 */
+.pyr-dirs { display: flex; gap: 10px; margin: 0 0 30px; flex-wrap: wrap; }
+.pyr-dirs a {
+  font-size: 12.5px; color: var(--ink-2); text-decoration: none;
+  padding: 6px 14px; border: 1px solid var(--line-2); border-radius: 999px;
+  transition: color .15s, border-color .15s;
+}
+.pyr-dirs a.on { color: var(--teal); border-color: var(--teal); }
+.pyr-dirs a:hover { color: var(--teal); border-color: var(--teal); }
+
+.td-flip { display: flex; align-items: center; gap: 14px; margin: 54px 0 26px; }
+.td-flip::before, .td-flip::after { content: ""; height: 1px; background: var(--line-2); flex: 1; }
+.td-flip span { font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.16em; white-space: nowrap; }
+
+.rt { padding-bottom: 10px; }
+.rt-kind { font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.3em; }
+.rt h2 { font-family: var(--display); font-size: 25px; font-weight: 700; margin: 10px 0 14px; }
+.rt-intro { font-size: 13.5px; color: var(--ink-2); line-height: 2; margin: 0 0 8px; max-width: 740px; }
+.rt-note { font-size: 12.5px; color: var(--ink-3); line-height: 1.95; margin: 0 0 6px; max-width: 740px; }
+.rt-stat { font-size: 12px; color: var(--ink-3); margin: 12px 0 6px; font-family: var(--mono); }
+.rt-list { margin: 30px 0 0; padding-left: 30px; border-left: 1px solid var(--line-2); }
+.rt-stop { position: relative; padding-bottom: 26px; }
+.rt-stop::before {
+  content: ""; position: absolute; left: -36px; top: 6px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--teal);
+}
+.rt-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--ink-3); }
+.rt-date { font-family: var(--mono); letter-spacing: 0.06em; color: var(--ink-2); }
+.rt-br { color: var(--teal); text-decoration: none; border-bottom: 1px solid transparent; }
+.rt-br:hover { border-bottom-color: var(--teal); }
+.rt-stop h3 { font-family: var(--display); font-size: 19px; font-weight: 700; margin: 8px 0 10px; }
+.rt-q { font-size: 14.5px; color: var(--ink); line-height: 1.9; margin: 0 0 12px; }
+.rt-qlab {
+  display: inline-block; font-size: 11px; color: var(--ink-3); line-height: 1.6;
+  border: 1px solid var(--line-2); border-radius: 3px; padding: 0 5px; margin-right: 9px; vertical-align: 2px;
+}
+.rt-quote {
+  margin: 0 0 14px; padding-left: 15px; border-left: 2px solid var(--line-2);
+  font-family: var(--quote); font-size: 14px; color: var(--ink-2); line-height: 2.05;
+}
+.rt-quote p { margin: 0 0 4px; }
+.rt-gap { font-family: var(--text); font-size: 11.5px; color: var(--ink-3); }
+.rt-take { font-size: 13px; color: var(--ink-2); line-height: 1.95; margin: 0 0 10px; }
+.rt-take b { color: var(--ink); font-weight: 600; margin-right: 8px; }
+.rt-links { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; }
+.rt-links a { color: var(--teal); text-decoration: none; border-bottom: 1px solid transparent; }
+.rt-links a:hover { border-bottom-color: var(--teal); }
+.rt-bridge { position: relative; margin: 0 0 26px; font-size: 12.5px; color: var(--ink-3); line-height: 1.9; }
+.rt-bridge::before { content: "↓"; position: absolute; left: -36px; top: 0; font-size: 13px; color: var(--line-2); }
+.rt-end { margin: 34px 0 50px; padding: 22px 26px; background: var(--paper-2); border-radius: 6px; }
+.rt-end h3 { font-family: var(--display); font-size: 16.5px; font-weight: 700; margin: 0 0 10px; }
+.rt-end p { font-size: 13px; color: var(--ink-2); line-height: 2; margin: 0 0 10px; }
+.rt-end a { font-size: 12.5px; color: var(--teal); text-decoration: none; }
+.pyr-br-from {
+  display: block; margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--line);
+  font-size: 11.5px; color: var(--ink-3); text-decoration: none;
+}
+.pyr-br-from:hover { color: var(--teal); }
+
 /* ---------- 响应式 ---------- */
 @media (max-width: 860px) {
   .entries { grid-template-columns: repeat(2, 1fr); }
@@ -462,6 +525,11 @@ a.term:hover { border-bottom-color: var(--teal); }
   .tool-tab-grp, .tool-legend .k, .md-sec-note { word-break: break-word; }
   .tool-legend { padding: 14px 16px; }
   .pyr-branches { grid-template-columns: 1fr; }
+  /* 窄屏：竖线轨道左移，圆点跟着收，否则 30px 缩进会把正文挤窄 */
+  .rt-list { padding-left: 20px; }
+  .rt-stop::before { left: -26px; }
+  .rt-bridge::before { left: -26px; }
+  .rt h2 { font-size: 21px; }
   .nav { display: none; }
   /* 窄屏顶栏：品牌英文副标 + 固定 150px 检索框把顶栏撑出视口，连带整页横向溢出。
      副标收起、检索框缩宽（聚焦时也不再撑大），顶栏不再溢出 */
