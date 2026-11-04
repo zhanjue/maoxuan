@@ -605,7 +605,10 @@ def build_timeline():
     evo_rows = []
     for c in CONCEPTS:
         if len(c["evolution"]) >= 2:
-            chain = " → ".join("%s《%s》" % (e["dateKey"], e["work"]) for e in c["evolution"])
+            # 卷外篇的目标题名自带书名号（《农村调查》的序言和跋），别再套一层
+            chain = " → ".join("%s%s" % (e["dateKey"],
+                                         e["work"] if e["work"].startswith("《") else "《%s》" % e["work"])
+                               for e in c["evolution"])
             evo_rows.append('<div class="evo-item"><span class="dt">%d 节点</span><span class="wk"><a href="concepts/%s.html">%s</a></span><span class="nt">%s</span></div>' % (
                 len(c["evolution"]), c["id"], esc(c["name"]), esc(chain)))
     body = """<div class="wrap" style="padding-top:40px">
