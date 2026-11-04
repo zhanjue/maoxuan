@@ -403,7 +403,10 @@ def term_head(w, num, para):
 
 
 def note_book():
-    """附录节：四小节 —— 谁是谁 / 哪一年被解释得最多 / 注出来的年表 / 词与物。
+    """附录节：四小节 —— 谁是谁 / 词与物 / 哪一年被解释得最多 / 注出来的年表。
+
+    词与物紧跟谁是谁：两节都是「按条查」的索引（查人、查词），年份分布与年表
+    是「按年读」的连续叙事，分开放，读者不必在两种读法之间来回跳。
 
     刻意不做「按人名聚合成百科」：314 条注里带生卒年的人物小传只有十几条，
     人名几乎不重复，聚不出词条空间，硬做只会得到一堆只有一条的空壳。
@@ -436,7 +439,7 @@ def note_book():
             if v and 1900 <= v <= 1949:
                 yearh[v] += 1
 
-    # --- 一 · 谁是谁 ---
+    # --- 谁是谁 ---
     ppl = []
     for name, p in sorted(people.items(), key=lambda kv: (-len(kv[1]["items"]), kv[1]["born"])):
         multi = ' data-multi="%d"' % len(p["items"]) if len(p["items"]) > 1 else ""
@@ -447,7 +450,7 @@ def note_book():
 <div class="nb-pp-tx" onclick="this.classList.toggle('open')">%s</div>
 <div class="nb-pp-ft">%s</div></div>""" % (multi, esc(name), p["born"], p["died"], esc(p["tail"]), srcs))
 
-    # --- 二 · 年份分布（内联 SVG，颜色走 CSS 变量，不烤死色值） ---
+    # --- 年份分布（内联 SVG，颜色走 CSS 变量，不烤死色值） ---
     bars = [(y, c) for y, c in sorted(yearh.items()) if 1921 <= y <= 1939 and c >= 2]
     mx = max(c for _, c in bars) if bars else 1
     W_, H_ = 640, len(bars) * 21 + 4
@@ -465,7 +468,7 @@ def note_book():
     top2 = collections.Counter(yearh).most_common(2)
     y_txt = "、".join("%d 年 %d 次" % (y, c) for y, c in top2)
 
-    # --- 三 · 注出来的年表 ---
+    # --- 注出来的年表 ---
     seen, by_year = {}, collections.OrderedDict()
     for e in sorted(events, key=lambda x: x["year"]):
         key = re.sub(r"\s+", "", e["brief"])[:26]
@@ -490,7 +493,7 @@ def note_book():
         ev.append("<details%s><summary><b>%d</b>%d 条注释解释这一年</summary>%s</details>"
                   % (" open" if y == (top2[0][0] if top2 else 0) else "", y, len(rows), inner))
 
-    # --- 四 · 词与物（同名词头只留一条） ---
+    # --- 词与物（同名词头只留一条） ---
     uniq, used = [], set()
     for h, t in terms:
         if h in used:
@@ -515,8 +518,8 @@ def note_book():
 <div class="stats">
 <div class="stat"><div class="n">%d</div><div class="l">条原版注释</div></div>
 <div class="stat"><div class="n">%d</div><div class="l">条人物小传</div></div>
-<div class="stat"><div class="n">%d</div><div class="l">条事件编年</div></div>
 <div class="stat"><div class="n">%d</div><div class="l">条名词释义</div></div>
+<div class="stat"><div class="n">%d</div><div class="l">条事件编年</div></div>
 </div>
 <p class="nb-note">数字由构建脚本从 works.json 现算，未作人工挑选；每条都能点回正文那一段。%s</p>
 
@@ -524,19 +527,19 @@ def note_book():
 <p class="nb-hint">注释里带生卒年的条目，本身就是一篇小传：原名、籍贯、做过什么、怎么死的。点正文可展开全文，点段号回到他被提到的那一句。</p>
 <div class="nb-ppl">%s</div></section>
 
-<section class="nb-sec"><h3>二 · 哪一年被解释得最多</h3>
+<section class="nb-sec"><h3>二 · 词与物</h3>
+<p class="nb-hint">正文里带〔N〕的地方，多数就是被解释的那个词。把词头抽成索引：自耕农、挨户团、五卅运动——今天听着陌生的，注释里一句讲清。</p>
+<div class="nb-tm">%s</div></section>
+
+<section class="nb-sec"><h3>三 · 哪一年被解释得最多</h3>
 <p class="nb-hint">统计 %d 条注释里出现的年份（1921 年以前与 1939 年以后的零散条目未画）。出现最多的是 %s。同一个年份被反复解释，说明那一年的事，几乎每篇文章都要交代一次。</p>
 <div style="max-width:640px">%s</div></section>
 
-<section class="nb-sec"><h3>三 · 注出来的年表</h3>
+<section class="nb-sec"><h3>四 · 注出来的年表</h3>
 <p class="nb-hint">以年份开头的注释，本身就是记事条目。按年份归拢，不用读正文，也能排出一条时间线。</p>
 <div class="nb-ev">%s</div></section>
-
-<section class="nb-sec"><h3>四 · 词与物</h3>
-<p class="nb-hint">正文里带〔N〕的地方，多数就是被解释的那个词。把词头抽成索引：自耕农、挨户团、五卅运动——今天听着陌生的，注释里一句讲清。</p>
-<div class="nb-tm">%s</div></section>
-</div>""" % (len(N), sum(len(p["items"]) for p in people.values()), len(events), len(terms), foreign_txt,
-             "".join(ppl), len(N), y_txt, "".join(svg), "".join(ev), tm)
+</div>""" % (len(N), sum(len(p["items"]) for p in people.values()), len(terms), len(events), foreign_txt,
+             "".join(ppl), tm, len(N), y_txt, "".join(svg), "".join(ev))
     return body
 
 
