@@ -148,10 +148,10 @@ def quote_snippet(text, keyword, width=64):
 # ---------- 页面骨架 ----------
 NAV = [
     ("index.html", "首页", 0),
-    ("pyramid.html", "金字塔", 0),
     ("works.html", "篇目", 0),
-    ("concepts.html", "概念图谱", 0),
     ("timeline.html", "时期轴", 0),
+    ("pyramid.html", "金字塔", 0),
+    ("concepts.html", "概念图谱", 0),
     ("quotes.html", "语录", 0),
     ("tool-maodun.html", "矛盾论工具", 0),
     ("search.html", "检索", 0),
