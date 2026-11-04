@@ -13,10 +13,12 @@ works = [w for w in works if isinstance(w, dict)]
 errors, warns = [], []
 
 # ---------- 1. 收集所有页面 ----------
+# 下划线开头的是 demo 草稿（未入库、未挂入口），只供版式对比，不参与正式站的检查：
+# 它们指向的是旧 CSS 版本，混进来会报「版本号不一致」这种假错。
 pages = []
 for base, _, files in os.walk(SITE):
     for f in files:
-        if f.endswith(".html"):
+        if f.endswith(".html") and not f.startswith("_"):
             pages.append(os.path.join(base, f))
 pages.sort()
 
@@ -161,10 +163,64 @@ if n_card != len(QUOTES):
 if qh.count('class="fav"') != len(QUOTES):
     errors.append("语录收藏按钮 %d 个，数据 %d 条" % (qh.count('class="fav"'), len(QUOTES)))
 
+# ---------- 9. 附录「注释里的另一本书」（挂在概念图谱页末） ----------
+# 这一节的所有段号都是「在正文里找〔N〕标记」反查出来的。注释编号一旦串篇
+# （《中国共产党在抗日时期的任务》36 条里有 14 条属于紧接其后的一篇，编号从〔1〕重来），
+# 反查会落在错误文章的段号上，而且死的只是「内容对不上」，链接照样存在。
+cp = open(os.path.join(SITE, "concepts.html"), encoding="utf-8").read()
+if 'id="notes"' not in cp:
+    errors.append("概念图谱页缺附录锚点 #notes")
+nb = cp[cp.find('id="notes"'):]
+n_pp = nb.count('class="nb-pp"')
+n_tm = nb.count('class="nb-tm-h"')
+n_ev = nb.count("<details")
+if n_pp < 10:
+    errors.append("附录人物卡只有 %d 条（预期 15 上下）" % n_pp)
+if n_tm < 10:
+    errors.append("附录词表只有 %d 条（预期 18 上下）" % n_tm)
+
+# 附录里每条溯源都要落到「带注释标记的那一段」；否则就是把注挂到了别的段落上
+for wid, para in set(re.findall(r'href="works/([\w-]+)\.html#p(\d+)"', nb)):
+    w = qmap.get(wid)
+    if not w:
+        errors.append("附录引用了不存在的篇目 %s" % wid)
+        continue
+    n = int(para)
+    if not (0 < n <= len(w["paragraphs"])):
+        errors.append("附录 %s 段号越界 p%d" % (wid, n))
+    elif "〔" not in w["paragraphs"][n - 1]:
+        errors.append("附录 %s p%d 里没有注释标记，这条溯源挂错了段" % (wid, n))
+
+# 四格数字：按「编号首次出现者为准」独立重算一遍，与页面上的数字对账
+def _notes_first_wins(raw):
+    out, seen = set(), set()
+    for t in raw or []:
+        m = re.match(r"〔(\d+)〕", (t or "").strip())
+        if not m:
+            continue
+        k = int(m.group(1))
+        if k in seen:
+            continue
+        seen.add(k)
+        out.add(k)
+    return out
+
+_total = sum(len(_notes_first_wins(w.get("notes"))) for w in works)
+_foreign = sum(len(w.get("notes") or []) for w in works) - _total
+_shown = re.findall(r'<div class="n">(\d+)</div>', nb)
+if not _shown:
+    errors.append("附录缺数字块")
+elif int(_shown[0]) != _total:
+    errors.append("附录注释条数写 %s，实际本篇注释 %d 条" % (_shown[0], _total))
+if _foreign and "%d 条注释" % _foreign not in nb:
+    warns.append("有 %d 条外篇注释未在附录里交代（应从〔1〕重来的那批）" % _foreign)
+
 print("页面 %d 个 | 链接 %d 条 | CSS v%s" % (len(pages), checked, css_ver))
 print("注释：正文上标 %d、注释条目 %d、回链 %d" % (n_ref, n_item, n_back))
 print("导读：%d 篇、%d 个问题 | 概念引文 %d 条 | 语录 %d 条" % (
     len([w for w in works if w["id"] in reading]), n_q, n_quote, n_q2))
+print("附录：人物 %d、词条 %d、年表 %d 年 | 本篇注释 %d 条、外篇 %d 条" % (
+    n_pp, n_tm, n_ev, _total, _foreign))
 if warns:
     print("\n提示：")
     for x in warns:

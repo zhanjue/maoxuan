@@ -409,6 +409,43 @@ a.term:hover { border-bottom-color: var(--teal); }
 .td-conn::before { content: ""; display: block; width: 1px; height: 20px; background: var(--line-2); margin: 0 auto 6px; }
 .td-conn span { font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.15em; }
 
+/* ---------- 附录：注释里的另一本书（概念图谱页下方） ----------
+   它本来是独立一页，并入概念页后只能是一件附录：不另起 h1、不再占一个导航项，
+   靠一条粗线 + 「附录」二字与上半页分开。类名统一 nb- 前缀——
+   .ev 已被概念演变时间线占用（.evo-item 等），复用会串味 */
+.nb { margin-top: 66px; padding-top: 40px; border-top: 1px solid var(--line-2); }
+.nb-kind { font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.3em; }
+.nb h2 { font-family: var(--display); font-size: 27px; font-weight: 700; margin-top: 10px; }
+.nb-lede { font-size: 13.5px; color: var(--ink-2); max-width: 660px; margin-top: 14px; line-height: 2.05; }
+.nb .stats { margin-top: 28px; }
+.nb-note { font-size: 11.5px; color: var(--ink-3); margin-top: 10px; }
+.nb-sec { margin: 46px 0 0; }
+.nb-sec > h3 { font-family: var(--display); font-size: 19px; font-weight: 700; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+.nb-hint { font-size: 12.5px; color: var(--ink-3); margin: 10px 0 20px; line-height: 1.95; }
+.nb-ppl { display: grid; grid-template-columns: 1fr 1fr; gap: 0 34px; }
+.nb-pp { padding: 16px 0; border-bottom: 1px solid var(--line); }
+.nb-pp-hd { display: flex; align-items: baseline; gap: 10px; }
+.nb-pp-nm { font-family: var(--display); font-size: 16px; font-weight: 700; }
+.nb-pp-yr { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* 小传默认两行截断，点开看全文——16 个人全展开会把这一节拉成三屏 */
+.nb-pp-tx { font-size: 12.5px; color: var(--ink-2); line-height: 1.95; margin-top: 6px; cursor: pointer;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.nb-pp-tx.open { display: block; -webkit-line-clamp: unset; }
+.nb-pp-ft { font-size: 11.5px; color: var(--ink-3); margin-top: 6px; }
+.nb-pp-ft a, .nb-ev a, .nb-tm a { color: var(--teal); text-decoration: none; }
+.nb-pp[data-multi] .nb-pp-nm::after { content: " ×" attr(data-multi); font-size: 10.5px; color: var(--teal); font-family: var(--text); }
+.nb-ev { border-left: 2px solid var(--line-2); padding-left: 18px; }
+.nb-ev details { padding: 5px 0; }
+.nb-ev summary { cursor: pointer; font-size: 13px; color: var(--ink-2); list-style: none; }
+.nb-ev summary::-webkit-details-marker { display: none; }
+.nb-ev summary b { font-family: var(--mono); font-size: 12.5px; color: var(--teal); margin-right: 10px; }
+.nb-ev details[open] summary { color: var(--ink); }
+.nb-ev .nb-ev-b { font-size: 12px; color: var(--ink-2); line-height: 1.9; margin: 8px 0 4px 42px; padding-left: 12px; border-left: 1px solid var(--line-2); }
+.nb-tm { display: grid; grid-template-columns: 1fr 1fr; gap: 0 34px; }
+.nb-tm > div { padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--ink-2); line-height: 1.85; }
+.nb-tm > div span { color: var(--ink-3); font-size: 11.5px; display: block; margin-top: 3px; }
+.nb-tm-h { font-family: var(--display); font-size: 13px; font-weight: 700; color: var(--ink); display: block; margin-bottom: 3px; }
+
 /* ---------- 响应式 ---------- */
 @media (max-width: 860px) {
   .entries { grid-template-columns: repeat(2, 1fr); }
@@ -447,6 +484,10 @@ a.term:hover { border-bottom-color: var(--teal); }
   .guide-list { padding-left: 18px; }
   .guide-list li { font-size: 13.5px; line-height: 1.85; }
   .note-pop { width: auto !important; left: 12px !important; right: 12px !important; }
+  /* 附录：两列并排的名单与词表在窄屏会挤成豆腐块，改单列 */
+  .nb-ppl, .nb-tm { grid-template-columns: 1fr; }
+  .nb h2 { font-size: 22px; }
+  .nb-pp-tx { -webkit-line-clamp: 3; }
   /* 触屏没有 hover 提示，书签要给足点击面积（≥36px），否则收藏入口形同隐藏 */
   .fav { width: 38px; height: 38px; top: 16px; right: -6px; opacity: .8; }
   .qt { padding-right: 42px; }

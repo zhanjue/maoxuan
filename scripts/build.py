@@ -4,7 +4,7 @@
 设计约束：数据全部内联（file:// 双击可用，无 fetch 依赖）；Ink 纸白主题；
 溯源单元 = 卷/篇/段；段号为本库对求是网电子文本的编号，非纸质版页码。
 """
-import json, os, html as H
+import json, os, re, collections, html as H
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(ROOT, "site")
@@ -56,30 +56,52 @@ def link_terms(text, depth):
 NOTE_PAT = __import__("re").compile(r"〔(\d+)〕")
 
 
-def parse_notes(raw_notes):
-    """解析原版注释为 {编号: 正文}。
+def split_note_series(raw_notes):
+    """拆开一篇的注释，返回 (本篇 {编号: 正文}, 混进来的外篇注释列表)。
 
     编号取自注释文本自带的〔N〕，**不依赖数组下标**：注释条数与正文标记数并不相等
     （《中国革命战争的战略问题》53 条注释／52 处标记，《中国共产党在抗日时期的任务》
-    36 条／25 处），按下标配对会整体错位。
-    少数注释没有编号（题解类），排在最大编号之后，保证一条都不丢。
+    29 段里 25 处标记），按下标配对会整体错位。
+
+    **编号一旦回退，就说明换了一篇。**《中国共产党在抗日时期的任务》36 条注里，
+    前 22 条是本篇的，第 23 条起又从〔1〕开始——那是同日另一篇
+    《为争取千百万群众进入抗日民族统一战线而斗争》的注，本篇正文里没有对应标记。
+    旧实现直接按编号覆盖，结果是〔1〕—〔14〕的弹层全部显示成那另一篇的解释，
+    正文上标点的却是本篇的事：14 处错注，构建和死链检查都发现不了。
     """
-    out = {}
-    plain = []
+    out, foreign, seen = {}, [], set()
     for n in raw_notes or []:
         t = (n or "").strip()
         if not t:
             continue
         m = NOTE_PAT.match(t)
         if m:
-            out[int(m.group(1))] = t[m.end():].strip()
+            num = int(m.group(1))
+            if num in seen:
+                foreign.append(t)
+                continue
+            seen.add(num)
+            out[num] = t[m.end():].strip()
         else:
-            plain.append(t)
-    nxt = (max(out) if out else 0) + 1
-    for t in plain:
-        out[nxt] = t
-        nxt += 1
-    return out
+            # 无编号的题解类：接在最大编号之后，且不与已有号冲突
+            num = (max(out) if out else 0) + 1
+            while num in seen:
+                num += 1
+            seen.add(num)
+            out[num] = t
+    return out, foreign
+
+
+def parse_notes(raw_notes):
+    """本篇注释 {编号: 正文}；外篇注释不参与渲染（由 check_site 单独报数）。"""
+    return split_note_series(raw_notes)[0]
+
+
+# 全卷注释计数只算各篇自己的。首页原先把 works.json 的数组长度当条数（314），
+# 其中 14 条是另一篇的注，页面实际渲染不到，数字与内容对不上。
+NOTE_MAPS = {w["id"]: parse_notes(w.get("notes")) for w in WORKS}
+FOREIGN_NOTES = {w["id"]: split_note_series(w.get("notes"))[1] for w in WORKS}
+TOTAL_NOTES = sum(len(m) for m in NOTE_MAPS.values())
 
 
 def add_note_refs(html, notemap):
@@ -148,7 +170,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
-<link rel="stylesheet" href="%sassets/style.css?v=30">
+<link rel="stylesheet" href="%sassets/style.css?v=31">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -214,7 +236,7 @@ def build_index():
 <p class="desc">20 个概念节点中的 6 个。<a href="concepts.html" style="color:var(--teal)">看全部 →</a></p>
 <div class="concept-grid">%s</div>
 </section>
-</div>""" % ("{:,}".format(TOTAL_CHARS), len(CONCEPTS), TOTAL_QUOTES, sum(len(w["notes"]) for w in WORKS), len(QUOTES["items"]), "".join(cats))
+</div>""" % ("{:,}".format(TOTAL_CHARS), len(CONCEPTS), TOTAL_QUOTES, TOTAL_NOTES, len(QUOTES["items"]), "".join(cats))
     # 今日一篇数据内联
     brief = [{"t": w["title"], "d": date_disp(w), "c": w["charCount"], "u": "works/%s.html" % w["id"]} for w in WORKS]
     body += '<script>window.__TODAY__=%s;</script>' % json.dumps(brief, ensure_ascii=False)
@@ -326,6 +348,198 @@ def build_work(w):
              rel_tags or "<span style='font-size:13px;color:var(--ink-3)'>暂无</span>", prev_html, next_html)
     write("works/%s.html" % w["id"], page(w["title"], body, 1, "works"))
 
+# ---------- 4a. 附：注释里的另一本书 ----------
+# 只读注释、不读正文：把 314 条注按「人 / 事件 / 名词」重排一遍，就是一张 1925—1937 的政治地图。
+# 全部在构建时从 works.json 现算，不另存数据文件——同一份东西存两处，早晚会走偏。
+CN_NUM = str.maketrans("〇一二三四五六七八九", "0123456789")
+DOC_PAT = re.compile(r"^([\u4e00-\u9fa5·]{2,6})[（(]([〇一二三四五六七八九]{4})[—―－\-─]+"
+                     r"([〇一二三四五六七八九]{4})[）)](.*)$", re.S)
+YEAR_PAT = re.compile(r"^([〇一二三四五六七八九]{4})年")
+TERM_PAT = re.compile(r"^(这里|这|那时)?(是)?指")
+ANY_YEAR = re.compile(r"([〇一二三四五六七八九]{4})")
+
+
+def cn2num(s):
+    s = s.translate(CN_NUM)
+    return int(s) if s.isdigit() else None
+
+
+def note_entries():
+    """把原版注释拆成 (篇, 编号, 正文, 所在段号) 四元组。
+
+    段号是注释标记〔N〕在正文里出现的那一段，用于「点回原文」——
+    没有段号说明正文里没有对应标记，条目照样保留，只是不给链接。
+    """
+    out = []
+    for w in WORKS:
+        for num, text in parse_notes(w.get("notes")).items():
+            para = None
+            for i, p in enumerate(w["paragraphs"], 1):
+                if "〔%d〕" % num in p:
+                    para = i
+                    break
+            out.append((w, num, text, para))
+    return out
+
+
+def term_head(w, num, para):
+    """取正文上标前面那几个字当词头，清理「如自耕农」「们从…的五卅运动」这类上下文。"""
+    if not para:
+        return ""
+    ppr = w["paragraphs"][para - 1]
+    i = ppr.find("〔%d〕" % num)
+    if i <= 0:
+        return ""
+    m = re.search(r"([\u4e00-\u9fa5A-Za-z0-9“”\"]{2,12})$", ppr[max(0, i - 16):i])
+    if not m:
+        return ""
+    h = m.group(1)
+    if "的" in h:
+        h = h.rsplit("的", 1)[1] or h
+    h = re.sub(r"^(例如|比如|所谓|这些|那些|这个|一个|如|即|是|和|与|及|其)", "", h)
+    if re.match(r"^[〇一二三四五六七八九十]+年$", h) or h.startswith(("那", "这")):
+        return ""
+    return h if 2 <= len(h) <= 7 else ""
+
+
+def note_book():
+    """附录节：四小节 —— 谁是谁 / 哪一年被解释得最多 / 注出来的年表 / 词与物。
+
+    刻意不做「按人名聚合成百科」：314 条注里带生卒年的人物小传只有十几条，
+    人名几乎不重复，聚不出词条空间，硬做只会得到一堆只有一条的空壳。
+    """
+    N = note_entries()
+
+    people = {}
+    for w, num, text, para in N:
+        m = DOC_PAT.match(text)
+        if m:
+            people.setdefault(m.group(1), {
+                "born": cn2num(m.group(2)), "died": cn2num(m.group(3)),
+                "tail": m.group(4).lstrip("，,"), "items": []})["items"].append((w, para))
+
+    events = []
+    for w, num, text, para in N:
+        m = YEAR_PAT.match(text)
+        if m and cn2num(m.group(1)):
+            events.append({"year": cn2num(m.group(1)), "brief": text.split("。")[0],
+                           "w": w, "para": para, "dups": 0})
+
+    terms = [(term_head(w, num, para), (w, para, text.split("。")[0] + "。"))
+             for w, num, text, para in N if TERM_PAT.match(text)]
+    terms = [(h, t) for h, t in terms if h]
+
+    yearh = collections.Counter()
+    for _, _, text, _ in N:
+        for y in ANY_YEAR.findall(text):
+            v = cn2num(y)
+            if v and 1900 <= v <= 1949:
+                yearh[v] += 1
+
+    # --- 一 · 谁是谁 ---
+    ppl = []
+    for name, p in sorted(people.items(), key=lambda kv: (-len(kv[1]["items"]), kv[1]["born"])):
+        multi = ' data-multi="%d"' % len(p["items"]) if len(p["items"]) > 1 else ""
+        srcs = "、".join("《%s》<a href=\"works/%s.html#p%d\">p%d</a>" % (esc(w["title"]), w["id"], para, para)
+                        for w, para in p["items"] if para) or "正文中未找到对应标记"
+        ppl.append("""<div class="nb-pp"%s>
+<div class="nb-pp-hd"><span class="nb-pp-nm">%s</span><span class="nb-pp-yr">%d—%d</span></div>
+<div class="nb-pp-tx" onclick="this.classList.toggle('open')">%s</div>
+<div class="nb-pp-ft">%s</div></div>""" % (multi, esc(name), p["born"], p["died"], esc(p["tail"]), srcs))
+
+    # --- 二 · 年份分布（内联 SVG，颜色走 CSS 变量，不烤死色值） ---
+    bars = [(y, c) for y, c in sorted(yearh.items()) if 1921 <= y <= 1939 and c >= 2]
+    mx = max(c for _, c in bars) if bars else 1
+    W_, H_ = 640, len(bars) * 21 + 4
+    svg = ['<svg viewBox="0 0 640 %d" style="width:100%%;max-width:640px;height:auto" role="img" '
+           'aria-label="注释里各年份被提到的次数">' % H_]
+    for i, (y, c) in enumerate(bars):
+        yy = i * 21
+        svg.append('<text x="42" y="%d" font-size="11" fill="var(--ink-3)" text-anchor="end">%d</text>' % (yy + 11, y))
+        # 一种颜色到底：曾按次数深浅分两档，但门槛 8 是人拍的，读者只会问「为什么这条浅」
+        svg.append('<rect x="52" y="%d" width="%.1f" height="10" fill="var(--teal)" opacity="0.8"/>'
+                   % (yy + 2, c / mx * 490))
+        svg.append('<text x="%.1f" y="%d" font-size="10.5" fill="var(--ink-3)">%d</text>'
+                   % (56 + c / mx * 490, yy + 11, c))
+    svg.append("</svg>")
+    top2 = collections.Counter(yearh).most_common(2)
+    y_txt = "、".join("%d 年 %d 次" % (y, c) for y, c in top2)
+
+    # --- 三 · 注出来的年表 ---
+    seen, by_year = {}, collections.OrderedDict()
+    for e in sorted(events, key=lambda x: x["year"]):
+        key = re.sub(r"\s+", "", e["brief"])[:26]
+        if key in seen:
+            seen[key]["dups"] += 1
+            continue
+        seen[key] = e
+        # 与年份分布图同一区间：这一节讲的是 1925—1937 的那个人事现场，
+        # 1951 年那条是《选集》出版说明一类的后记，混进来会打断时间线
+        if 1921 <= e["year"] <= 1949:
+            by_year.setdefault(e["year"], []).append(e)
+
+    ev = []
+    for y in sorted(by_year):
+        rows = by_year[y]
+        inner = "".join('<div class="nb-ev-b">%s%s <a href="works/%s.html#p%d">p%d ↗</a></div>'
+                        % (esc(r["brief"]), ("（另 %d 处同注）" % r["dups"]) if r["dups"] else "",
+                           r["w"]["id"], r["para"] or 0, r["para"] or 0) for r in rows[:4])
+        if len(rows) > 4:
+            inner += ('<div class="nb-ev-b" style="border-left:0;color:var(--ink-3)">'
+                      "另有 %d 条同年的注释未列出</div>") % (len(rows) - 4)
+        ev.append("<details%s><summary><b>%d</b>%d 条注释解释这一年</summary>%s</details>"
+                  % (" open" if y == (top2[0][0] if top2 else 0) else "", y, len(rows), inner))
+
+    # --- 四 · 词与物（同名词头只留一条） ---
+    uniq, used = [], set()
+    for h, t in terms:
+        if h in used:
+            continue
+        used.add(h)
+        uniq.append((h, t))
+    tm = "".join('<div><b class="nb-tm-h">%s</b>%s<span>《%s》<a href="works/%s.html#p%d">p%d ↗</a></span></div>'
+                 % (esc(h), esc(t[2]), esc(t[0]["title"]), t[0]["id"], t[1] or 0, t[1] or 0)
+                 for h, t in uniq[:24])
+
+    foreign_n = sum(len(v) for v in FOREIGN_NOTES.values())
+    foreign_txt = ""
+    if foreign_n:
+        foreign_txt = ("另有 %d 条注释的编号从〔1〕重新开始，属于紧接其后的一篇"
+                       "（《为争取千百万群众进入抗日民族统一战线而斗争》）——本库尚未收录那一篇正文，"
+                       "故不计入上面的总数，也不出现在下面各节。" % foreign_n)
+
+    body = """<div class="nb" id="notes">
+<div class="nb-kind">附录</div>
+<h2>注释里的另一本书</h2>
+<p class="nb-lede">上半页按概念读，这一节按人读。正文十六万字讲道理，脚注里三百多条讲人事——把注释单独抽出来按年代排，就是一张 1925—1937 年的中国政治地图：谁掌权、谁叛变、哪个组织成立、哪一年打什么仗。这一节不读正文，只读注。</p>
+<div class="stats">
+<div class="stat"><div class="n">%d</div><div class="l">条原版注释</div></div>
+<div class="stat"><div class="n">%d</div><div class="l">条人物小传</div></div>
+<div class="stat"><div class="n">%d</div><div class="l">条事件编年</div></div>
+<div class="stat"><div class="n">%d</div><div class="l">条名词释义</div></div>
+</div>
+<p class="nb-note">数字由构建脚本从 works.json 现算，未作人工挑选；每条都能点回正文那一段。%s</p>
+
+<section class="nb-sec"><h3>一 · 谁是谁</h3>
+<p class="nb-hint">注释里带生卒年的条目，本身就是一篇小传：原名、籍贯、做过什么、怎么死的。点正文可展开全文，点段号回到他被提到的那一句。</p>
+<div class="nb-ppl">%s</div></section>
+
+<section class="nb-sec"><h3>二 · 哪一年被解释得最多</h3>
+<p class="nb-hint">统计 %d 条注释里出现的年份（1921 年以前与 1939 年以后的零散条目未画）。出现最多的是 %s。同一个年份被反复解释，说明那一年的事，几乎每篇文章都要交代一次。</p>
+<div style="max-width:640px">%s</div></section>
+
+<section class="nb-sec"><h3>三 · 注出来的年表</h3>
+<p class="nb-hint">以年份开头的注释，本身就是记事条目。按年份归拢，不用读正文，也能排出一条时间线。</p>
+<div class="nb-ev">%s</div></section>
+
+<section class="nb-sec"><h3>四 · 词与物</h3>
+<p class="nb-hint">正文里带〔N〕的地方，多数就是被解释的那个词。把词头抽成索引：自耕农、挨户团、五卅运动——今天听着陌生的，注释里一句讲清。</p>
+<div class="nb-tm">%s</div></section>
+</div>""" % (len(N), sum(len(p["items"]) for p in people.values()), len(events), len(terms), foreign_txt,
+             "".join(ppl), len(N), y_txt, "".join(svg), "".join(ev), tm)
+    return body
+
+
 # ---------- 4. 概念索引 ----------
 def build_concepts_index():
     cats = {}
@@ -337,8 +551,8 @@ def build_concepts_index():
         blocks.append("""<div style="margin-bottom:34px"><div class="cat-head"><span class="pn">%s</span><span class="pr">%d 个节点</span></div><div class="concept-grid">%s</div></div>""" % (esc(cat), len(cs), items))
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">概念图谱</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">%d 个概念节点，按 %d 个领域归类。每个节点 = 一句话定义 + 核心要义 + 原话精选（逐字引文，精确到段）+ 演变时间线 + 自问自答。</p>
-%s</div>""" % (len(CONCEPTS), len(cats), "".join(blocks))
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">%d 个概念节点，按 %d 个领域归类。每个节点 = 一句话定义 + 核心要义 + 原话精选（逐字引文，精确到段）+ 演变时间线 + 自问自答。<a href="#notes" style="color:var(--teal);text-decoration:none;margin-left:6px">↓ 页末另有「注释里的另一本书」</a></p>
+%s%s</div>""" % (len(CONCEPTS), len(cats), "".join(blocks), note_book())
     write("concepts.html", page("概念图谱", body, 0, "concepts"))
 
 # ---------- 5. 概念页 ----------
