@@ -21,6 +21,10 @@ VOL = "卷一"
 SRC = "人民出版社《毛泽东选集》第一卷"
 TOTAL_CHARS = sum(w["charCount"] for w in WORKS)
 TOTAL_QUOTES = sum(len(c["quotes"]) for c in CONCEPTS)
+NW = len(WORKS)
+# 一处定义，全站引用：篇数写死过一次「17 篇」，补到 18 篇时六处文案全错
+DESC = ("知行录：《毛泽东选集》第一卷结构化知识库。%d 篇正式出版文本，%d 个概念节点，"
+        "%d 条溯源引文，每一段都可回溯到卷/篇/段。" % (NW, len(CONCEPTS), TOTAL_QUOTES))
 
 def esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
@@ -169,7 +173,7 @@ def page(title, body, depth, active=""):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
-<meta name="description" content="知行录：《毛泽东选集》第一卷结构化知识库。17 篇正式出版文本，20 个概念节点，46 条溯源引文，每一段都可回溯到卷/篇/段。">
+<meta name="description" content="%s">
 <link rel="stylesheet" href="%sassets/style.css?v=33">
 </head>
 <body>
@@ -180,12 +184,12 @@ def page(title, body, depth, active=""):
 </div></header>
 %s
 <footer class="footer"><div class="wrap"><div class="bd">
-<p><b>知行录</b>——文献检索与阅读工具。文本依据%s，电子文本核自求是网（qstheory.cn）。逐字收录，未作改写，仅供阅读与检索。</p>
+<p><b>知行录</b>——文献检索与阅读工具。正文与引文依据%s，电子文本核自求是网（qstheory.cn），逐字收录、未作改写；概念释义、导语、导读问题与页内说明文字为本站整理，不属原版文字。</p>
 <p>不作历史评价与政治表达。文中「段号」为本库段落编号，非纸质版页码；引文可点出处核对原文。</p>
 </div></div></footer>
 <script src="%sassets/app.js"></script>
 </body>
-</html>""" % (title, p, p, "".join(nav), body, SRC, p)
+</html>""" % (title, DESC, p, p, "".join(nav), body, SRC, p)
 
 def write(path, content):
     full = os.path.join(SITE, path)
@@ -202,9 +206,9 @@ def build_index():
     body = """
 <div class="wrap"><section class="hero">
 <h1>把《毛选》第一卷<br>读成一座可检索的图书馆</h1>
-<p class="sub">正文 17 篇、%s 字，另有 %d 条原版脚注——那是另一本书：人名、组织、战事。<br><b>同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注</b>——每条判断都挂回原话，点开就跳到那一段。</p>
+<p class="sub">正文 %d 篇、%s 字，另有 %d 条原版脚注——那是另一本书：人名、组织、战事。<br><b>同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注</b>——释义是本站整理，出处逐条挂回原段，点开即核对。</p>
 <div class="stats">
-<div class="stat"><div class="n">17</div><div class="l">篇目（第一卷全量）</div></div>
+<div class="stat"><div class="n">%d</div><div class="l">篇目（第一卷全量）</div></div>
 <div class="stat"><div class="n">%s</div><div class="l">字正文</div></div>
 <div class="stat"><div class="n">%d</div><div class="l">概念节点</div></div>
 <div class="stat"><div class="n">%d</div><div class="l">溯源引文</div></div>
@@ -217,7 +221,7 @@ def build_index():
 <p class="desc">六种读法：用金字塔看全书结构、顺着时期读原文、按概念查、看语录、用工具理解、检索全文。</p>
 <div class="entries">
 <a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">塔尖一句答案，向下拆成三根支柱；页末另附四篇入门路线</div></a>
-<a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 17 篇</div></a>
+<a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 %d 篇</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
 <a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">%d 句原文，一字未改，每条都能点回去看上下文，也能收藏</div></a>
@@ -227,17 +231,18 @@ def build_index():
 
 <section class="section">
 <h2>今日一篇</h2>
-<p class="desc">每次打开随机开一篇——像翻一本书那样翻完 17 篇。</p>
+<p class="desc">每次打开随机开一篇——像翻一本书那样翻完 %d 篇。</p>
 <div class="today" id="today"></div>
 </section>
 
 <section class="section">
 <h2>概念精选</h2>
-<p class="desc">20 个概念节点中的 6 个。<a href="concepts.html" style="color:var(--teal)">看全部 →</a></p>
+<p class="desc">%d 个概念节点中的 6 个。释义为本站整理，出处逐条挂回原文段落。<a href="concepts.html" style="color:var(--teal)">看全部 →</a></p>
 <div class="concept-grid">%s</div>
 </section>
-</div>""" % ("{:,}".format(TOTAL_CHARS), TOTAL_NOTES, "{:,}".format(TOTAL_CHARS),
-               len(CONCEPTS), TOTAL_QUOTES, TOTAL_NOTES, len(QUOTES["items"]), "".join(cats))
+</div>""" % (NW, "{:,}".format(TOTAL_CHARS), TOTAL_NOTES, NW, "{:,}".format(TOTAL_CHARS),
+               len(CONCEPTS), TOTAL_QUOTES, TOTAL_NOTES, NW, len(QUOTES["items"]), NW, len(CONCEPTS),
+               "".join(cats))
     # 今日一篇数据内联
     brief = [{"t": w["title"], "d": date_disp(w), "c": w["charCount"], "u": "works/%s.html" % w["id"]} for w in WORKS]
     body += '<script>window.__TODAY__=%s;</script>' % json.dumps(brief, ensure_ascii=False)
@@ -614,14 +619,14 @@ def build_timeline():
                 len(c["evolution"]), c["id"], esc(c["name"]), esc(chain)))
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">时期轴</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 12px">第一卷 17 篇按写作时间排列——1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，横跨第一次国内革命战争与第二次国内革命战争两个时期。</p>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 12px">第一卷 %d 篇按写作时间排列——1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，横跨第一次国内革命战争与第二次国内革命战争两个时期。</p>
 <div class="tl">%s</div>
 <div class="section" style="border-top:1px solid var(--line);margin-top:24px">
 <h2>概念演变链</h2>
 <p class="desc">同一个概念在不同时期的表述变化——这是 AI 聊天给不了的深度。</p>
 <div class="evo">%s</div>
 </div>
-</div>""" % ("".join(items), "".join(evo_rows))
+</div>""" % (NW, "".join(items), "".join(evo_rows))
     write("timeline.html", page("时期轴", body, 0, "timeline"))
 
 # ---------- 7. 矛盾论工具 ----------
@@ -640,13 +645,15 @@ def build_tool():
 <div id="scene"></div>
 </div>
 <div class="tool-explain" id="explain"></div>
-<div class="tool-quote">《矛盾论》第四节：「任何过程如果有多数矛盾存在的话，其中必定有一种是主要的，起着领导的、决定的作用，其他则处于次要和服从的地位。」<a href="works/v1-017.html#p68" style="color:var(--teal);text-decoration:none">第 68 段 ↗</a>　下面三个场景演示：主要矛盾怎么随阶段换人。</div>
+<div class="tool-quote">《矛盾论》第四节：「任何过程如果有多数矛盾存在的话，其中必定有一种是主要的，起着领导的、决定的作用，其他则处于次要和服从的地位。」<a href="works/@@MD@@.html#p68" style="color:var(--teal);text-decoration:none">第 68 段 ↗</a>　下面三个场景演示：主要矛盾怎么随阶段换人。</div>
 <div class="section" style="border-top:1px solid var(--line);margin-top:36px">
 <h2>语料依据</h2>
 <p class="desc">工具中的结构判断均可在《矛盾论》第一卷第 68—72 段核对。</p>
 %s
 </div>
 </div>""" % TOOL_QUOTES_HTML
+    # 篇 id 会随补篇重排，这里按篇名取当前 id，不写死 v1-0xx
+    body = body.replace("@@MD@@", WORK_BY_TITLE["矛盾论"]["id"])
     body += '<script>window.__TOOL__=%s;</script>' % json.dumps(TOOL_SCENES, ensure_ascii=False)
     write("tool-maodun.html", page("主要矛盾演示器", body, 0, "tool"))
 

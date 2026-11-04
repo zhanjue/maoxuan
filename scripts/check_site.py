@@ -131,10 +131,15 @@ for c in concepts:
         seen[text] = i
 
 # ---------- 7. 分页残留复查 ----------
+# 只查开头：采集模板有时把篇名重复灌进正文首段。正文中后部出现与篇名同字的小节标题
+# 是原文如此（《为争取千百万群众进入抗日民族统一战线而斗争》末节标题与篇名完全相同），
+# 一律按残留报错会逼人去改原文。
 for w in works:
     for i, t in enumerate(w["paragraphs"], 1):
-        if "上一页" in t or "下一页" in t or t.strip() == w["title"].strip():
+        if "上一页" in t or "下一页" in t:
             errors.append("%s p%d 仍有采集残留：%s" % (w["id"], i, t[:30]))
+        elif i <= 3 and t.strip() == w["title"].strip():
+            errors.append("%s p%d 篇名重复灌入正文：%s" % (w["id"], i, t[:30]))
 
 # ---------- 8. 语录：段号 / 原文子串 / 收藏钩子 ----------
 # 语录曾经整体错位过一段：gen_quotes 用 0 基下标取段落，又把下标当段号输出，
