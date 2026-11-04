@@ -232,7 +232,7 @@ body1 = """<div class="wrap"><div class="dm-hero">
 # 这里不再重复生成，否则会出现两份内容不一致的同一页——上面这段代码留作历史参考。
 # write('_demo-notes.html', page('另一本书', body1, CSS1))
 
-# Demo 2「四篇读通全书」已并入正式站：金字塔页末那一节（build.py 的 route_section）。
+# Demo 2「四篇读通全书」已放进正式站：金字塔页末那一节（build.py 的 route_section）。
 # 这里不再重复生成，否则同一页会有两份内容不一致的副本。
 
 # ================= Demo 3 词频 =================

@@ -215,9 +215,10 @@ elif int(_shown[0]) != _total:
 if _foreign and "%d 条注释" % _foreign not in nb:
     warns.append("有 %d 条外篇注释未在附录里交代（应从〔1〕重来的那批）" % _foreign)
 
-# ---------- 10. 金字塔页末「四篇读通全书」（自下而上那一面） ----------
+# ---------- 10. 金字塔页末「四篇读通全书」 ----------
 # 这一节的引文直接决定读者点进去看到的是不是同一句话；段号会随数据清理位移，
 # 而锚点照样存在、死链检查查不出来。所以必须验「这一段真的含这句话」。
+# 它是页末独立的一段，不与上半页互补成「两个读法」，别再加切换条或反向锚点。
 py = json.load(open(os.path.join(ROOT, "data", "pyramid.json"), encoding="utf-8"))
 route = py.get("route") or {}
 sts = route.get("stations") or []
@@ -253,10 +254,13 @@ for s in sts:
 for b in py["branches"]:
     if ("b-%s" % b.get("slug")) not in pids:
         errors.append("金字塔页缺支柱锚点 #b-%s" % b.get("slug"))
-if ph.count('class="rt-stop"') != len(sts):
-    errors.append("金字塔页渲染了 %d 站，数据 %d 站" % (ph.count('class="rt-stop"'), len(sts)))
-if ph.count('class="pyr-br-from"') != len(keys):
-    errors.append("支柱卡反向链接 %d 条，三根支柱应有 3 条" % ph.count('class="pyr-br-from"'))
+if ph.count('class="st"') != len(sts):
+    errors.append("金字塔页渲染了 %d 站，数据 %d 站" % (ph.count('class="st"'), len(sts)))
+# 这一节是独立的一段「先读这四篇」，不做「自上而下 / 自下而上」的切换，
+# 也不与支柱卡互设锚点。谁再把它整合回去，这里会先报出来。
+for _ghost in ("pyr-dirs", "pyr-br-from", "td-flip", "rt-stop"):
+    if _ghost in ph:
+        errors.append("金字塔页仍有整合残留 %s：页末那一节应独立摆放" % _ghost)
 for href in re.findall(r'href="#([^"]+)"', ph):
     if href not in pids:
         errors.append("金字塔页页内锚点 #%s 找不到目标" % href)
