@@ -202,7 +202,7 @@ def build_index():
     body = """
 <div class="wrap"><section class="hero">
 <h1>把《毛选》第一卷<br>读成一座可检索的图书馆</h1>
-<p class="sub">17 篇正式出版文本，20 个概念节点，46 条溯源引文。<br><b>每一个判断都挂回原话</b>——点开任何一条引文，都能跳到它在某卷某篇某段的位置。</p>
+<p class="sub">正文 17 篇、%s 字，另有 %d 条原版脚注——那是另一本书：人名、组织、战事。<br><b>同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注</b>——每条判断都挂回原话，点开就跳到那一段。</p>
 <div class="stats">
 <div class="stat"><div class="n">17</div><div class="l">篇目（第一卷全量）</div></div>
 <div class="stat"><div class="n">%s</div><div class="l">字正文</div></div>
@@ -236,7 +236,8 @@ def build_index():
 <p class="desc">20 个概念节点中的 6 个。<a href="concepts.html" style="color:var(--teal)">看全部 →</a></p>
 <div class="concept-grid">%s</div>
 </section>
-</div>""" % ("{:,}".format(TOTAL_CHARS), len(CONCEPTS), TOTAL_QUOTES, TOTAL_NOTES, len(QUOTES["items"]), "".join(cats))
+</div>""" % ("{:,}".format(TOTAL_CHARS), TOTAL_NOTES, "{:,}".format(TOTAL_CHARS),
+               len(CONCEPTS), TOTAL_QUOTES, TOTAL_NOTES, len(QUOTES["items"]), "".join(cats))
     # 今日一篇数据内联
     brief = [{"t": w["title"], "d": date_disp(w), "c": w["charCount"], "u": "works/%s.html" % w["id"]} for w in WORKS]
     body += '<script>window.__TODAY__=%s;</script>' % json.dumps(brief, ensure_ascii=False)
