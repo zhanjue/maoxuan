@@ -201,13 +201,14 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="%s">
-<link rel="stylesheet" href="%sassets/style.css?v=35">
+<link rel="stylesheet" href="%sassets/style.css?v=38">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
 <a class="brand" href="%sindex.html">知行录<small>MAO WORKS · VOL.1</small></a>
-<nav class="nav">%s</nav>
+<nav class="nav" id="nav">%s</nav>
 <div class="searchbox"><input id="q" type="search" placeholder="检索全文…" autocomplete="off"><span style="font-size:11px;color:var(--ink-3)">↵</span></div>
+<button class="nav-toggle" id="navBtn" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>
 </div></header>
 %s
 <footer class="footer"><div class="wrap"><div class="bd">
@@ -891,6 +892,27 @@ def build_search():
 APP_JS = r"""
 (function(){
   var $ = function(s){ return document.querySelector(s); };
+  // 窄屏折叠菜单：≤860px 时顶部那排链接收进面板，这里管开合
+  var navBtn = document.getElementById('navBtn');
+  var nav = document.getElementById('nav');
+  if (navBtn && nav) {
+    var setOpen = function(open){
+      nav.classList.toggle('open', open);
+      navBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      navBtn.setAttribute('aria-label', open ? '收起菜单' : '打开菜单');
+    };
+    navBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      setOpen(!nav.classList.contains('open'));
+    });
+    // 点面板外面、按 Esc 都收起；点链接本身直接跳走，不用管
+    document.addEventListener('click', function(e){
+      if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && nav.classList.contains('open')) { setOpen(false); navBtn.focus(); }
+    });
+  }
   // 顶栏检索 → 跳检索页
   var q = document.getElementById('q');
   if (q) {

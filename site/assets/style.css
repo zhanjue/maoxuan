@@ -56,6 +56,8 @@ body {
 }
 .nav a:hover { color: var(--ink); }
 .nav a.on { color: var(--teal); border-bottom-color: var(--teal); }
+/* 折叠菜单按钮：桌面端不出现，只在 ≤860px 的窄屏顶栏里用 */
+.nav-toggle { display: none; }
 .searchbox { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .searchbox input {
   width: 118px; height: 30px; padding: 0 10px;
@@ -499,13 +501,35 @@ a.term:hover { border-bottom-color: var(--teal); }
   .rt-sec h2 { font-size: 21px; }
   .st h3 { font-size: 21px; }
   .st-q { font-size: 16.5px; }
-  .nav { display: none; }
+  /* 窄屏：导航原来直接 display:none，等于把整站入口全藏了。
+     改成收进折叠面板，顶栏留一个按钮。 */
+  .nav {
+    display: none; position: absolute; left: 0; right: 0; top: 100%;
+    flex-direction: column; gap: 0; margin: 0; padding: 2px 16px 8px;
+    background: #fff; border-bottom: 1px solid var(--line);
+    box-shadow: 0 16px 26px -16px rgba(28, 27, 26, .22);
+  }
+  .nav.open { display: flex; }
+  .nav a { padding: 12px 0; font-size: 15px; border-bottom: 1px solid var(--line); }
+  .nav a:last-child { border-bottom: 0; }
+  .nav a.on { border-bottom-color: var(--line); }
+  .nav-toggle {
+    display: inline-flex; flex-direction: column; justify-content: center; gap: 4px;
+    width: 34px; height: 34px; padding: 0 7px; margin-left: 2px;
+    background: none; border: 1px solid var(--line); border-radius: 4px; cursor: pointer;
+  }
+  .nav-toggle span { display: block; height: 1.5px; background: var(--ink-2); border-radius: 1px; transition: transform .18s, opacity .18s; }
+  .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+  .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
   /* 窄屏顶栏：品牌英文副标 + 固定 150px 检索框把顶栏撑出视口，连带整页横向溢出。
      副标收起、检索框缩宽（聚焦时也不再撑大），顶栏不再溢出 */
   .brand small { display: none; }
   .topbar-in { gap: 12px; padding: 0 16px; }
   .searchbox { margin-left: auto; min-width: 0; }
   .searchbox input { width: 118px; }
+  /* 触屏没有回车键，那个 ↵ 提示在手机上是块噪声 */
+  .searchbox span { display: none; }
   .searchbox input:focus { width: 150px; }
   .wrap, .narrow { padding: 0 16px; }
   .hero { padding: 48px 0 32px; }

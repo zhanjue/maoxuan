@@ -1,6 +1,27 @@
 
 (function(){
   var $ = function(s){ return document.querySelector(s); };
+  // 窄屏折叠菜单：≤860px 时顶部那排链接收进面板，这里管开合
+  var navBtn = document.getElementById('navBtn');
+  var nav = document.getElementById('nav');
+  if (navBtn && nav) {
+    var setOpen = function(open){
+      nav.classList.toggle('open', open);
+      navBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      navBtn.setAttribute('aria-label', open ? '收起菜单' : '打开菜单');
+    };
+    navBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      setOpen(!nav.classList.contains('open'));
+    });
+    // 点面板外面、按 Esc 都收起；点链接本身直接跳走，不用管
+    document.addEventListener('click', function(e){
+      if (nav.classList.contains('open') && !nav.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && nav.classList.contains('open')) { setOpen(false); navBtn.focus(); }
+    });
+  }
   // 顶栏检索 → 跳检索页
   var q = document.getElementById('q');
   if (q) {
