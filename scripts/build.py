@@ -4,7 +4,9 @@
 设计约束：数据全部内联（file:// 双击可用，无 fetch 依赖）；Ink 纸白主题；
 溯源单元 = 卷/篇/段；段号为本库对求是网电子文本的编号，非纸质版页码。
 """
-import json, os, re, collections, html as H
+import json, os, re, collections, html as H, time
+
+BUILD = time.strftime("%Y-%m-%d %H:%M")  # 页脚构建戳：用来分辨看到的页面是不是最新一次构建
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(ROOT, "site")
@@ -185,11 +187,11 @@ def page(title, body, depth, active=""):
 %s
 <footer class="footer"><div class="wrap"><div class="bd">
 <p><b>知行录</b>——文献检索与阅读工具。正文与引文依据%s，电子文本核自求是网（qstheory.cn），逐字收录、未作改写；概念释义、导语、导读问题与页内说明文字为本站整理，不属原版文字。</p>
-<p>不作历史评价与政治表达。文中「段号」为本库段落编号，非纸质版页码；引文可点出处核对原文。</p>
+<p>不作历史评价与政治表达。文中「段号」为本库段落编号，非纸质版页码；引文可点出处核对原文。<span style="margin-left:10px;font-size:11.5px;color:var(--ink-3)">构建 %s</span></p>
 </div></div></footer>
 <script src="%sassets/app.js"></script>
 </body>
-</html>""" % (title, DESC, p, p, "".join(nav), body, SRC, p)
+</html>""" % (title, DESC, p, p, "".join(nav), body, SRC, BUILD, p)
 
 def write(path, content):
     full = os.path.join(SITE, path)
