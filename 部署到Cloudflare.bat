@@ -18,12 +18,12 @@ if errorlevel 1 call npx --yes wrangler@latest login
 if errorlevel 1 goto fail
 
 echo.
-echo  [3/3] 上传 site/ 到 Pages 项目 mao-kb
-call npx --yes wrangler@latest pages deploy site --project-name=mao-kb --commit-dirty=true
+echo  [3/3] 上传 site/ 到 Pages 项目 maoxuan
+call npx --yes wrangler@latest pages deploy site --project-name=maoxuan --commit-dirty=true
 if errorlevel 1 goto fail
 
 echo.
-echo  发布完成。地址： https://mao-kb.pages.dev
+echo  发布完成。地址： https://maoxuan-cye.pages.dev
 pause
 exit /b 0
 

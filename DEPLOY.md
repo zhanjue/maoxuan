@@ -90,7 +90,11 @@ npx wrangler pages deploy site --project-name=mao-kb --commit-dirty=true
 
 ### 地址
 
-`https://mao-kb.pages.dev` —— 2026-11-05 已上线（项目 `mao-kb`，生产分支 `main`）。
+`https://maoxuan-cye.pages.dev` —— 项目名 `maoxuan`，生产分支 `main`。
+
+**注意它为什么带 `-cye`**：`maoxuan.pages.dev` 这个子域名已被别的 Cloudflare 账号占用，
+Pages 项目名允许叫 `maoxuan`，但分到的域名会自动加一串后缀。想要不带后缀的短域名，
+只有两条路：换一个没人占的名字（`maoxuan1`、`maoxuan-vol1` 之类），或者绑自己的域名。
 
 页面会做 pretty URL：站内的 `concepts.html` 会被 308 到 `/concepts`，实际内容照常返回；
 `concepts/`、`works/` 这类同名目录不冲突（`/concepts` 就是概念图谱页本身）。
