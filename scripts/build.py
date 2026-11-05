@@ -828,8 +828,8 @@ def build_pyramid():
             blocks.append('<div class="td-conn"><span>%s</span></div>' % esc(L.get("conn", "拆开下一层")))
     body = """<div class="wrap" style="padding-top:40px">
 <div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 全书骨架</div>
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">全书骨架 · 一本书怎么立起来</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 20px">%s篇其实在回答同一个问题：<b>先问，再答，再看三根支柱——概念节点各归其位</b>。%s</p>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">全书骨架 · %s篇，一个答案</h1>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 20px">从 1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，题目各异，问的是同一件事：<b>中国的路在哪</b>。%s</p>
 <div id="top-down">%s</div>
 %s
 </div>""" % (cn_num(NW), esc(td["intro"]), "".join(blocks), route_section())
