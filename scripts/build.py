@@ -566,19 +566,33 @@ def note_book():
 <p class="nb-hint">正文里带〔N〕的地方，多数就是被解释的那个词。把词头抽成索引：自耕农、挨户团、五卅运动——今天听着陌生的，注释里一句讲清。</p>
 <div class="nb-tm">%s</div></section>
 
-<section class="nb-sec"><h3>三 · 哪一年被解释得最多</h3>
-<p class="nb-hint">统计 %d 条注释里出现的年份（1921 年以前与 1939 年以后的零散条目未画）。出现最多的是 %s。同一个年份被反复解释，说明那一年的事，几乎每篇文章都要交代一次。</p>
-<div style="max-width:640px">%s</div></section>
-
-<section class="nb-sec"><h3>四 · 注出来的年表</h3>
+<section class="nb-sec"><h3>三 · 注出来的年表</h3>
 <p class="nb-hint">以年份开头的注释，本身就是记事条目。按年份归拢，不用读正文，也能排出一条时间线。</p>
 <div class="nb-ev">%s</div></section>
+
+<section class="nb-sec"><h3>四 · 哪一年被解释得最多</h3>
+<p class="nb-hint">统计 %d 条注释里出现的年份（1921 年以前与 1939 年以后的零散条目未画）。出现最多的是 %s。同一个年份被反复解释，说明那一年的事，几乎每篇文章都要交代一次。</p>
+<div style="max-width:640px">%s</div></section>
 </div>""" % (len(N), sum(len(p["items"]) for p in people.values()), len(terms), len(events), foreign_txt,
-             "".join(ppl), tm, len(N), y_txt, "".join(svg), "".join(ev))
+             "".join(ppl), tm, "".join(ev), len(N), y_txt, "".join(svg))
     return body
 
 
 # ---------- 4. 概念索引 ----------
+def evolution_rows():
+    """跨概念的演变链：只列有两个以上节点的概念，按数据里的时间顺序串起来。"""
+    rows = []
+    for c in CONCEPTS:
+        if len(c["evolution"]) >= 2:
+            # 卷外篇的目标题名自带书名号（《农村调查》的序言和跋），别再套一层
+            chain = " → ".join("%s%s" % (e["dateKey"],
+                                         e["work"] if e["work"].startswith("《") else "《%s》" % e["work"])
+                               for e in c["evolution"])
+            rows.append('<div class="evo-item"><span class="dt">%d 节点</span><span class="wk"><a href="concepts/%s.html">%s</a></span><span class="nt">%s</span></div>' % (
+                len(c["evolution"]), c["id"], esc(c["name"]), esc(chain)))
+    return "".join(rows)
+
+
 def build_concepts_index():
     cats = {}
     for c in CONCEPTS:
@@ -590,7 +604,11 @@ def build_concepts_index():
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">概念图谱</h1>
 <p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">%d 个概念节点，按 %d 个领域归类。每个节点 = 一句话定义 + 核心要义 + 原话精选（逐字引文，精确到段）+ 演变时间线 + 自问自答。<a href="#notes" style="color:var(--teal);text-decoration:none;margin-left:6px">↓ 页末另有「注释里的另一本书」</a></p>
-%s%s</div>""" % (len(CONCEPTS), len(cats), "".join(blocks), note_book())
+%s<div class="section" style="border-top:1px solid var(--line);margin-top:10px">
+<h2>概念演变链</h2>
+<p class="desc">同一个概念在不同篇里的提法变化，按写作时间串成一条线。点概念名进那一页看逐条说明。</p>
+<div class="evo">%s</div>
+</div>%s</div>""" % (len(CONCEPTS), len(cats), "".join(blocks), evolution_rows(), note_book())
     write("concepts.html", page("概念图谱", body, 0, "concepts"))
 
 # ---------- 5. 概念页 ----------
@@ -636,26 +654,11 @@ def build_timeline():
             tag = " · " + "、".join(sorted({e["dateKey"] for e in evos})) + " 概念演变"
         items.append("""<div class="tl-item"><div class="d">%s</div><div class="t"><a href="works/%s.html">%s</a></div><div class="s">%s · %s 字%s</div></div>""" % (
             esc(w["dateKey"] or "—"), w["id"], esc(w["title"]), esc(w["period"] or ""), "{:,}".format(w["charCount"]), tag))
-    # 概念演变汇总
-    evo_rows = []
-    for c in CONCEPTS:
-        if len(c["evolution"]) >= 2:
-            # 卷外篇的目标题名自带书名号（《农村调查》的序言和跋），别再套一层
-            chain = " → ".join("%s%s" % (e["dateKey"],
-                                         e["work"] if e["work"].startswith("《") else "《%s》" % e["work"])
-                               for e in c["evolution"])
-            evo_rows.append('<div class="evo-item"><span class="dt">%d 节点</span><span class="wk"><a href="concepts/%s.html">%s</a></span><span class="nt">%s</span></div>' % (
-                len(c["evolution"]), c["id"], esc(c["name"]), esc(chain)))
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">时期轴</h1>
 <p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 12px">第一卷 %d 篇按写作时间排列——1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，横跨第一次国内革命战争与第二次国内革命战争两个时期。</p>
 <div class="tl">%s</div>
-<div class="section" style="border-top:1px solid var(--line);margin-top:24px">
-<h2>概念演变链</h2>
-<p class="desc">同一个概念在不同时期的表述变化——这是 AI 聊天给不了的深度。</p>
-<div class="evo">%s</div>
-</div>
-</div>""" % (NW, "".join(items), "".join(evo_rows))
+</div>""" % (NW, "".join(items))
     write("timeline.html", page("时期轴", body, 0, "timeline"))
 
 # ---------- 7. 矛盾论工具 ----------
