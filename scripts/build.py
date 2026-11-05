@@ -180,7 +180,7 @@ def quote_snippet(text, keyword, width=64):
 NAV = [
     ("index.html", "首页", 0),
     ("works.html", "篇目", 0),
-    ("pyramid.html", "金字塔", 0),
+    ("pyramid.html", "全书骨架", 0),
     ("timeline.html", "时期轴", 0),
     ("tool-maodun.html", "矛盾论工具", 0),
     ("concepts.html", "概念图谱", 0),
@@ -245,10 +245,10 @@ def build_index():
 
 <section class="section">
 <h2>从这里进</h2>
-<p class="desc">六种读法：顺着时期读原文、用金字塔看全书结构、用工具理解、按概念查、看语录、检索全文。</p>
+<p class="desc">六种读法：顺着时期读原文、看整卷骨架、用工具理解、按概念查、看语录、检索全文。</p>
 <div class="entries">
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 %d 篇</div></a>
-<a class="entry" href="pyramid.html"><div class="t">金字塔读法</div><div class="d">塔尖一句答案，向下拆成三根支柱；页末另附四篇入门路线</div></a>
+<a class="entry" href="pyramid.html"><div class="t">全书骨架</div><div class="d">整卷共答一个问题：答案下面三根支柱，概念各归其位；页末另附四篇入门路线</div></a>
 <a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">%d 句原文，一字未改，每条都能点回去看上下文，也能收藏</div></a>
@@ -714,7 +714,7 @@ TOOL_QUOTES_HTML = "".join("""<div class="quote"><div class="qt">%s</div><div cl
     quote_snippet(q["text"], q.get("keyword", ""), 60), [x for x in WORKS if x["title"] == "矛盾论"][0]["id"], q["para"], q["para"], esc(q["note"]))
     for q in [c for c in CONCEPTS if c["id"] == "zhuyaomaodun"][0]["quotes"])
 
-# ---------- 7.5 金字塔（先问，再答，三根支柱） ----------
+# ---------- 7.5 全书骨架（先问，再答，三根柱子） ----------
 def concept_chip(cid):
     c = CONCEPT_BY_ID[cid]
     return '<a class="chip" href="concepts/%s.html">%s</a>' % (cid, esc(c["name"]))
@@ -798,7 +798,7 @@ def route_section():
 <p class="rt-intro">%s</p>
 <p class="rt-stat">%d 篇 · %s 字 · 占全卷 %.0f%% · 读完约 %d 小时</p>
 <div class="rt">%s</div>
-<p class="rt-foot">「问」与「读完带走」是本库的编辑概括，不是原文。引文一律逐字截取，标了段号，可点回原文核对——塔尖那句里的「以弱胜强、农村包围城市」，是后来人对这段历史的概括，本卷原文里没有这样的提法。</p>
+<p class="rt-foot">「问」与「读完带走」是本库的编辑概括，不是原文。引文一律逐字截取，标了段号，可点回原文核对——顶上那句总括里的「以弱胜强、农村包围城市」，是后来人对这段历史的概括，本卷原文里没有这样的提法。</p>
 </section>""" % (esc(R["kicker"]), esc(R["title"]), esc(R["intro"]),
                  len(R["stations"]), "{:,}".format(chars), chars / TOTAL_CHARS * 100,
                  max(1, round(mins / 60)), "".join(out))
@@ -827,13 +827,13 @@ def build_pyramid():
         if i < len(td["layers"]) - 1:
             blocks.append('<div class="td-conn"><span>%s</span></div>' % esc(L.get("conn", "拆开下一层")))
     body = """<div class="wrap" style="padding-top:40px">
-<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 金字塔</div>
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · 一本书的结构</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 20px">用金字塔原理把第一卷立起来：<b>先问，再答，再看三根支柱——二十个概念节点各归其位</b>。%s</p>
+<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 全书骨架</div>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">全书骨架 · 一本书怎么立起来</h1>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 20px">%s篇其实在回答同一个问题：<b>先问，再答，再看三根支柱——概念节点各归其位</b>。%s</p>
 <div id="top-down">%s</div>
 %s
-</div>""" % (esc(td["intro"]), "".join(blocks), route_section())
-    write("pyramid.html", page("金字塔", body, 0, "pyramid"))
+</div>""" % (cn_num(NW), esc(td["intro"]), "".join(blocks), route_section())
+    write("pyramid.html", page("全书骨架", body, 0, "pyramid"))
 
 # ---------- 8. 经典语录 ----------
 def build_quotes():

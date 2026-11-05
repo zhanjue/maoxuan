@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .DS_Store
+.wrangler/
 
 # 本地临时验证产物
 _verify/
