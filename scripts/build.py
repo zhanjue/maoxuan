@@ -203,7 +203,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="%s">
-<link rel="stylesheet" href="%sassets/style.css?v=34">
+<link rel="stylesheet" href="%sassets/style.css?v=35">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -234,7 +234,7 @@ def build_index():
             c["id"], esc(c["category"]), esc(c["name"]), esc(c["oneliner"])))
     body = """
 <div class="wrap"><section class="hero">
-<h1>把《毛选》第一卷<br>读成一座可检索的图书馆</h1>
+<h1>把《毛选》第一卷<br>变成一本可检索的<br class="m-br">知识笔记</h1>
 <p class="sub">正文 %d 篇、%s 字，另有 %d 条原版脚注——那是另一本书：人名、组织、战事。<br><b>同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注</b>——释义是本站整理，出处逐条挂回原段，点开即核对。</p>
 <div class="stats">
 <div class="stat"><div class="n">%d</div><div class="l">篇目（第一卷全量）</div></div>

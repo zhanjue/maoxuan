@@ -76,6 +76,9 @@ body {
   font-family: var(--display); font-size: 44px; font-weight: 700;
   line-height: 1.32; letter-spacing: 0.05em;
 }
+/* 手机专用断行：这一句 13 字，390px 屏上会自动折成三行且末行只剩两字，
+   所以在「知识笔记」前放一个只在窄屏显示的 <br>，桌面端整句一行 */
+.hero h1 br.m-br { display: none; }
 .hero .sub { margin-top: 16px; font-size: 16px; color: var(--ink-2); max-width: 760px; line-height: 1.9; }
 .hero .sub b { color: var(--teal); font-weight: 600; }
 .stats { display: flex; flex-wrap: wrap; gap: 0; margin-top: 36px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
@@ -525,6 +528,11 @@ a.term:hover { border-bottom-color: var(--teal); }
   /* 触屏没有 hover 提示，书签要给足点击面积（≥36px），否则收藏入口形同隐藏 */
   .fav { width: 38px; height: 38px; top: 16px; right: -6px; opacity: .8; }
   .qt { padding-right: 42px; }
+}
+/* 470px 以下：13 字的副题一行放不下，先断成「变成一本可检索的 / 知识笔记」，
+   比让它自动折成「……的知 / 识笔记」好看 */
+@media (max-width: 470px) {
+  .hero h1 br.m-br { display: inline; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
