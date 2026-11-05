@@ -243,6 +243,7 @@ a.term:hover { border-bottom-color: var(--teal); }
 .guide-at { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 4px; white-space: nowrap; }
 .guide-at a { color: var(--teal); text-decoration: none; border-bottom: 1px dotted var(--teal); }
 .guide-ft { margin-top: 10px; font-size: 11.5px; color: var(--ink-3); }
+.guide-src { margin-left: 8px; font-family: var(--text); font-size: 11px; font-weight: 400; color: var(--ink-3); letter-spacing: 0.02em; }
 .guide-after { background: #fff; border-style: dashed; }
 /* 分割线在边框上沿：margin-top 把线推离上方内容（padding-top 只推线下的文字，
    曾因漏 margin-top 导致线贴在「本篇涉及的概念」chip 底边上） */

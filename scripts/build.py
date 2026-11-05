@@ -28,6 +28,33 @@ NW = len(WORKS)
 DESC = ("知行录：《毛泽东选集》第一卷结构化知识库。%d 篇正式出版文本，%d 个概念节点，"
         "%d 条溯源引文，每一段都可回溯到卷/篇/段。" % (NW, len(CONCEPTS), TOTAL_QUOTES))
 
+def cn_num(n):
+    """18 → 十八。文案里写「第一卷十八篇」比「第一卷18篇」自然。"""
+    d = "〇一二三四五六七八九"
+    if n < 10:
+        return d[n]
+    if n < 20:
+        return "十" + (d[n % 10] if n % 10 else "")
+    if n < 100:
+        return d[n // 10] + "十" + (d[n % 10] if n % 10 else "")
+    return str(n)
+
+def _fill_n(o):
+    """数据文件里的 {n} 填成实际篇数。
+
+    pyramid.json 的三处文案曾写死「十七篇」，补到 18 篇后页面仍说十七篇，
+    而 build 不报错。改成占位符后，篇数只有 NW 一个来源。
+    """
+    if isinstance(o, dict):
+        return {k: _fill_n(v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [_fill_n(v) for v in o]
+    if isinstance(o, str):
+        return o.replace("{n}", cn_num(NW))
+    return o
+
+PYRAMID = _fill_n(PYRAMID)
+
 def esc(s):
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
@@ -176,7 +203,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="%s">
-<link rel="stylesheet" href="%sassets/style.css?v=33">
+<link rel="stylesheet" href="%sassets/style.css?v=34">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -314,7 +341,8 @@ def build_work(w):
     if rd.get("before"):
         gi = "".join("<li>%s</li>" % esc(q) for q in rd["before"])
         guide_before = ('<div class="guide guide-before">'
-                        '<div class="guide-hd"><span class="guide-lb">读之前</span>先摆着这几个问题</div>'
+                        '<div class="guide-hd"><span class="guide-lb">读之前</span>先摆着这几个问题'
+                        '<span class="guide-src">题目由本站整理</span></div>'
                         '<ol class="guide-list">%s</ol>'
                         '<div class="guide-ft">答案在正文里，这里不给位置。</div></div>') % gi
     if rd.get("after"):
@@ -332,7 +360,8 @@ def build_work(w):
                 " · ".join('<a href="#p%d">第 %d 段</a>' % (n, n) for n in x.get("paras", [])))
             for x in rd["after"])
         guide_after = ('<div class="guide guide-after">'
-                       '<div class="guide-hd"><span class="guide-lb">读完了</span>回头核对这几件事</div>'
+                       '<div class="guide-hd"><span class="guide-lb">读完了</span>回头核对这几件事'
+                       '<span class="guide-src">题目由本站整理</span></div>'
                        '<ol class="guide-list">%s</ol>'
                        '<div class="guide-ft">只指位置，不给答案。</div></div>') % gi
     prev_html = '<a href="%s.html">← 上一篇 · %s</a>' % (prev_w["id"], esc(prev_w["title"])) if prev_w else "<span></span>"
@@ -591,11 +620,11 @@ def build_concept(c):
 <h1>%s</h1>
 <div class="oneliner">%s</div>
 </div>
-<div class="section"><h2>核心要义</h2><ul class="essence">%s</ul></div>
+<div class="section"><h2>核心要义<span class="guide-src">本站概括</span></h2><ul class="essence">%s</ul></div>
 <div class="section"><h2>原话精选</h2><p class="desc">逐字引文，点击出处跳到原文段落核对。</p>%s</div>
 <div class="section"><h2>思想演变</h2><div class="evo">%s</div></div>
 <div class="section"><h2>关联篇目</h2><div class="related-concepts">%s</div></div>
-<div class="section"><h2>问与答</h2><div class="qa">%s</div></div>
+<div class="section"><h2>问与答<span class="guide-src">本站整理</span></h2><div class="qa">%s</div></div>
 </div>""" % (esc(c["category"]), esc(c["name"]), esc(c["oneliner"]), essence, "".join(quotes), "".join(evo), "".join(related), qa)
     write("concepts/%s.html" % c["id"], page(c["name"], body, 1, "concepts"))
 
