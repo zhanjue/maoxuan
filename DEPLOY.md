@@ -13,6 +13,25 @@ bash deploy-cf.sh                # 需要时另外推一份到 Cloudflare Pages
 
 ---
 
+## 〇、本地怎么"启动"
+
+**最省事**：直接双击 `site\index.html`。全站数据内联，`file://` 就能打开，不需要服务。
+
+**要网址（推荐）**：双击根目录的 **`启动预览.bat`** —— 自动起本地服务并打开
+`http://127.0.0.1:8801/index.html`。关掉那个黑窗口就停止。服务已在跑时会直接开浏览器。
+
+手动等价命令：
+
+```bat
+cd /d E:\software\agent\workbuddy_workplcae\mao-kb
+"C:\Users\80926\.workbuddy\binaries\python\versions\3.13.12\python.exe" _serve.py 8801
+```
+
+`_serve.py` 带了 `Cache-Control: no-store`，改完重建刷新就能看到新版；
+如果还看到旧页面，先看页脚的「构建 时间」对不对得上，再按 `Ctrl+Shift+R`。
+
+---
+
 ## 一、GitHub Pages
 
 ### 一次性配置
@@ -44,21 +63,30 @@ bash deploy-cf.sh                # 需要时另外推一份到 Cloudflare Pages
 
 ## 二、Cloudflare Pages
 
-### 一次性配置
+### 为什么选它
+
+免费、不需要备案（用 `pages.dev` 子域名）、国内访问比 `github.io` 稳一些、能绑自己的域名。
+本站是纯静态，**不需要服务器、不需要数据库**，传上去就是全部。
+
+### 一次性配置（要做的事只有两件：注册 + 授权）
+
+1. **注册账号**：打开 <https://dash.cloudflare.com/sign-up>，邮箱 + 密码，去邮箱点验证链接。
+   不需要绑卡，免费额度（每月 500 次构建、无限请求）够用。
+2. **授权这台电脑**：双击根目录的 **`部署到Cloudflare.bat`**。第一次运行会自动下载
+   `wrangler`（命令行工具，约 40MB），然后弹出浏览器让你登录 —— 选你那台机器上的
+   Cloudflare 账号，点 **Allow**。这一步只做一次，凭据存在本机。
+
+### 之后每次发布
+
+改完内容，双击 **`部署到Cloudflare.bat`** 就行。它依次做三件事：
+重新构建 → 检查登录（已登录自动跳过）→ 上传 `site/`。看到 `Deployment complete` 就成功了，
+通常 10~30 秒生效。项目名固定是 `mao-kb`，重复执行是覆盖，地址不变。
+
+命令行等价写法：
 
 ```bash
-npm i -g wrangler
-wrangler login          # 浏览器里点一次授权
+npx wrangler pages deploy site --project-name=mao-kb --commit-dirty=true
 ```
-
-### 发布
-
-```bash
-python scripts/build.py
-bash deploy-cf.sh
-```
-
-脚本里的项目名是 `mao-kb`，第一次执行会自动创建项目，之后每次都是覆盖发布，地址不变。
 
 ### 地址
 
@@ -69,6 +97,8 @@ bash deploy-cf.sh
 - **不要**用 Connect to Git 方式，那个方式默认把仓库根目录当站点，会发布不出东西。用直传。
 - 如果要接 Git 自动部署，Build output directory 必须填 `site`，Build command 留空。
 - `pages.dev` 在国内部分运营商下可能超时，长期用建议绑自定义域名。
+- 想临时给别人看一眼、又不想注册账号：`npx wrangler pages deploy` 之外还有
+  `cloudflared tunnel --url http://127.0.0.1:8801`（免登录，随机域名，关电脑就失效）。
 
 ---
 
