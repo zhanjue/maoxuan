@@ -28,7 +28,7 @@ cd /d E:\software\agent\workbuddy_workplcae\mao-kb
 ```
 
 `_serve.py` 带了 `Cache-Control: no-store`，改完重建刷新就能看到新版；
-如果还看到旧页面，先看页脚的「构建 时间」对不对得上，再按 `Ctrl+Shift+R`。
+如果还看到旧页面，按 `Ctrl+Shift+R` 硬刷新，或者换一个端口重开（`_serve.py 8802`）。
 
 ---
 
@@ -90,11 +90,17 @@ npx wrangler pages deploy site --project-name=mao-kb --commit-dirty=true
 
 ### 地址
 
-`https://mao-kb.pages.dev`
+`https://mao-kb.pages.dev` —— 2026-11-05 已上线（项目 `mao-kb`，生产分支 `main`）。
+
+页面会做 pretty URL：站内的 `concepts.html` 会被 308 到 `/concepts`，实际内容照常返回；
+`concepts/`、`works/` 这类同名目录不冲突（`/concepts` 就是概念图谱页本身）。
 
 ### 注意
 
 - **不要**用 Connect to Git 方式，那个方式默认把仓库根目录当站点，会发布不出东西。用直传。
+- 第一次要在本机登录一次：`npx wrangler login`（浏览器里点 Allow，凭据存本机）。之后不用再登。
+- 本机装了代理时 wrangler 会走代理，**上传偶尔在 16/49 或 32/49 处 `Failed to upload files`**，
+  再执行一遍就好——它是整批重传，不会传坏。
 - 如果要接 Git 自动部署，Build output directory 必须填 `site`，Build command 留空。
 - `pages.dev` 在国内部分运营商下可能超时，长期用建议绑自定义域名。
 - 想临时给别人看一眼、又不想注册账号：`npx wrangler pages deploy` 之外还有
