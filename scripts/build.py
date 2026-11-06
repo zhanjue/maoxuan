@@ -180,7 +180,7 @@ def quote_snippet(text, keyword, width=64):
 NAV = [
     ("index.html", "首页", 0),
     ("works.html", "篇目", 0),
-    ("pyramid.html", "全书骨架", 0),
+    ("pyramid.html", "金字塔", 0),
     ("timeline.html", "时期轴", 0),
     ("concepts.html", "概念图谱", 0),
     ("quotes.html", "语录", 0),
@@ -245,10 +245,10 @@ def build_index():
 
 <section class="section">
 <h2>从这里进</h2>
-<p class="desc">六种读法：顺着时期读原文、看整卷骨架、查时期轴、按概念查、看语录、检索全文。</p>
+<p class="desc">六种读法：顺着时期读原文、看金字塔、查时期轴、按概念查、看语录、检索全文。</p>
 <div class="entries">
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 %d 篇</div></a>
-<a class="entry" href="pyramid.html"><div class="t">全书骨架</div><div class="d">整卷共答一个问题：答案下面三根支柱，概念各归其位；页末另附四篇入门路线</div></a>
+<a class="entry" href="pyramid.html"><div class="t">金字塔</div><div class="d">整卷共答一个问题：答案下面三根支柱，概念各归其位；页末另附四篇入门路线</div></a>
 <a class="entry" href="timeline.html"><div class="t">时期轴</div><div class="d">十八篇按写作时间排开；页末的主要矛盾演示器，看主要矛盾怎么随阶段换人</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">%d 句原文，一字未改，每条都能点回去看上下文，也能收藏</div></a>
@@ -734,7 +734,7 @@ TOOL_QUOTES_HTML = "".join("""<div class="quote"><div class="qt">%s</div><div cl
     quote_snippet(q["text"], q.get("keyword", ""), 60), [x for x in WORKS if x["title"] == "矛盾论"][0]["id"], q["para"], q["para"], esc(q["note"]))
     for q in [c for c in CONCEPTS if c["id"] == "zhuyaomaodun"][0]["quotes"])
 
-# ---------- 7.5 全书骨架（先问，再答，三根柱子） ----------
+# ---------- 7.5 金字塔（先问，再答，三根柱子） ----------
 def concept_chip(cid):
     c = CONCEPT_BY_ID[cid]
     return '<a class="chip" href="concepts/%s.html">%s</a>' % (cid, esc(c["name"]))
@@ -847,13 +847,13 @@ def build_pyramid():
         if i < len(td["layers"]) - 1:
             blocks.append('<div class="td-conn"><span>%s</span></div>' % esc(L.get("conn", "拆开下一层")))
     body = """<div class="wrap" style="padding-top:40px">
-<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 全书骨架</div>
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">全书骨架 · %s篇，一个答案</h1>
+<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 金字塔</div>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">金字塔 · %s篇，一个答案</h1>
 <p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 20px">从 1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，题目各异，问的是同一件事：<b>中国的路在哪</b>。%s</p>
 <div id="top-down">%s</div>
 %s
 </div>""" % (cn_num(NW), esc(td["intro"]), "".join(blocks), route_section())
-    write("pyramid.html", page("全书骨架", body, 0, "pyramid"))
+    write("pyramid.html", page("金字塔", body, 0, "pyramid"))
 
 # ---------- 8. 经典语录 ----------
 def build_quotes():
