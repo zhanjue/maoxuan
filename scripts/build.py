@@ -182,7 +182,6 @@ NAV = [
     ("works.html", "篇目", 0),
     ("pyramid.html", "全书骨架", 0),
     ("timeline.html", "时期轴", 0),
-    ("tool-maodun.html", "矛盾论工具", 0),
     ("concepts.html", "概念图谱", 0),
     ("quotes.html", "语录", 0),
     ("search.html", "检索", 0),
@@ -246,11 +245,11 @@ def build_index():
 
 <section class="section">
 <h2>从这里进</h2>
-<p class="desc">六种读法：顺着时期读原文、看整卷骨架、用工具理解、按概念查、看语录、检索全文。</p>
+<p class="desc">六种读法：顺着时期读原文、看整卷骨架、查时期轴、按概念查、看语录、检索全文。</p>
 <div class="entries">
 <a class="entry" href="works.html"><div class="t">按时期读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 %d 篇</div></a>
 <a class="entry" href="pyramid.html"><div class="t">全书骨架</div><div class="d">整卷共答一个问题：答案下面三根支柱，概念各归其位；页末另附四篇入门路线</div></a>
-<a class="entry" href="tool-maodun.html"><div class="t">矛盾论工具</div><div class="d">交互演示主要矛盾与矛盾主要方面的转化——把「读」变成「用」</div></a>
+<a class="entry" href="timeline.html"><div class="t">时期轴</div><div class="d">十八篇按写作时间排开；页末的主要矛盾演示器，看主要矛盾怎么随阶段换人</div></a>
 <a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
 <a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">%d 句原文，一字未改，每条都能点回去看上下文，也能收藏</div></a>
 <a class="entry" href="search.html"><div class="t">全文检索</div><div class="d">段落级检索，命中直接跳到段</div></a>
@@ -659,14 +658,16 @@ def build_timeline():
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">时期轴</h1>
 <p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 12px">第一卷 %d 篇按写作时间排列——1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，横跨第一次国内革命战争与第二次国内革命战争两个时期。</p>
 <div class="tl">%s</div>
-</div>""" % (NW, "".join(items))
+%s
+</div>""" % (NW, "".join(items), tool_section())
     write("timeline.html", page("时期轴", body, 0, "timeline"))
 
-# ---------- 7. 矛盾论工具 ----------
-def build_tool():
-    body = """<div class="narrow tool-wide" style="padding-top:40px">
-<div class="crumb" style="font-size:12px;color:var(--ink-3)"><a href="index.html" style="color:var(--ink-3);text-decoration:none">首页</a> / 工具</div>
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">主要矛盾演示器</h1>
+# ---------- 7. 矛盾论工具（并入时期轴页末，旧地址留跳转） ----------
+def tool_section():
+    """主要矛盾演示器：作为时期轴页末的一节，不再单独成页。"""
+    html = """<div class="section" id="maodun" style="border-top:1px solid var(--line);margin-top:44px;padding-top:30px">
+<h2>主要矛盾演示器</h2>
+<p class="desc">上面按年份排，这里按阶段排——每个阶段拉扯的两方不一样，主要矛盾会换人。</p>
 <p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">「矛盾」在这里的意思是：一个事物内部互相拉扯、又互相依赖的两方——它们你进我退，推动整个事物变化。一个社会里同时存在好几对这样的矛盾，<b>其中必有一种是主要的</b>：捉住了它，其余问题就有了头绪。</p>
 <div class="tool-legend">
 <span class="k"><span class="sw" style="background:#0F766E"></span><b>主要矛盾</b>　它规定这一阶段整个过程的性质，谁说话算数看它</span>
@@ -679,16 +680,34 @@ def build_tool():
 </div>
 <div class="tool-explain" id="explain"></div>
 <div class="tool-quote">《矛盾论》第四节：「任何过程如果有多数矛盾存在的话，其中必定有一种是主要的，起着领导的、决定的作用，其他则处于次要和服从的地位。」<a href="works/@@MD@@.html#p68" style="color:var(--teal);text-decoration:none">第 68 段 ↗</a>　下面三个场景演示：主要矛盾怎么随阶段换人。</div>
-<div class="section" style="border-top:1px solid var(--line);margin-top:36px">
+<div style="border-top:1px solid var(--line);margin-top:36px;padding-top:8px">
 <h2>语料依据</h2>
 <p class="desc">工具中的结构判断均可在《矛盾论》第一卷第 68—72 段核对。</p>
 %s
 </div>
 </div>""" % TOOL_QUOTES_HTML
     # 篇 id 会随补篇重排，这里按篇名取当前 id，不写死 v1-0xx
-    body = body.replace("@@MD@@", WORK_BY_TITLE["矛盾论"]["id"])
-    body += '<script>window.__TOOL__=%s;</script>' % json.dumps(TOOL_SCENES, ensure_ascii=False)
-    write("tool-maodun.html", page("主要矛盾演示器", body, 0, "tool"))
+    html = html.replace("@@MD@@", WORK_BY_TITLE["矛盾论"]["id"])
+    return html + '<script>window.__TOOL__=%s;</script>' % json.dumps(TOOL_SCENES, ensure_ascii=False)
+
+
+def build_tool():
+    """旧地址 tool-maodun.html：工具已并入时期轴，这里只做跳转。"""
+    write("tool-maodun.html", """<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主要矛盾演示器 · 知行录</title>
+<link rel="canonical" href="timeline.html#maodun">
+<meta http-equiv="refresh" content="0; url=timeline.html#maodun">
+</head>
+<body>
+<p style="font-family:system-ui,-apple-system,'Microsoft YaHei',sans-serif;padding:40px 24px;line-height:1.8">主要矛盾演示器已并入<a href="timeline.html#maodun" style="color:#0F766E">时期轴</a>页末，正在跳转。</p>
+</body>
+</html>
+""")
+
 
 TOOL_SCENES = [
     {"key": "a", "name": "阶段一 · 半殖民地的中国", "group": "中国：主要矛盾的转化",
