@@ -184,7 +184,6 @@ NAV = [
     ("timeline.html", "时期轴", 0),
     ("concepts.html", "概念图谱", 0),
     ("quotes.html", "语录", 0),
-    ("search.html", "检索", 0),
 ]
 
 def page(title, body, depth, active=""):
@@ -200,13 +199,13 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="%s">
-<link rel="stylesheet" href="%sassets/style.css?v=40">
+<link rel="stylesheet" href="%sassets/style.css?v=41">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
 <a class="brand" href="%sindex.html">知行录<small>MAO WORKS · VOL.1</small></a>
 <nav class="nav" id="nav" aria-label="主导航">%s</nav>
-<div class="searchbox"><input id="q" type="search" placeholder="检索全文…" autocomplete="off"><span style="font-size:11px;color:var(--ink-3)">↵</span></div>
+<div class="searchbox"><input id="q" type="search" placeholder="检索全文…" autocomplete="off" data-root="%s"><span style="font-size:11px;color:var(--ink-3)">↵</span></div>
 </div></header>
 %s
 <footer class="footer"><div class="wrap"><div class="bd">
@@ -215,7 +214,7 @@ def page(title, body, depth, active=""):
 </div></div></footer>
 <script src="%sassets/app.js"></script>
 </body>
-</html>""" % (title, DESC, p, p, "".join(nav), body, SRC, p)
+</html>""" % (title, DESC, p, p, "".join(nav), p, body, SRC, p)
 
 def write(path, content):
     full = os.path.join(SITE, path)
@@ -911,12 +910,13 @@ APP_JS = r"""
 (function(){
   var $ = function(s){ return document.querySelector(s); };
   // 窄屏导航常驻顶栏第二排，不再折叠，这里无需脚本开合
-  // 顶栏检索 → 跳检索页
+  // 顶栏检索 → 跳检索页（data-root 带出相对层级，深度 1 的页面才不会指到 works/search.html）
   var q = document.getElementById('q');
   if (q) {
     q.addEventListener('keydown', function(e){
       if (e.key === 'Enter' && q.value.trim()) {
-        location.href = 'search.html?q=' + encodeURIComponent(q.value.trim());
+        var root = q.getAttribute('data-root') || '';
+        location.href = root + 'search.html?q=' + encodeURIComponent(q.value.trim());
       }
     });
   }

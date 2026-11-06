@@ -513,6 +513,7 @@ a.term:hover { border-bottom-color: var(--teal); }
     display: flex; flex-wrap: wrap; gap: 6px;
   }
   .nav a {
+    flex: 1 1 30%; text-align: center;
     padding: 7px 11px; font-size: 13px; line-height: 1.2;
     border: 1px solid var(--line-2); border-radius: 999px; background: #fff;
   }

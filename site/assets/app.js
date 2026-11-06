@@ -2,12 +2,13 @@
 (function(){
   var $ = function(s){ return document.querySelector(s); };
   // 窄屏导航常驻顶栏第二排，不再折叠，这里无需脚本开合
-  // 顶栏检索 → 跳检索页
+  // 顶栏检索 → 跳检索页（data-root 带出相对层级，深度 1 的页面才不会指到 works/search.html）
   var q = document.getElementById('q');
   if (q) {
     q.addEventListener('keydown', function(e){
       if (e.key === 'Enter' && q.value.trim()) {
-        location.href = 'search.html?q=' + encodeURIComponent(q.value.trim());
+        var root = q.getAttribute('data-root') || '';
+        location.href = root + 'search.html?q=' + encodeURIComponent(q.value.trim());
       }
     });
   }
