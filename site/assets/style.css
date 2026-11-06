@@ -56,8 +56,6 @@ body {
 }
 .nav a:hover { color: var(--ink); }
 .nav a.on { color: var(--teal); border-bottom-color: var(--teal); }
-/* 折叠菜单按钮：桌面端不出现，只在 ≤860px 的窄屏顶栏里用 */
-.nav-toggle { display: none; }
 .searchbox { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .searchbox input {
   width: 118px; height: 30px; padding: 0 10px;
@@ -501,47 +499,26 @@ a.term:hover { border-bottom-color: var(--teal); }
   .rt-sec h2 { font-size: 21px; }
   .st h3 { font-size: 21px; }
   .st-q { font-size: 16.5px; }
-  /* 窄屏：导航原来直接 display:none，等于把整站入口全藏了。
-     改成收进折叠面板，顶栏留一个按钮。
-     面板做成一张压住内容的卡片：圆角、投影、可滚动，当前页给实心块 + 左侧色条，
-     而不是只把文字染成青色——手机上那点颜色差看不出来是「你在这一页」。 */
+  /* 窄屏：导航原来直接 display:none，手机上整站入口是没有的。
+     不做折叠——顶栏下面常驻一排胶囊，七个入口一眼全看见。
+     当前页给实心反白块，而不是只把字染青：手机上那点颜色差看不出「你在这一页」。 */
+  .topbar-in {
+    flex-wrap: wrap; align-content: space-between; height: auto;
+    padding: 0 16px 10px; gap: 0 10px;
+  }
+  .brand { display: flex; align-items: center; height: 52px; }
+  .searchbox { height: 52px; }
   .nav {
-    display: none; position: absolute; left: 0; right: 0; top: 100%;
-    flex-direction: column; gap: 0; margin: 0; padding: 8px 12px 12px;
-    background: #fff; border-bottom: 1px solid var(--line);
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 20px 34px -20px rgba(28, 27, 26, .32);
-    max-height: calc(100vh - 56px); max-height: calc(100dvh - 56px);
-    overflow-y: auto; overscroll-behavior: contain;
+    order: 3; flex: 0 0 100%; margin: 0;
+    display: flex; flex-wrap: wrap; gap: 6px;
   }
-  .nav.open { display: flex; animation: navdrop .16s ease-out; }
-  @keyframes navdrop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   .nav a {
-    position: relative; padding: 13px 12px; font-size: 15.5px;
-    border-bottom: 0; border-radius: 6px;
-  }
-  .nav a + a::before {
-    content: ""; position: absolute; left: 12px; right: 12px; top: 0;
-    height: 1px; background: var(--line);
+    padding: 7px 11px; font-size: 13px; line-height: 1.2;
+    border: 1px solid var(--line-2); border-radius: 999px; background: #fff;
   }
   .nav a.on {
-    color: var(--teal); background: var(--teal-soft);
-    border-bottom-color: transparent;
+    color: #fff; background: var(--teal); border-color: var(--teal); font-weight: 600;
   }
-  .nav a.on::before, .nav a.on + a::before { display: none; }
-  .nav a.on::after {
-    content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px;
-    border-radius: 2px; background: var(--teal);
-  }
-  .nav-toggle {
-    display: inline-flex; flex-direction: column; justify-content: center; gap: 4px;
-    width: 36px; height: 36px; padding: 0 8px; margin-left: 2px;
-    background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
-  }
-  .nav-toggle span { display: block; height: 1.5px; background: var(--ink-2); border-radius: 1px; transition: transform .18s, opacity .18s; }
-  .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
-  .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-  .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
   /* 窄屏顶栏：品牌英文副标 + 固定 150px 检索框把顶栏撑出视口，连带整页横向溢出。
      副标收起、检索框缩宽（聚焦时也不再撑大），顶栏不再溢出 */
   .brand small { display: none; }
