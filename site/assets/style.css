@@ -502,21 +502,41 @@ a.term:hover { border-bottom-color: var(--teal); }
   .st h3 { font-size: 21px; }
   .st-q { font-size: 16.5px; }
   /* 窄屏：导航原来直接 display:none，等于把整站入口全藏了。
-     改成收进折叠面板，顶栏留一个按钮。 */
+     改成收进折叠面板，顶栏留一个按钮。
+     面板做成一张压住内容的卡片：圆角、投影、可滚动，当前页给实心块 + 左侧色条，
+     而不是只把文字染成青色——手机上那点颜色差看不出来是「你在这一页」。 */
   .nav {
     display: none; position: absolute; left: 0; right: 0; top: 100%;
-    flex-direction: column; gap: 0; margin: 0; padding: 2px 16px 8px;
+    flex-direction: column; gap: 0; margin: 0; padding: 8px 12px 12px;
     background: #fff; border-bottom: 1px solid var(--line);
-    box-shadow: 0 16px 26px -16px rgba(28, 27, 26, .22);
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 20px 34px -20px rgba(28, 27, 26, .32);
+    max-height: calc(100vh - 56px); max-height: calc(100dvh - 56px);
+    overflow-y: auto; overscroll-behavior: contain;
   }
-  .nav.open { display: flex; }
-  .nav a { padding: 12px 0; font-size: 15px; border-bottom: 1px solid var(--line); }
-  .nav a:last-child { border-bottom: 0; }
-  .nav a.on { border-bottom-color: var(--line); }
+  .nav.open { display: flex; animation: navdrop .16s ease-out; }
+  @keyframes navdrop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .nav a {
+    position: relative; padding: 13px 12px; font-size: 15.5px;
+    border-bottom: 0; border-radius: 6px;
+  }
+  .nav a + a::before {
+    content: ""; position: absolute; left: 12px; right: 12px; top: 0;
+    height: 1px; background: var(--line);
+  }
+  .nav a.on {
+    color: var(--teal); background: var(--teal-soft);
+    border-bottom-color: transparent;
+  }
+  .nav a.on::before, .nav a.on + a::before { display: none; }
+  .nav a.on::after {
+    content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px;
+    border-radius: 2px; background: var(--teal);
+  }
   .nav-toggle {
     display: inline-flex; flex-direction: column; justify-content: center; gap: 4px;
-    width: 34px; height: 34px; padding: 0 7px; margin-left: 2px;
-    background: none; border: 1px solid var(--line); border-radius: 4px; cursor: pointer;
+    width: 36px; height: 36px; padding: 0 8px; margin-left: 2px;
+    background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
   }
   .nav-toggle span { display: block; height: 1.5px; background: var(--ink-2); border-radius: 1px; transition: transform .18s, opacity .18s; }
   .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }

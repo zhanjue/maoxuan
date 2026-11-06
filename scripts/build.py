@@ -200,7 +200,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="%s">
-<link rel="stylesheet" href="%sassets/style.css?v=38">
+<link rel="stylesheet" href="%sassets/style.css?v=39">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
