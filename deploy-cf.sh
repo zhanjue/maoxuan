@@ -14,7 +14,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-PROJECT="maoxuan"
+PROJECT="maoxuan1"
 
 [ -f site/index.html ] || { echo "site/index.html 不存在，先跑 python scripts/build.py"; exit 1; }
 
