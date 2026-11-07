@@ -499,36 +499,36 @@ a.term:hover { border-bottom-color: var(--teal); }
   .rt-sec h2 { font-size: 21px; }
   .st h3 { font-size: 21px; }
   .st-q { font-size: 16.5px; }
-  /* 窄屏：导航原来直接 display:none，手机上整站入口是没有的。
-     不做折叠——顶栏下面常驻一排胶囊，七个入口一眼全看见。
-     当前页给实心反白块，而不是只把字染青：手机上那点颜色差看不出「你在这一页」。 */
+  /* 窄屏导航：不做折叠——折叠等于把入口藏进一个图标里，手机上打开页面看不见任何入口。
+     但也不需要六个大胶囊：两行各约 36px 的实心块把顶栏压得比正文还重，看着像一排开关。
+     这里沿用桌面端的形态——一行文字，当前页青色 + 2px 下划线，六个词在整行里均匀分开。 */
   .topbar-in {
     flex-wrap: wrap; align-content: space-between; height: auto;
-    padding: 0 16px 10px; gap: 0 10px;
+    padding: 0 16px 6px; gap: 0 12px;
   }
-  .brand { display: flex; align-items: center; height: 52px; }
-  .searchbox { height: 52px; }
+  .brand { display: flex; align-items: center; height: 50px; }
+  .searchbox { height: 50px; }
   .nav {
     order: 3; flex: 0 0 100%; margin: 0;
-    display: flex; flex-wrap: wrap; gap: 6px;
+    display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 0;
   }
   .nav a {
-    flex: 1 1 30%; text-align: center;
-    padding: 7px 11px; font-size: 13px; line-height: 1.2;
-    border: 1px solid var(--line-2); border-radius: 999px; background: #fff;
+    padding: 9px 0 7px; font-size: 13.5px; line-height: 1.2;
+    text-align: center; white-space: nowrap;
+    border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none;
   }
   .nav a.on {
-    color: #fff; background: var(--teal); border-color: var(--teal); font-weight: 600;
+    color: var(--teal); background: none; border-bottom-color: var(--teal);
   }
   /* 窄屏顶栏：品牌英文副标 + 固定 150px 检索框把顶栏撑出视口，连带整页横向溢出。
      副标收起、检索框缩宽（聚焦时也不再撑大），顶栏不再溢出 */
   .brand small { display: none; }
-  .topbar-in { gap: 12px; padding: 0 16px; }
+  .topbar-in { gap: 12px; }
   .searchbox { margin-left: auto; min-width: 0; }
-  .searchbox input { width: 118px; }
+  .searchbox input { width: 104px; height: 28px; font-size: 12.5px; }
   /* 触屏没有回车键，那个 ↵ 提示在手机上是块噪声 */
   .searchbox span { display: none; }
-  .searchbox input:focus { width: 150px; }
+  .searchbox input:focus { width: 136px; }
   .wrap, .narrow { padding: 0 16px; }
   .hero { padding: 48px 0 32px; }
   .hero h1 { font-size: 32px; }
@@ -555,6 +555,15 @@ a.term:hover { border-bottom-color: var(--teal); }
    比让它自动折成「……的知 / 识笔记」好看 */
 @media (max-width: 470px) {
   .hero h1 br.m-br { display: inline; }
+}
+/* 340px 以下（老机型/大字号）：六个词排一行只剩 12px 的缝，降半号再看 */
+@media (max-width: 340px) {
+  .nav a { font-size: 12.5px; }
+}
+/* 平板竖屏（600–860）：这一行有 700 多像素，六个词摊开会散成两簇。
+   改回左对齐、固定间距，读起来还是一条链。 */
+@media (min-width: 600px) and (max-width: 860px) {
+  .nav { justify-content: flex-start; gap: 28px; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
