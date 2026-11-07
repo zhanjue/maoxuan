@@ -504,10 +504,15 @@ a.term:hover { border-bottom-color: var(--teal); }
      这里沿用桌面端的形态——一行文字，当前页青色 + 2px 下划线，六个词在整行里均匀分开。 */
   .topbar-in {
     flex-wrap: wrap; align-content: space-between; height: auto;
-    padding: 0 16px 6px; gap: 0 12px;
+    padding: 0 16px; gap: 0 12px;
   }
   .brand { display: flex; align-items: center; height: 50px; }
-  .searchbox { height: 50px; }
+  /* 检索框不再跟品牌挤第一行：一个小方框贴在标题右边，既不像输入框也不像按钮。
+     挪到导航下面单独占一整行，宽度够、点击面积够，也就不用再猜它归属哪一行。 */
+  .searchbox {
+    order: 4; flex: 0 0 100%; margin: 0; height: auto;
+    padding: 0 0 10px; gap: 0;
+  }
   .nav {
     order: 3; flex: 0 0 100%; margin: 0;
     display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 0;
@@ -524,11 +529,11 @@ a.term:hover { border-bottom-color: var(--teal); }
      副标收起、检索框缩宽（聚焦时也不再撑大），顶栏不再溢出 */
   .brand small { display: none; }
   .topbar-in { gap: 12px; }
-  .searchbox { margin-left: auto; min-width: 0; }
-  .searchbox input { width: 104px; height: 28px; font-size: 12.5px; }
+  .searchbox { min-width: 0; }
+  .searchbox input { width: 100%; height: 34px; font-size: 13px; border-radius: 6px; }
   /* 触屏没有回车键，那个 ↵ 提示在手机上是块噪声 */
   .searchbox span { display: none; }
-  .searchbox input:focus { width: 136px; }
+  .searchbox input:focus { width: 100%; }
   .wrap, .narrow { padding: 0 16px; }
   .hero { padding: 48px 0 32px; }
   .hero h1 { font-size: 32px; }

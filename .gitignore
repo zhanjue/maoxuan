@@ -4,6 +4,7 @@ __pycache__/
 .wrangler/
 
 # 本地临时验证产物
+.shots/
 _verify/
 _shot.py
 _measure.js
