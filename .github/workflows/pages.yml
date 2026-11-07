@@ -44,6 +44,14 @@ jobs:
         with:
           path: site
 
+      # Pages 的发布接口偶发超时（artifact 已上传成功，卡在最后这一步，跑十分钟后报失败）。
+      # 这种失败跟代码无关，重试一次基本就过，所以这里让它失败后自动再发一次。
       - name: Deploy to GitHub Pages
         id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Retry deploy (Pages 偶发超时)
+        id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4
