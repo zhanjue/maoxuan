@@ -49,7 +49,10 @@ cd /d E:\software\agent\workbuddy_workplcae\mao-kb
 | 仓库名 | 访问地址 |
 |---|---|
 | `<用户名>.github.io` | `https://<用户名>.github.io/` |
-| 其他名字（如 `maoxuan1`） | `https://<用户名>.github.io/maoxuan1/` |
+| 其他名字（如 `maoxuan`） | `https://<用户名>.github.io/maoxuan/` |
+
+**当前仓库 `zhanjue/maoxuan`，站点地址 `https://zhanjue.github.io/maoxuan/`。**
+2026-11-07 从 `maoxuan1` 改名而来 —— **Pages 的子路径就是仓库名**，想让地址不带「1」只能改仓库名（在仓库 Settings 里改，改名后 `git remote` 也要跟着换）。旧地址 `github.io/maoxuan1/` 会自动 301 到新地址，但对外只用新的。
 
 **本站所有链接都是相对路径**，放在子路径下也能正常工作，不需要改配置。
 
