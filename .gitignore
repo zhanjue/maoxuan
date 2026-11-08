@@ -15,3 +15,6 @@ _t.html
 # 编辑器
 .vscode/
 .idea/
+
+# Markdown 导出产物（scripts/export_md.py 可随时重生成）
+export/
