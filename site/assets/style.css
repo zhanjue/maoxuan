@@ -74,21 +74,35 @@ body {
 .hero { padding: 72px 0 40px; border-bottom: 1px solid var(--line); }
 .hero h1 {
   font-family: var(--display); font-size: 44px; font-weight: 700;
-  line-height: 1.32; letter-spacing: 0.05em;
+  line-height: 1.7; letter-spacing: 0.05em;
 }
 /* 手机专用断行：这一句 13 字，390px 屏上会自动折成三行且末行只剩两字，
    所以在「知识笔记」前放一个只在窄屏显示的 <br>，桌面端整句一行 */
 .hero h1 br.m-br { display: none; }
-.hero h1 .hl { color: var(--teal); }
-.hero .sub { margin-top: 16px; font-size: 16px; color: var(--ink-2); max-width: 760px; line-height: 1.9; }
+/* 主标题的关键词色块：像两张斜着贴上去的便签。
+   要旋转就必须 inline-block（inline 的 transform 不生效），
+   块与周围文字靠 margin 留缝，否则「把」会贴上块边 */
+.hero h1 .mk {
+  display: inline-block;
+  margin: 0 .2em; padding: .1em .26em .14em;
+  border-radius: 2px;
+  transform-origin: 50% 60%;
+}
+/* 卷一＝书，用纸黄；绿块是产品名，压白字 */
+.hero h1 .mk-paper {
+  background: #F7E3A0; transform: rotate(-2.4deg);
+  /* 《》是「字身宽、字墨窄」，左侧自带一大截空白，所以黄块左边收窄、右边补宽，
+     让「字到边」的视觉距离左右相等 */
+  padding-left: .06em; padding-right: .4em;
+}
+.hero h1 .mk-teal { background: var(--teal); color: #fff; transform: rotate(1.8deg); }
+.hero .sub { margin-top: 22px; font-size: 16px; color: var(--ink-2); max-width: 760px; line-height: 1.9; }
 .hero .sub b { color: var(--teal); font-weight: 600; }
 .stats { display: flex; flex-wrap: wrap; gap: 0; margin-top: 36px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
 .stat { flex: 1 1 120px; padding: 16px 20px; border-right: 1px solid var(--line); }
 .stat:last-child { border-right: none; }
 .stat .n { font-family: var(--display); font-size: 26px; font-weight: 700; }
 .stat .l { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
-/* 阅读时长不进统计格：它是估算值，跟篇数/字数那种确数并列会显得同等可信 */
-.stats-note { margin-top: 10px; font-size: 12.5px; color: var(--ink-3); }
 .section { padding: 44px 0; border-bottom: 1px solid var(--line); }
 .section:last-child { border-bottom: none; }
 .section h2 {
@@ -98,6 +112,8 @@ body {
 .section .desc { font-size: 13.5px; color: var(--ink-3); margin-bottom: 24px; }
 /* 6 个入口：定死 3 列，排成 3+3。用 auto-fit 会出现 4+1，右下留一块空。 */
 .entries { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+/* 四种读法：四张卡片排 2×2，比 3+1 的残行稳 */
+.entries.e4 { grid-template-columns: repeat(2, 1fr); }
 .entry {
   display: block; padding: 20px 18px; background: #fff;
   border: 1px solid var(--line); border-radius: 6px;
@@ -150,6 +166,24 @@ body {
 
 .footer { padding: 36px 0 48px; color: var(--ink-3); font-size: 12.5px; line-height: 1.9; }
 .footer .bd { border-top: 1px solid var(--line); padding-top: 24px; max-width: 1000px; }
+/* 纠错信箱：不把 @ 印在页面上，显示成「数字 艾特 域名」，点一下复制地址。
+   用 button 而不是 a：它不跳转，只做复制，语义上本来就不是链接 */
+.mailcopy {
+  font: inherit; font-family: var(--mono); font-size: .96em;
+  color: var(--teal); background: none; border: 0;
+  border-bottom: 1px dotted var(--teal);
+  padding: 0 1px; margin: 0; cursor: pointer; line-height: 1.6;
+  transition: background .18s, color .18s;
+}
+.mailcopy b { font-family: inherit; font-weight: 400; padding: 0 .18em; opacity: .72; }
+/* 光看一串数字读者不知道能点，补一句人话；不在正文里写，避免被复制进正文 */
+.mailcopy::after {
+  content: "（点一下复制）"; font-family: var(--ui, system-ui, -apple-system, "Microsoft YaHei", sans-serif);
+  font-size: 11.5px; opacity: .5; border-bottom: 0;
+}
+.mailcopy.ok::after { content: ""; }
+.mailcopy:hover { background: var(--teal-soft); border-bottom-style: solid; }
+.mailcopy.ok { color: #fff; background: var(--teal); border-bottom-color: transparent; }
 
 /* ---------- 篇目库 ---------- */
 .period-group { margin-bottom: 40px; }
@@ -173,19 +207,25 @@ body {
 .work-row .ct { font-size: 12px; color: var(--ink-3); white-space: nowrap; text-align: right; flex-shrink: 0; }
 
 /* ---------- 阅读页 ---------- */
-.read-head { padding: 48px 0 28px; border-bottom: 1px solid var(--line); }
+/* 阅读页列宽：760 时「源：求是网」后面空出一大片、整页重心偏左；880 又太宽，
+   一行五十多个汉字越过舒适区。780 取中间，一行约 46 字，meta 仍排得下 */
+.narrow.read-wide { max-width: 780px; }
+/* 头部与正文之间不画分割线，靠留白断开；原来那条线下面是 16px 空带，看着像残块 */
+.read-head { padding: 44px 0 6px; }
 .crumb { font-size: 12px; color: var(--ink-3); letter-spacing: 0.08em; margin-bottom: 14px; }
 .crumb a { color: var(--ink-3); text-decoration: none; }
 .crumb a:hover { color: var(--teal); }
 .read-head h1 { font-family: var(--display); font-size: 34px; font-weight: 700; line-height: 1.45; letter-spacing: 0.04em; }
 .read-meta { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 16px; font-size: 12.5px; color: var(--ink-3); font-family: var(--mono); }
+/* 把出处推到行尾，meta 这一行才不会只占左半截 */
+.read-meta .src { margin-left: auto; }
 .intro-box {
   margin: 24px 0; padding: 16px 20px; background: var(--paper-2);
   border-left: 3px solid var(--teal); border-radius: 0 6px 6px 0;
   font-size: 14px; color: var(--ink-2); line-height: 1.9;
 }
 .intro-box .lb { font-size: 11px; color: var(--teal); letter-spacing: 0.2em; display: block; margin-bottom: 4px; }
-.article { padding: 8px 0 40px; }
+.article { padding: 0 0 40px; }
 .para { position: relative; padding: 10px 56px 10px 0; }
 .para .pno {
   position: absolute; right: 0; top: 14px;
@@ -236,16 +276,18 @@ a.term:hover { border-bottom-color: var(--teal); }
 .note-back { flex: 0 0 auto; color: var(--ink-3); text-decoration: none; font-size: 12px; }
 .note-back:hover { color: var(--teal); }
 /* 篇内导读：读之前摆问题（不给位置），读完了回头核对（给段号） */
-.guide { margin: 0 0 30px; padding: 18px 20px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper-2); }
+/* 问题卡：底用极淡的品牌绿，跟页面米白纸拉开一层；文字压到近墨色，
+   原来 --ink-2 的灰在米灰底上读起来发虚 */
+.guide { margin: 0 0 16px; padding: 18px 20px 16px; border: 1px solid #CFE3DF; border-radius: 8px; background: #F1F7F5; }
 .guide-hd { font-family: var(--display); font-size: 14.5px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
 .guide-lb {
   font-family: var(--text); font-size: 10.5px; font-weight: 400; letter-spacing: 0.18em;
-  color: var(--teal); background: #fff; border: 1px solid var(--line-2);
+  color: #fff; background: var(--teal); border: 1px solid var(--teal);
   border-radius: 3px; padding: 2px 6px; margin-right: 8px;
 }
 .guide-list { margin: 0; padding-left: 20px; }
-.guide-list li { font-size: 14px; color: var(--ink-2); line-height: 1.95; }
-.guide-list li::marker { color: var(--teal); font-family: var(--mono); font-size: 12px; }
+.guide-list li { font-size: 14.5px; color: var(--ink); line-height: 1.95; }
+.guide-list li::marker { color: var(--teal); font-family: var(--mono); font-size: 12px; font-weight: 700; }
 .guide-at { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); margin-left: 4px; white-space: nowrap; }
 .guide-at a { color: var(--teal); text-decoration: none; border-bottom: 1px dotted var(--teal); }
 .guide-ft { margin-top: 10px; font-size: 11.5px; color: var(--ink-3); }
@@ -281,8 +323,14 @@ a.term:hover { border-bottom-color: var(--teal); }
 .quote .qm { margin-top: 10px; font-size: 12px; color: var(--ink-3); display: flex; justify-content: space-between; gap: 12px; }
 .quote .qm a { color: var(--teal); text-decoration: none; }
 .quote .qm a:hover { text-decoration: underline; }
-.evo { margin: 16px 0; }
-.evo-item { display: flex; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+/* 原文依据：默认全都能读；切到某阶段后，不相干的压暗（不隐藏——隐藏会让人以为内容没了） */
+.yj { margin-top: 34px; border-top: 1px solid var(--line); padding-top: 10px; }
+.yj-q { display: block; text-decoration: none; color: inherit; transition: opacity .3s, border-color .3s, background .3s, box-shadow .3s; }
+.yj-q.dim { opacity: .3; }
+.yj-q.dim .qt { color: var(--ink-2); }
+.yj-q.on { border-color: #B7D8D2; background: #FAFDFC; box-shadow: inset 3px 0 0 var(--teal); }
+.yj-q.on .qm span:last-child { color: var(--teal); }
+.evo { margin: 16px 0; }.evo-item { display: flex; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .evo-item:last-child { border-bottom: none; }
 .evo-item .dt { font-family: var(--mono); font-size: 12px; color: var(--ink-3); width: 76px; flex-shrink: 0; padding-top: 3px; }
 .evo-item .wk { font-family: var(--display); font-size: 15px; font-weight: 700; width: 210px; flex-shrink: 0; }
@@ -296,20 +344,6 @@ a.term:hover { border-bottom-color: var(--teal); }
 .qa .a { font-size: 14px; color: var(--ink-2); padding: 2px 0 14px; }
 .qa .a::before { content: "答 · "; color: var(--ink-3); font-size: 12px; }
 
-/* ---------- 时间线 ---------- */
-.tl { position: relative; margin: 28px 0 8px; padding-left: 24px; }
-.tl::before { content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 1px; background: var(--line-2); }
-.tl-item { position: relative; padding: 12px 0 20px; }
-.tl-item::before {
-  content: ""; position: absolute; left: -22px; top: 22px;
-  width: 7px; height: 7px; border-radius: 50%; background: var(--paper);
-  border: 2px solid var(--teal);
-}
-.tl-item .d { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
-.tl-item .t { font-family: var(--display); font-size: 17px; font-weight: 700; margin-top: 2px; }
-.tl-item .t a { color: var(--ink); text-decoration: none; }
-.tl-item .t a:hover { color: var(--teal); }
-.tl-item .s { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
 
 /* ---------- 工具页 ---------- */
 /* min-width:0 让 stage 在窄屏可以压到比内容更窄，否则内部弹性布局撑破页面 */
@@ -410,6 +444,9 @@ a.term:hover { border-bottom-color: var(--teal); }
 .td-q { font-family: var(--display); font-size: 22px; font-weight: 700; margin-top: 8px; }
 .td-a { margin-top: 16px; }
 .td-note { font-size: 12.5px; color: var(--ink-3); line-height: 1.85; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+/* 纠错信箱：跟着正文的链接样式走，别用浏览器默认的蓝紫下划线 */
+.td-note a, .footer a { color: var(--teal); text-decoration: none; border-bottom: 1px dotted var(--teal); }
+.td-note a:hover, .footer a:hover { border-bottom-style: solid; }
 /* 支柱层不用大白卡罩住三张卡：层题与注释放页面上，三张卡独立并排 */
 .td-layer-open { padding: 0; border: none; background: none; }
 .td-conn { text-align: center; margin: 16px 0; position: relative; }
@@ -547,7 +584,9 @@ a.term:hover { border-bottom-color: var(--teal); }
   .para { padding-right: 40px; }
   .stat { flex-basis: 45%; border-bottom: 1px solid var(--line); }
   /* 导读卡在窄屏要收窄内边距，否则清单缩进后每行只剩几个字 */
-  .guide { padding: 15px 14px 13px; margin-bottom: 24px; }
+  .guide { padding: 15px 14px 13px; margin-bottom: 14px; }
+  /* 窄屏 meta 会折行，行尾对齐会把「源」单独甩到第二行最右 */
+  .read-meta .src { margin-left: 0; }
   .guide-list { padding-left: 18px; }
   .guide-list li { font-size: 13.5px; line-height: 1.85; }
   .note-pop { width: auto !important; left: 12px !important; right: 12px !important; }
@@ -561,6 +600,10 @@ a.term:hover { border-bottom-color: var(--teal); }
 }
 /* 470px 以下：13 字的副题一行放不下，先断成「变成一本可检索的 / 知识笔记」，
    比让它自动折成「……的知 / 识笔记」好看 */
+@media (max-width: 620px) {
+  .entries.e4 { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 470px) {
   .hero h1 br.m-br { display: inline; }
 }
@@ -572,6 +615,50 @@ a.term:hover { border-bottom-color: var(--teal); }
    改回左对齐、固定间距，读起来还是一条链。 */
 @media (min-width: 600px) and (max-width: 860px) {
   .nav { justify-content: flex-start; gap: 28px; }
+}
+/* ---------- 微交互：鼠标悬停时轻微上浮 ---------- */
+/* 触屏没有真 hover，点按后 :hover 会粘住不散，所以整段用 hover/pointer 兜住 */
+@media (hover: hover) and (pointer: fine) {
+  /* 主标题：两条便签被"拎起来"——抬起 6px、带一层浅投影，
+     旋转角保持不变（hover 里必须重写，否则 transform 会被覆盖成瞬移） */
+  .hero h1 .mk {
+    transition: transform .34s cubic-bezier(.22, .68, .3, 1),
+                background-color .26s ease, box-shadow .3s ease;
+  }
+  .hero h1 .mk-paper:hover {
+    transform: rotate(-2.4deg) translateY(-6px);
+    background-color: #F2D77E;
+    box-shadow: 0 12px 22px -14px rgba(26, 26, 26, .34);
+  }
+  .hero h1 .mk-teal:hover {
+    transform: rotate(1.8deg) translateY(-6px);
+    background-color: #0B5C56;
+    box-shadow: 0 12px 22px -12px rgba(26, 26, 26, .45);
+  }
+
+  /* 入口卡 / 概念卡：上浮 + 一层浅投影，标题跟着变绿 */
+  .entry, .cc { transition: border-color .24s, transform .3s cubic-bezier(.22, .68, .3, 1), box-shadow .3s; }
+  .entry:hover, .cc:hover {
+    border-color: var(--teal); transform: translateY(-4px);
+    box-shadow: 0 12px 26px -16px rgba(26, 26, 26, .34);
+  }
+  .entry .t, .cc .nm { transition: color .24s; }
+  .entry:hover .t, .cc:hover .nm { color: var(--teal); }
+
+  /* 篇目行：整行淡底 + 左边一根竖条。不做平移，行会跟手抖 */
+  .work-row { transition: background .18s, box-shadow .18s; }
+  .work-row:hover { background: var(--teal-soft); box-shadow: inset 3px 0 0 var(--teal); }
+  .work-row .tt { transition: color .18s; }
+  .work-row:hover .tt { color: var(--teal); }
+
+
+  /* 统计格：只让数字变色，格子不动，五格一起浮太吵 */
+  .stat .n { transition: color .2s; }
+  .stat:hover .n { color: var(--teal); }
+
+  /* 语录：左竖线本来就会变色，再垫一层几乎看不见的底 */
+  .qt { transition: background .2s, border-left-color .2s; }
+  .qt:hover { background: var(--paper-2); border-left-color: var(--teal); }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }

@@ -98,6 +98,24 @@
         '<div class="md-sec-note">次要矛盾 · 被主要矛盾规定和影响，随阶段相互转化</div>' +
         '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + '</div>';
       ex.innerHTML = '<b>读法</b>　' + esc(s.note);
+      syncQuotes(s.key);
+    }
+    // 阶段 ↔ 原文依据联动：切到哪个阶段，就只把给这个阶段作证的段落点亮，其余压暗。
+    // 不做滚动（读的人正在看上面那块，页面自己跳走最招人烦）
+    function syncQuotes(key) {
+      var box = document.getElementById('yuju');
+      if (!box) return;
+      var n = 0;
+      Array.prototype.forEach.call(box.querySelectorAll('.yj-q'), function(q){
+        var hit = (q.getAttribute('data-for') || '').split(',').indexOf(key) >= 0;
+        q.classList.toggle('on', hit);
+        q.classList.toggle('dim', !hit);
+        if (hit) n++;
+      });
+      var cap = document.getElementById('yuju-cap');
+      if (cap) cap.textContent = '当前这一阶段，给「' + scenes[
+        (function(){ for (var j = 0; j < scenes.length; j++) { if (scenes[j].key === key) return j; } return 0; })()
+      ].name + '」作证的原文有 ' + n + ' 段，已点亮；点段号回原文核对。';
     }
     var start = 0, hashKey = (location.hash || '').replace('#', '');
     if (hashKey) {
@@ -237,4 +255,27 @@
 
     paint();
   })();
+
+  // 纠错信箱：页面上只有「1035775998 艾特 qq.com」，真地址在点击时才拼出来，
+  // 一是别让爬虫直接收走，二是读者不用自己把艾特改回 @
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('.mailcopy') : null;
+    if (!b) return;
+    var addr = b.getAttribute('data-u') + '@' + b.getAttribute('data-d');
+    var old = b.textContent;
+    function ok(){ b.classList.add('ok'); b.textContent = '已复制，去粘贴'; }
+    function back(){ b.classList.remove('ok'); b.textContent = old; }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = addr;
+      ta.style.position = 'fixed'; ta.style.top = '-1000px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); ok(); } catch (err) {}
+      document.body.removeChild(ta);
+      setTimeout(back, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(addr).then(function(){ ok(); setTimeout(back, 1600); }, fallback);
+    } else { fallback(); }
+  });
 })();

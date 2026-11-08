@@ -4,7 +4,7 @@
 设计约束：数据全部内联（file:// 双击可用，无 fetch 依赖）；Ink 纸白主题；
 溯源单元 = 卷/篇/段；段号为本库对求是网电子文本的编号，非纸质版页码。
 """
-import json, os, re, collections, html as H
+import json, os, re, collections, html as H, math
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(ROOT, "site")
@@ -25,6 +25,17 @@ NW = len(WORKS)
 # 阅读时长估算：370 字/分钟。这个数不是拍的——金字塔路线四站
 # （3780/10、6288/18、9267/25、22937/60）反推是 349~382 字/分，取中位 370。
 WPM = 370
+# 纠错信箱：页面上不直写完整地址（省得被爬虫收走），显示成「1035775998 艾特 qq.com」，
+# 点一下复制到剪贴板。@ 由 app.js 在点击时拼回去，HTML 里没有连续可读的地址。
+MAIL_USER = "1035775998"
+MAIL_DOMAIN = "qq.com"
+MAIL = MAIL_USER + "@" + MAIL_DOMAIN
+
+
+def mail_html():
+    return ('<button type="button" class="mailcopy" data-u="%s" data-d="%s" '
+            'title="点击复制邮箱地址">%s<b>艾特</b>%s</button>') % (
+        MAIL_USER, MAIL_DOMAIN, MAIL_USER, MAIL_DOMAIN)
 
 def read_minutes(chars):
     """字数 → 分钟（向上取到整数分钟，最少 1 分钟）。"""
@@ -199,9 +210,8 @@ def quote_snippet(text, keyword, width=64):
 # ---------- 页面骨架 ----------
 NAV = [
     ("index.html", "首页", 0),
-    ("works.html", "篇目", 0),
     ("pyramid.html", "金字塔", 0),
-    ("timeline.html", "时期轴", 0),
+    ("works.html", "时期轴", 0),
     ("concepts.html", "概念图谱", 0),
     ("quotes.html", "语录", 0),
 ]
@@ -219,7 +229,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="%s">
-<link rel="stylesheet" href="%sassets/style.css?v=46">
+<link rel="stylesheet" href="%sassets/style.css?v=63">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -231,10 +241,11 @@ def page(title, body, depth, active=""):
 <footer class="footer"><div class="wrap"><div class="bd">
 <p><b>知行录</b>——文献检索与阅读工具。正文与引文依据%s，电子文本核自求是网（qstheory.cn），逐字收录、未作改写；概念释义、导语、导读问题与页内说明文字为本站整理，不属原版文字。</p>
 <p>不作历史评价与政治表达。文中「段号」为本库段落编号，非纸质版页码；引文可点出处核对原文。</p>
+<p>概念释义、导读问题、金字塔答句等整理文字若与原文不合，欢迎来信指正：%s。</p>
 </div></div></footer>
 <script src="%sassets/app.js"></script>
 </body>
-</html>""" % (title, DESC, p, p, "".join(nav), p, body, SRC, p)
+</html>""" % (title, DESC, p, p, "".join(nav), p, body, SRC, mail_html(), p)
 
 def write(path, content):
     full = os.path.join(SITE, path)
@@ -250,28 +261,25 @@ def build_index():
             c["id"], esc(c["category"]), esc(c["name"]), esc(c["oneliner"])))
     body = """
 <div class="wrap"><section class="hero">
-<h1>把《毛选》第一卷<br>变成一本<span class="hl">可检索</span>的<br class="m-br"><span class="hl">知识笔记</span></h1>
-<p class="sub"><b>同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注</b>。<br>释义是本站整理，出处逐条挂回原段，点开即核对。</p>
+<h1>把<span class="mk mk-paper">《毛选》第一卷</span><br>变成一本可检索的<br class="m-br"><span class="mk mk-teal">知识笔记</span></h1>
+<p class="sub"><b>同一段文字，可以按结构、按年代读、按概念读、按语录读、也可以只读脚注</b>。<br>释义是本站整理，出处逐条挂回原段，点开即核对。</p>
 <div class="stats">
 <div class="stat"><div class="n">%d</div><div class="l">篇目（第一卷全量）</div></div>
 <div class="stat"><div class="n">%s</div><div class="l">字正文</div></div>
-<div class="stat"><div class="n">%d</div><div class="l">概念节点</div></div>
+<div class="stat"><div class="n">%s</div><div class="l">读完（估）</div></div>
 <div class="stat"><div class="n">%d</div><div class="l">溯源引文</div></div>
 <div class="stat"><div class="n">%d</div><div class="l">条注释</div></div>
 </div>
-<p class="stats-note">按每分钟 %d 字算，全卷读完约 %s。单篇时长标在篇目页和每篇开头。</p>
 </section>
 
 <section class="section">
 <h2>从这里进</h2>
-<p class="desc">六种读法：按原文顺序读、看金字塔、查时期轴、按概念查、看语录、检索全文。</p>
-<div class="entries">
-<a class="entry" href="works.html"><div class="t">按原文顺序读</div><div class="d">第一次国内革命战争时期 · 第二次国内革命战争时期，共 %d 篇</div></a>
-<a class="entry" href="pyramid.html"><div class="t">金字塔</div><div class="d">整卷共答一个问题：答案下面三根支柱，概念各归其位；页末另附四篇入门路线</div></a>
-<a class="entry" href="timeline.html"><div class="t">时期轴</div><div class="d">十八篇按写作时间排开；页末的主要矛盾演示器，看主要矛盾怎么随阶段换人</div></a>
-<a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个概念都有出处和演变</div></a>
-<a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">%d 句原文，一字未改，每条都能点回去看上下文，也能收藏</div></a>
-<a class="entry" href="search.html"><div class="t">全文检索</div><div class="d">段落级检索，命中直接跳到段</div></a>
+<p class="desc">四种读法：按结构看金字塔，按年代看时期轴，按关键词看概念图谱，回原文核对看语录。</p>
+<div class="entries e4">
+<a class="entry" href="pyramid.html"><div class="t">金字塔</div><div class="d">全卷其实只答一个问题，答案底下三根支柱。先看清骨架，再进原文，细节不会散</div></a>
+<a class="entry" href="works.html"><div class="t">时期轴</div><div class="d">十八篇按写作时间排开，分两个时期，每篇标了字数和读完要多长；页末看主要矛盾怎么换人</div></a>
+<a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个关键词都有出处和演变</div></a>
+<a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">%d 句原文，一字未改；读着对不上原文，就点回去核对上下文</div></a>
 </div>
 </section>
 
@@ -286,15 +294,20 @@ def build_index():
 <p class="desc">%d 个概念节点中的 6 个。释义为本站整理，出处逐条挂回原文段落。<a href="concepts.html" style="color:var(--teal)">看全部 →</a></p>
 <div class="concept-grid">%s</div>
 </section>
-</div>""" % (NW, "{:,}".format(TOTAL_CHARS), len(CONCEPTS), TOTAL_QUOTES, TOTAL_NOTES,
-               WPM, fmt_minutes(TOTAL_MINS), NW, len(QUOTES["items"]), NW, len(CONCEPTS),
+</div>""" % (NW, "{:,}".format(TOTAL_CHARS), "%dh" % int(math.ceil(TOTAL_MINS / 60.0)),
+               TOTAL_QUOTES, TOTAL_NOTES, len(QUOTES["items"]), NW, len(CONCEPTS),
                "".join(cats))
     # 今日一篇数据内联
     brief = [{"t": w["title"], "d": date_disp(w), "c": w["charCount"], "r": read_time(w["charCount"]), "u": "works/%s.html" % w["id"]} for w in WORKS]
     body += '<script>window.__TODAY__=%s;</script>' % json.dumps(brief, ensure_ascii=False)
     write("index.html", page("首页", body, 0, "index"))
 
-# ---------- 2. 篇目库 ----------
+# ---------- 2. 时期轴（篇目清单 + 页末主要矛盾换人） ----------
+def dk_disp(dk):
+    """1925-12-01 -> 1925.12.01；只到月份的写成 1925.12"""
+    return (dk or "—").replace("-", ".")
+
+
 def build_works():
     groups = []
     for period in ("第一次国内革命战争时期", "第二次国内革命战争时期"):
@@ -305,14 +318,17 @@ def build_works():
         for w in ws:
             rows.append("""<a class="work-row" href="works/%s.html"><span class="no">%03d</span><span class="tt">%s</span><span class="dt">%s</span><span class="ct">%s 字 · 约 %s</span></a>""" % (
                 w["id"], w["order"], esc(w["title"]), esc(date_disp(w)), "{:,}".format(w["charCount"]), read_time(w["charCount"])))
-        span = "%s — %s" % (ws[0]["dateKey"], ws[-1]["dateKey"])
-        groups.append("""<div class="period-group"><div class="period-head"><span class="pn">%s</span><span class="pr">%s · %d 篇</span></div>%s</div>""" % (
-            esc(period), span, len(ws), "".join(rows)))
+        # 时期头不只写区间和篇数：带上两段的合计字数与读完时长，两段的轻重才看得出
+        chars = sum(w["charCount"] for w in ws)
+        span = "%s — %s" % (dk_disp(ws[0]["dateKey"]), dk_disp(ws[-1]["dateKey"]))
+        groups.append("""<div class="period-group"><div class="period-head"><span class="pn">%s</span><span class="pr">%s · %d 篇 · %s 字 · 读完约 %s</span></div>%s</div>""" % (
+            esc(period), span, len(ws), "{:,}".format(chars), read_time(chars), "".join(rows)))
     body = """<div class="wrap" style="padding-top:40px">
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">篇目库 · 第一卷全量</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">按写作时间排序。点击篇名进入阅读页——正文段落全部编号，段号即锚点。</p>
-%s</div>""" % "".join(groups)
-    write("works.html", page("篇目库", body, 0, "works"))
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">时期轴 · 第一卷全量</h1>
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px;line-height:1.9">%d 篇按写作时间排，分两个时期——从 1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》。点篇名进阅读页：正文段落全部编号，段号即锚点。</p>
+%s
+%s</div>""" % (NW, "".join(groups), tool_section())
+    write("works.html", page("时期轴", body, 0, "works"))
 
 # ---------- 3. 阅读页 ----------
 def build_work(w):
@@ -383,11 +399,11 @@ def build_work(w):
                        '<div class="guide-ft">只指位置，不给答案。</div></div>') % gi
     prev_html = '<a href="%s.html">← 上一篇 · %s</a>' % (prev_w["id"], esc(prev_w["title"])) if prev_w else "<span></span>"
     next_html = '<a class="next" href="%s.html">下一篇 · %s →</a>' % (next_w["id"], esc(next_w["title"])) if next_w else "<span></span>"
-    body = """<div class="narrow">
+    body = """<div class="narrow read-wide">
 <div class="read-head">
-<div class="crumb"><a href="../index.html">首页</a> / <a href="../works.html">篇目库</a> / %s · %s</div>
+<div class="crumb"><a href="../index.html">首页</a> / <a href="../works.html">时期轴</a> / %s · %s</div>
 <h1>%s</h1>
-<div class="read-meta"><span>%s</span><span>%d 段</span><span>%s 字</span><span>约 %s读完</span><span>源：求是网</span></div>
+<div class="read-meta"><span>%s</span><span>%d 段</span><span>%s 字</span><span>%s</span><span class="src">源：求是网</span></div>
 %s
 %s
 </div>
@@ -663,29 +679,47 @@ def build_concept(c):
 </div>""" % (esc(c["category"]), esc(c["name"]), esc(c["oneliner"]), essence, "".join(quotes), "".join(evo), "".join(related), qa)
     write("concepts/%s.html" % c["id"], page(c["name"], body, 1, "concepts"))
 
-# ---------- 6. 时期轴 ----------
-def build_timeline():
-    items = []
-    for w in WORKS:
-        evos = [e for c in CONCEPTS for e in c["evolution"] if e["work"] == w["title"] and not e.get("outside")]
-        tag = ""
-        if evos:
-            tag = " · " + "、".join(sorted({e["dateKey"] for e in evos})) + " 概念演变"
-        items.append("""<div class="tl-item"><div class="d">%s</div><div class="t"><a href="works/%s.html">%s</a></div><div class="s">%s · %s 字%s</div></div>""" % (
-            esc(w["dateKey"] or "—"), w["id"], esc(w["title"]), esc(w["period"] or ""), "{:,}".format(w["charCount"]), tag))
-    body = """<div class="wrap" style="padding-top:40px">
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">时期轴</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 12px">第一卷 %d 篇按写作时间排列——1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》，横跨第一次国内革命战争与第二次国内革命战争两个时期。</p>
-<div class="tl">%s</div>
-%s
-</div>""" % (NW, "".join(items), tool_section())
-    write("timeline.html", page("时期轴", body, 0, "timeline"))
+# ---------- 6. 旧地址跳转（timeline / tool-maodun 都收进时期轴页） ----------
+def build_redirects():
+    """早先 timeline.html / tool-maodun.html 是两个独立地址，都被外部链接过，
+    现在内容合进 works.html，这两个地址只留跳转，别让老链接 404。"""
+    pages = [
+        ("timeline.html", "时期轴", "旧地址：时期轴已移到", "时期轴", "works.html", ""),
+        ("tool-maodun.html", "主要矛盾换人", "主要矛盾换人已并入", "时期轴页末", "works.html", "#maodun"),
+    ]
+    for fn, title, label, dest, url, anchor in pages:
+        write(fn, """<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>%s · 知行录</title>
+<link rel="canonical" href="%s%s">
+<meta http-equiv="refresh" content="0; url=%s%s">
+</head>
+<body>
+<p style="font-family:system-ui,-apple-system,'Microsoft YaHei',sans-serif;padding:40px 24px;line-height:1.8">%s<a href="%s%s" style="color:#0F766E">%s</a>，正在跳转。</p>
+</body>
+</html>
+""" % (title, url, anchor, url, anchor, label, url, anchor, dest))
 
-# ---------- 7. 矛盾论工具（并入时期轴页末，旧地址留跳转） ----------
+# ---------- 7. 主要矛盾换人（时期轴页末，旧地址留跳转） ----------
+def md_para(n):
+    """《矛盾论》第 n 段原文（1 起算，与阅读页 #pn 锚点同一套编号）。"""
+    ps = [p if isinstance(p, str) else p.get("text", "") for p in WORK_BY_TITLE["矛盾论"]["paragraphs"]]
+    return ps[n - 1]
+
+
 def tool_section():
-    """主要矛盾演示器：作为时期轴页末的一节，不再单独成页。"""
+    """主要矛盾怎么随阶段换人。讲完就落到原文：下面几段能按阶段点亮，指示「这段在给谁作证」。"""
+    md = WORK_BY_TITLE["矛盾论"]["id"]
+    quotes = []
+    for q in TOOL_QUOTES:
+        quotes.append("""<a class="quote yj-q" data-for="%s" href="works/%s.html#p%d"><div class="qt">%s</div><div class="qm"><span>矛盾论 · 第 %d 段 ↗</span><span>%s</span></div></a>""" % (
+            ",".join(q["for"]), md, q["para"], quote_snippet(md_para(q["para"]), q["kw"], 52), q["para"], esc(q["note"])))
+    nums = sorted(q["para"] for q in TOOL_QUOTES)
     html = """<div class="section" id="maodun" style="border-top:1px solid var(--line);margin-top:44px;padding-top:30px">
-<h2>主要矛盾演示器</h2>
+<h2>主要矛盾换人</h2>
 <p class="desc">上面按年份排，这里按阶段排——每个阶段拉扯的两方不一样，主要矛盾会换人。</p>
 <p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">「矛盾」在这里的意思是：一个事物内部互相拉扯、又互相依赖的两方——它们你进我退，推动整个事物变化。一个社会里同时存在好几对这样的矛盾，<b>其中必有一种是主要的</b>：捉住了它，其余问题就有了头绪。</p>
 <div class="tool-legend">
@@ -698,34 +732,20 @@ def tool_section():
 <div id="scene"></div>
 </div>
 <div class="tool-explain" id="explain"></div>
-<div class="tool-quote">《矛盾论》第四节：「任何过程如果有多数矛盾存在的话，其中必定有一种是主要的，起着领导的、决定的作用，其他则处于次要和服从的地位。」<a href="works/@@MD@@.html#p68" style="color:var(--teal);text-decoration:none">第 68 段 ↗</a>　下面三个场景演示：主要矛盾怎么随阶段换人。</div>
-<div style="border-top:1px solid var(--line);margin-top:36px;padding-top:8px">
-<h2>语料依据</h2>
-<p class="desc">工具中的结构判断均可在《矛盾论》第一卷第 68—72 段核对。</p>
-%s
+<div class="tool-quote">《矛盾论》第四节：「任何过程如果有多数矛盾存在的话，其中必定有一种是主要的，起着领导的、决定的作用，其他则处于次要和服从的地位。」<a href="works/@MD@.html#p65" style="color:var(--teal);text-decoration:none">第 65 段 ↗</a>　三个场景，换一次阶段，主要矛盾就换一组人。</div>
+<div class="yj" id="yuju-wrap">
+<h2>原文依据</h2>
+<p class="desc" id="yuju-cap">切换上面的阶段，下面标亮的几段就是那一段的原文；点段号回原文核对。全部出自《矛盾论》第 %s 段。</p>
+<div id="yuju">%s</div>
 </div>
-</div>""" % TOOL_QUOTES_HTML
-    # 篇 id 会随补篇重排，这里按篇名取当前 id，不写死 v1-0xx
-    html = html.replace("@@MD@@", WORK_BY_TITLE["矛盾论"]["id"])
+</div>""" % ("—".join(str(n) for n in (nums[0], nums[-1])) if len(nums) > 2 else "、".join(str(n) for n in nums), "".join(quotes))
+    html = html.replace("@MD@", md)
     return html + '<script>window.__TOOL__=%s;</script>' % json.dumps(TOOL_SCENES, ensure_ascii=False)
 
 
 def build_tool():
-    """旧地址 tool-maodun.html：工具已并入时期轴，这里只做跳转。"""
-    write("tool-maodun.html", """<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>主要矛盾演示器 · 知行录</title>
-<link rel="canonical" href="timeline.html#maodun">
-<meta http-equiv="refresh" content="0; url=timeline.html#maodun">
-</head>
-<body>
-<p style="font-family:system-ui,-apple-system,'Microsoft YaHei',sans-serif;padding:40px 24px;line-height:1.8">主要矛盾演示器已并入<a href="timeline.html#maodun" style="color:#0F766E">时期轴</a>页末，正在跳转。</p>
-</body>
-</html>
-""")
+    """旧地址 tool-maodun.html：已并入时期轴页，跳转在 build_redirects 里生成。"""
+    pass
 
 
 TOOL_SCENES = [
@@ -749,9 +769,15 @@ TOOL_SCENES = [
      "note": "根本矛盾（性质）未变，但在不同阶段采取了逐渐激化的形式，并激化/发生新的大小矛盾——过程显出阶段性。"},
 ]
 
-TOOL_QUOTES_HTML = "".join("""<div class="quote"><div class="qt">%s</div><div class="qm"><span>卷一 · 矛盾论 · <a href="works/%s.html#p%d">第 %d 段 ↗</a></span><span>%s</span></div></div>""" % (
-    quote_snippet(q["text"], q.get("keyword", ""), 60), [x for x in WORKS if x["title"] == "矛盾论"][0]["id"], q["para"], q["para"], esc(q["note"]))
-    for q in [c for c in CONCEPTS if c["id"] == "zhuyaomaodun"][0]["quotes"])
+# 原文依据：段号 + 摘句关键词 + 对应哪个阶段（a/b/c 见 TOOL_SCENES 的 key）。
+# 段号一律 1 起算，与阅读页 #pn 锚点同源，点进去就是这一句所在的那一段。
+TOOL_QUOTES = [
+    {"para": 63, "kw": "成为一个主要矛盾", "for": ["b"], "note": "主要矛盾怎么重新组合"},
+    {"para": 65, "kw": "必定有一种是主要的", "for": ["a", "b"], "note": "方法：先找出主要矛盾"},
+    {"para": 66, "kw": "事物的性质，主要地是由取得支配地位的矛盾的主要方面所规定的", "for": ["c"], "note": "主要方面决定性质"},
+    {"para": 69, "kw": "在资本主义社会中", "for": ["c"], "note": "《矛盾论》原例"},
+    {"para": 70, "kw": "帝国主义处在形成半殖民地这种矛盾的主要地位", "for": ["a"], "note": "中国：半殖民地是怎么形成的"},
+]
 
 # ---------- 7.5 金字塔（先问，再答，三根柱子） ----------
 def concept_chip(cid):
@@ -769,9 +795,9 @@ def branch_card(b, with_chips):
 %s</div>""" % (b["slug"], esc(b["question"]), esc(b["key"]), esc(b["name"]),
                  esc(b["claim"]), esc(b["logic"]), chips)
 
-def layer_block(level, q, inner, note):
+def layer_block(level, q, inner, note, raw_note=False):
     q_html = '<div class="td-q">%s</div>' % esc(q) if q else ""
-    n_html = '<div class="td-note">%s</div>' % esc(note) if note else ""
+    n_html = '<div class="td-note">%s</div>' % (note if raw_note else esc(note)) if note else ""
     return """<div class="td-layer">
 <div class="td-lv">%s</div>
 %s
@@ -855,7 +881,11 @@ def build_pyramid():
 </div>""" % (esc(L["level"]), esc(PYRAMID["apex"]["question"]), esc(L["note"])))
         elif L["a"] == "answer":
             inner = """<div class="pyr-apex"><div class="pyr-apex-t">%s</div></div>""" % esc(PYRAMID["apex"]["answer"])
-            blocks.append(layer_block(L["level"], "", inner, PYRAMID["apex"]["note"]))
+            # 这句是本库自己概括的，不是原文；页面必须把"可被指正"的口子开着，
+            # 读者拿原文一对就能发现偏差，所以要留一个直接可点的信箱
+            apex_note = esc(PYRAMID["apex"]["note"]) + \
+                '概括如有不对，请来信指正：%s。' % mail_html()
+            blocks.append(layer_block(L["level"], "", inner, apex_note, raw_note=True))
         else:  # branches——不用大白卡罩住三张卡：层题与注释放页面上，三张卡独立并排
             # 不设层标题问句：三张卡各自的问句已经在回答上一层的「凭什么成立」，再来一行总问句是重复
             blocks.append("""<div class="td-layer-open">
@@ -1027,6 +1057,24 @@ APP_JS = r"""
         '<div class="md-sec-note">次要矛盾 · 被主要矛盾规定和影响，随阶段相互转化</div>' +
         '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + '</div>';
       ex.innerHTML = '<b>读法</b>　' + esc(s.note);
+      syncQuotes(s.key);
+    }
+    // 阶段 ↔ 原文依据联动：切到哪个阶段，就只把给这个阶段作证的段落点亮，其余压暗。
+    // 不做滚动（读的人正在看上面那块，页面自己跳走最招人烦）
+    function syncQuotes(key) {
+      var box = document.getElementById('yuju');
+      if (!box) return;
+      var n = 0;
+      Array.prototype.forEach.call(box.querySelectorAll('.yj-q'), function(q){
+        var hit = (q.getAttribute('data-for') || '').split(',').indexOf(key) >= 0;
+        q.classList.toggle('on', hit);
+        q.classList.toggle('dim', !hit);
+        if (hit) n++;
+      });
+      var cap = document.getElementById('yuju-cap');
+      if (cap) cap.textContent = '当前这一阶段，给「' + scenes[
+        (function(){ for (var j = 0; j < scenes.length; j++) { if (scenes[j].key === key) return j; } return 0; })()
+      ].name + '」作证的原文有 ' + n + ' 段，已点亮；点段号回原文核对。';
     }
     var start = 0, hashKey = (location.hash || '').replace('#', '');
     if (hashKey) {
@@ -1166,6 +1214,29 @@ APP_JS = r"""
 
     paint();
   })();
+
+  // 纠错信箱：页面上只有「1035775998 艾特 qq.com」，真地址在点击时才拼出来，
+  // 一是别让爬虫直接收走，二是读者不用自己把艾特改回 @
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('.mailcopy') : null;
+    if (!b) return;
+    var addr = b.getAttribute('data-u') + '@' + b.getAttribute('data-d');
+    var old = b.textContent;
+    function ok(){ b.classList.add('ok'); b.textContent = '已复制，去粘贴'; }
+    function back(){ b.classList.remove('ok'); b.textContent = old; }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = addr;
+      ta.style.position = 'fixed'; ta.style.top = '-1000px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); ok(); } catch (err) {}
+      document.body.removeChild(ta);
+      setTimeout(back, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(addr).then(function(){ ok(); setTimeout(back, 1600); }, fallback);
+    } else { fallback(); }
+  });
 })();
 """
 os.makedirs(os.path.join(SITE, "assets"), exist_ok=True)
@@ -1181,8 +1252,7 @@ for w in WORKS:
 build_concepts_index()
 for c in CONCEPTS:
     build_concept(c)
-build_timeline()
-build_tool()
+build_redirects()
 build_quotes()
 build_search()
 
