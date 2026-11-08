@@ -231,7 +231,7 @@ def build_index():
     body = """
 <div class="wrap"><section class="hero">
 <h1>把《毛选》第一卷<br>变成一本可检索的<br class="m-br">知识笔记</h1>
-<p class="sub">正文 %d 篇、%s 字，另有 %d 条原版脚注——那是另一本书：人名、组织、战事。<br><b>同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注</b>——释义是本站整理，出处逐条挂回原段，点开即核对。</p>
+<p class="sub"><b>同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注</b>——释义是本站整理，出处逐条挂回原段，点开即核对。</p>
 <div class="stats">
 <div class="stat"><div class="n">%d</div><div class="l">篇目（第一卷全量）</div></div>
 <div class="stat"><div class="n">%s</div><div class="l">字正文</div></div>
@@ -265,7 +265,7 @@ def build_index():
 <p class="desc">%d 个概念节点中的 6 个。释义为本站整理，出处逐条挂回原文段落。<a href="concepts.html" style="color:var(--teal)">看全部 →</a></p>
 <div class="concept-grid">%s</div>
 </section>
-</div>""" % (NW, "{:,}".format(TOTAL_CHARS), TOTAL_NOTES, NW, "{:,}".format(TOTAL_CHARS),
+</div>""" % (NW, "{:,}".format(TOTAL_CHARS),
                len(CONCEPTS), TOTAL_QUOTES, TOTAL_NOTES, NW, len(QUOTES["items"]), NW, len(CONCEPTS),
                "".join(cats))
     # 今日一篇数据内联
