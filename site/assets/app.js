@@ -18,7 +18,7 @@
     var ws = window.__TODAY__;
     var w = ws[Math.floor(Math.random() * ws.length)];
     today.innerHTML = '<div class="k">今日一篇</div><div><a class="t" href="' + w.u + '">' + w.t + '</a>' +
-      '<div class="m">' + w.d + ' · ' + w.c + ' 字</div></div>';
+      '<div class="m">' + w.d + ' · ' + w.c + ' 字 · 约 ' + w.r + '</div></div>';
   }
   // 检索
   var sq = document.getElementById('sq');

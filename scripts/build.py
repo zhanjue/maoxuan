@@ -22,6 +22,26 @@ SRC = "人民出版社《毛泽东选集》第一卷"
 TOTAL_CHARS = sum(w["charCount"] for w in WORKS)
 TOTAL_QUOTES = sum(len(c["quotes"]) for c in CONCEPTS)
 NW = len(WORKS)
+# 阅读时长估算：370 字/分钟。这个数不是拍的——金字塔路线四站
+# （3780/10、6288/18、9267/25、22937/60）反推是 349~382 字/分，取中位 370。
+WPM = 370
+
+def read_minutes(chars):
+    """字数 → 分钟（向上取到整数分钟，最少 1 分钟）。"""
+    return max(1, int(round(chars / WPM)))
+
+def fmt_minutes(mins):
+    """448 → 7 小时 28 分钟；25 → 25 分钟。"""
+    if mins < 60:
+        return "%d 分钟" % mins
+    h, m = divmod(mins, 60)
+    return "%d 小时" % h if m < 5 else "%d 小时 %d 分钟" % (h, m)
+
+def read_time(chars):
+    """字数 → 「约 25 分钟」里的时长部分。"""
+    return fmt_minutes(read_minutes(chars))
+
+TOTAL_MINS = read_minutes(TOTAL_CHARS)
 # 一处定义，全站引用：篇数写死过一次「17 篇」，补到 18 篇时六处文案全错
 DESC = ("知行录：《毛泽东选集》第一卷结构化知识库。%d 篇正式出版文本，%d 个概念节点，"
         "%d 条溯源引文，每一段都可回溯到卷/篇/段。" % (NW, len(CONCEPTS), TOTAL_QUOTES))
@@ -199,7 +219,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="%s">
-<link rel="stylesheet" href="%sassets/style.css?v=43">
+<link rel="stylesheet" href="%sassets/style.css?v=44">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -231,11 +251,11 @@ def build_index():
     body = """
 <div class="wrap"><section class="hero">
 <h1>把《毛选》第一卷<br>变成一本可检索的<br class="m-br">知识笔记</h1>
-<p class="sub"><b>同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注</b>——释义是本站整理，出处逐条挂回原段，点开即核对。</p>
+<p class="sub">同一段文字，可以按结构读、按年代读、按概念读，也可以只读脚注。<br>释义是本站整理，出处逐条挂回原段，点开即核对。</p>
 <div class="stats">
 <div class="stat"><div class="n">%d</div><div class="l">篇目（第一卷全量）</div></div>
 <div class="stat"><div class="n">%s</div><div class="l">字正文</div></div>
-<div class="stat"><div class="n">%d</div><div class="l">概念节点</div></div>
+<div class="stat"><div class="n">%s</div><div class="l">小时读完（估）</div></div>
 <div class="stat"><div class="n">%d</div><div class="l">溯源引文</div></div>
 <div class="stat"><div class="n">%d</div><div class="l">条注释</div></div>
 </div>
@@ -266,10 +286,10 @@ def build_index():
 <div class="concept-grid">%s</div>
 </section>
 </div>""" % (NW, "{:,}".format(TOTAL_CHARS),
-               len(CONCEPTS), TOTAL_QUOTES, TOTAL_NOTES, NW, len(QUOTES["items"]), NW, len(CONCEPTS),
+               "%.1f" % (TOTAL_MINS / 60.0), TOTAL_QUOTES, TOTAL_NOTES, NW, len(QUOTES["items"]), NW, len(CONCEPTS),
                "".join(cats))
     # 今日一篇数据内联
-    brief = [{"t": w["title"], "d": date_disp(w), "c": w["charCount"], "u": "works/%s.html" % w["id"]} for w in WORKS]
+    brief = [{"t": w["title"], "d": date_disp(w), "c": w["charCount"], "r": read_time(w["charCount"]), "u": "works/%s.html" % w["id"]} for w in WORKS]
     body += '<script>window.__TODAY__=%s;</script>' % json.dumps(brief, ensure_ascii=False)
     write("index.html", page("首页", body, 0, "index"))
 
@@ -282,8 +302,8 @@ def build_works():
             continue
         rows = []
         for w in ws:
-            rows.append("""<a class="work-row" href="works/%s.html"><span class="no">%03d</span><span class="tt">%s</span><span class="dt">%s</span><span class="ct">%s 字</span></a>""" % (
-                w["id"], w["order"], esc(w["title"]), esc(date_disp(w)), "{:,}".format(w["charCount"])))
+            rows.append("""<a class="work-row" href="works/%s.html"><span class="no">%03d</span><span class="tt">%s</span><span class="dt">%s</span><span class="ct">%s 字 · 约 %s</span></a>""" % (
+                w["id"], w["order"], esc(w["title"]), esc(date_disp(w)), "{:,}".format(w["charCount"]), read_time(w["charCount"])))
         span = "%s — %s" % (ws[0]["dateKey"], ws[-1]["dateKey"])
         groups.append("""<div class="period-group"><div class="period-head"><span class="pn">%s</span><span class="pr">%s · %d 篇</span></div>%s</div>""" % (
             esc(period), span, len(ws), "".join(rows)))
@@ -366,7 +386,7 @@ def build_work(w):
 <div class="read-head">
 <div class="crumb"><a href="../index.html">首页</a> / <a href="../works.html">篇目库</a> / %s · %s</div>
 <h1>%s</h1>
-<div class="read-meta"><span>%s</span><span>%d 段</span><span>%s 字</span><span>源：求是网</span></div>
+<div class="read-meta"><span>%s</span><span>%d 段</span><span>%s 字</span><span>约 %s读完</span><span>源：求是网</span></div>
 %s
 %s
 </div>
@@ -376,7 +396,7 @@ def build_work(w):
 <div style="margin-top:8px"><div style="font-size:12px;color:var(--ink-3);letter-spacing:0.2em">本篇涉及的概念</div><div class="related-concepts">%s</div></div>
 <div class="read-foot">%s%s</div>
 </div>""" % (esc(VOL), esc(w["period"] or ""), esc(w["title"]), esc(date_disp(w)),
-             len(w["paragraphs"]), "{:,}".format(w["charCount"]), intro, guide_before,
+             len(w["paragraphs"]), "{:,}".format(w["charCount"]), read_time(w["charCount"]), intro, guide_before,
              "".join(paras), guide_after, notes,
              rel_tags or "<span style='font-size:13px;color:var(--ink-3)'>暂无</span>", prev_html, next_html)
     write("works/%s.html" % w["id"], page(w["title"], body, 1, "works"))
@@ -926,7 +946,7 @@ APP_JS = r"""
     var ws = window.__TODAY__;
     var w = ws[Math.floor(Math.random() * ws.length)];
     today.innerHTML = '<div class="k">今日一篇</div><div><a class="t" href="' + w.u + '">' + w.t + '</a>' +
-      '<div class="m">' + w.d + ' · ' + w.c + ' 字</div></div>';
+      '<div class="m">' + w.d + ' · ' + w.c + ' 字 · 约 ' + w.r + '</div></div>';
   }
   // 检索
   var sq = document.getElementById('sq');

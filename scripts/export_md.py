@@ -20,6 +20,17 @@ OUT = os.path.join(ROOT, "export")
 
 END_PUNCT = "。？！：；"
 
+# 与 build.py 保持一致：370 字/分钟
+WPM = 370
+
+
+def read_time(chars):
+    mins = max(1, int(round(chars / WPM)))
+    if mins < 60:
+        return "%d 分钟" % mins
+    h, m = divmod(mins, 60)
+    return "%d 小时" % h if m < 5 else "%d 小时 %d 分钟" % (h, m)
+
 
 def is_heading(p):
     s = p.strip()
@@ -34,6 +45,13 @@ def is_heading(p):
 
 def safe_name(s):
     return re.sub(r'[\\/:*?"<>|]', "＿", s).strip()
+
+
+def slug(s):
+    """按 GitHub 的锚点规则生成：小写、去标点、空格转连字符。"""
+    s = s.lower()
+    s = re.sub(r"[^\w\- ]", "", s)
+    return re.sub(r"\s+", "-", s.strip())
 
 
 def note_lines(notes):
@@ -56,7 +74,7 @@ def render_work(w, level=1, with_toc=False):
     lines = ["%s %02d %s" % (h, w["order"], w["title"]), ""]
     lines.append("- 时期：%s" % w.get("period", ""))
     lines.append("- 写作日期：%s" % w.get("date", "").strip("（）"))
-    lines.append("- 字数：%s" % "{:,}".format(w.get("charCount", 0)))
+    lines.append("- 字数：%s（约 %s读完）" % ("{:,}".format(w.get("charCount", 0)), read_time(w.get("charCount", 0))))
     if w.get("source"):
         lines.append("- 来源：%s" % w["source"])
     lines.append("")
@@ -95,14 +113,15 @@ def main():
     head = [
         "# 《毛泽东选集》第一卷 · 全文",
         "",
-        "> 共 %d 篇，%s 字，原注 %d 条。正文与脚注均按原文照录，未作改写。"
-        % (len(works), "{:,}".format(total_chars), total_notes),
+        "> 共 %d 篇，%s 字，原注 %d 条，读完约 %s。正文与脚注均按原文照录，未作改写。"
+        % (len(works), "{:,}".format(total_chars), total_notes, read_time(total_chars)),
         "",
         "## 目录",
         "",
     ]
     for w in works:
-        head.append("%d. [%s](#%02d-%s)" % (w["order"], w["title"], w["order"], w["order"]))
+        h = "%02d %s" % (w["order"], w["title"])
+        head.append("%d. [%s](#%s)" % (w["order"], w["title"], slug(h)))
     parts = ["\n".join(head)]
     for w in works:
         parts.append("\n---\n\n" + render_work(w, level=1))
