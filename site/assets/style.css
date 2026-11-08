@@ -79,6 +79,7 @@ body {
 /* 手机专用断行：这一句 13 字，390px 屏上会自动折成三行且末行只剩两字，
    所以在「知识笔记」前放一个只在窄屏显示的 <br>，桌面端整句一行 */
 .hero h1 br.m-br { display: none; }
+.hero h1 .hl { color: var(--teal); }
 .hero .sub { margin-top: 16px; font-size: 16px; color: var(--ink-2); max-width: 760px; line-height: 1.9; }
 .hero .sub b { color: var(--teal); font-weight: 600; }
 .stats { display: flex; flex-wrap: wrap; gap: 0; margin-top: 36px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
