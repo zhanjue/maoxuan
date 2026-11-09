@@ -270,6 +270,53 @@ for href in re.findall(r'href="#([^"]+)"', ph):
     if href not in pids:
         errors.append("骨架页页内锚点 #%s 找不到目标" % href)
 
+# ---------- 11. 时期轴页末「各阶段的主要矛盾」 ----------
+# 这一块 2026-11-09 重做过一次，规矩是「只写原文说过的话」：卡片名照《矛盾论》
+# 原文的「情形」起，不套党史分期；凡原文没说的年份/事变，只准出现在脚注里。
+# 这条规矩靠人记不住，所以在这里钉死三件事：
+#   ① 每一格都得有原文依据（TOOL_QUOTES 里至少一条 for 里含这个 key）；
+#   ② 每条依据的锚词必须真的在它标的那一段里（段号会漂，锚词不会）；
+#   ③ 卡片名里不许出现四位年份——一出现就说明又把编年史搬回正文了。
+import ast as _ast
+_src = open(os.path.join(ROOT, "scripts", "build.py"), encoding="utf-8").read()
+_want = {"TOOL_SCENES": None, "TOOL_QUOTES": None}
+for node in _ast.parse(_src).body:
+    if isinstance(node, _ast.Assign) and len(node.targets) == 1:
+        t = node.targets[0]
+        if isinstance(t, _ast.Name) and t.id in _want:
+            _want[t.id] = _ast.literal_eval(node.value)
+_scenes, _tq = _want["TOOL_SCENES"], _want["TOOL_QUOTES"]
+if not _scenes or not _tq:
+    errors.append("主要矛盾块：build.py 里找不到 TOOL_SCENES / TOOL_QUOTES")
+else:
+    keys = [x["key"] for x in _scenes]
+    covered = set()
+    for q in _tq:
+        w = by_title.get((q.get("work") or "矛盾论").strip())
+        if not w:
+            errors.append("主要矛盾块：依据指向不存在的篇目「%s」" % q.get("work"))
+            continue
+        n = q.get("para")
+        if not isinstance(n, int) or not (0 < n <= len(w["paragraphs"])):
+            errors.append("主要矛盾块：依据段号越界 p%s" % n)
+            continue
+        if (q.get("kw") or "") not in w["paragraphs"][n - 1]:
+            errors.append("主要矛盾块：锚词「%s」不在《%s》第 %d 段" % (q.get("kw"), w["title"], n))
+        for k in q.get("for") or []:
+            if k not in keys:
+                errors.append("主要矛盾块：依据 for 里的 %s 没有对应卡片" % k)
+            covered.add(k)
+    for k in keys:
+        if k not in covered:
+            errors.append("主要矛盾块：卡片 %s 没有挂任何原文依据" % k)
+    for x in _scenes:
+        if re.search(r"(?<!\d)(1[89]\d\d|20\d\d)(?!\d)", x.get("name", "")):
+            errors.append("主要矛盾块：卡片名「%s」出现四位年份，按规矩卡片只照原文情形起名" % x["name"])
+        if x.get("fn") and ('id="fn%s"' % x["fn"]) not in open(
+                os.path.join(SITE, "works.html"), encoding="utf-8").read():
+            errors.append("主要矛盾块：卡片 %s 的脚注 %s 在页面上不存在" % (x["key"], x["fn"]))
+    print("主要矛盾：%d 格、%d 条原文依据（锚词与段号已逐条核对）" % (len(_scenes), len(_tq)))
+
 print("页面 %d 个 | 链接 %d 条 | CSS v%s" % (len(pages), checked, css_ver))
 print("注释：正文上标 %d、注释条目 %d、回链 %d" % (n_ref, n_item, n_back))
 print("导读：%d 篇、%d 个问题 | 概念引文 %d 条 | 语录 %d 条" % (

@@ -59,6 +59,12 @@
   if (window.__TOOL__) {
     var scenes = window.__TOOL__, tabs = document.getElementById('tabs'), stage = document.getElementById('scene'), ex = document.getElementById('explain');
     function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+    // 阶段文案里要挂脚注时，scene.fn 给注号，跳页末「注 1 / 注 2」
+    function fnRef(s) {
+      if (!s.fn) return '';
+      var n = esc(s.fn);
+      return ' <a class="fn-ref" href="#fn' + n + '" title="见注 ' + n + '">注 ' + n + '</a>';
+    }
     function render(i) {
       var s = scenes[i];
       // 按 group 分块：每块＝组名 + 该组按钮。之前把组名与按钮平铺在同一层，
@@ -78,25 +84,35 @@
       Array.prototype.forEach.call(tabs.querySelectorAll('button'), function(b){
         b.addEventListener('click', function(){ render(+b.getAttribute('data-i')); });
       });
-      var sec = s.secondary.map(function(x){
-        return '<div class="md-sec-card">' + esc(x) + '</div>';
-      }).join('');
       var sideChips = s.sides.map(function(x){
         var m = s.aspectMain && x === s.aspectMain;
         return '<span class="md-chip' + (m ? ' md-chip-main' : '') + '">' + esc(x) + (m ? '<em>矛盾主要方面</em>' : '') + '</span>';
       }).join('<span class="md-vs">对</span>');
+      // 原文举的例子单独成行，用原文的年份写法（「一八四○」），不换成通行纪年
+      var egs = (s.egs && s.egs.length)
+        ? '<div class="md-egs"><span class="lb">原文举的例子</span>' +
+          s.egs.map(function(x){ return '<span class="eg">' + esc(x) + '</span>'; }).join('') + '</div>'
+        : '';
+      // 原文没逐条列次要矛盾的那几格，就空着并说明；不拿史学叙述来填空
+      var secBox = s.secondary.length
+        ? '<div class="md-sec">' + s.secondary.map(function(x){
+            return '<div class="md-sec-card">' + esc(x) + '</div>';
+          }).join('') + '</div>' +
+          '<div class="md-sec-note">' + esc(s.secnote || '次要矛盾 · 被主要矛盾规定和影响，随阶段相互转化') + '</div>'
+        : '<div class="md-sec md-sec-empty"><div class="md-sec-hd">次要矛盾 · 原文未逐条列出</div>' +
+          '<div class="md-sec-tx">' + esc(s.secnote || '') + '</div></div>';
       stage.innerHTML =
         '<div class="md-phase">' + esc(s.phase) + '</div>' +
         '<div class="md-grid">' +
           '<div class="md-main">' +
-            '<div class="md-tag">主要矛盾 · 现阶段谁说话算数</div>' +
+            '<div class="md-tag">' + esc(s.tag || '主要矛盾 · 现阶段谁说话算数') + '</div>' +
             '<div class="md-title">' + esc(s.main) + '</div>' +
             '<div class="md-sides">矛盾双方　' + sideChips + '</div>' +
+            egs +
           '</div>' +
-          '<div class="md-sec">' + sec + '</div>' +
+          secBox +
         '</div>' +
-        '<div class="md-sec-note">次要矛盾 · 被主要矛盾规定和影响，随阶段相互转化</div>' +
-        '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + '</div>';
+        '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + fnRef(s) + '</div>';
       ex.innerHTML = '<b>读法</b>　' + esc(s.note);
       syncQuotes(s.key);
     }
@@ -113,7 +129,7 @@
         if (hit) n++;
       });
       var cap = document.getElementById('yuju-cap');
-      if (cap) cap.textContent = '当前这一阶段，给「' + scenes[
+      if (cap) cap.textContent = '当前这一格，给「' + scenes[
         (function(){ for (var j = 0; j < scenes.length; j++) { if (scenes[j].key === key) return j; } return 0; })()
       ].name + '」作证的原文有 ' + n + ' 段，已点亮；点段号回原文核对。';
     }
@@ -256,26 +272,4 @@
     paint();
   })();
 
-  // 纠错信箱：页面上只有「1035775998 艾特 qq.com」，真地址在点击时才拼出来，
-  // 一是别让爬虫直接收走，二是读者不用自己把艾特改回 @
-  document.addEventListener('click', function(e){
-    var b = e.target && e.target.closest ? e.target.closest('.mailcopy') : null;
-    if (!b) return;
-    var addr = b.getAttribute('data-u') + '@' + b.getAttribute('data-d');
-    var old = b.textContent;
-    function ok(){ b.classList.add('ok'); b.textContent = '已复制，去粘贴'; }
-    function back(){ b.classList.remove('ok'); b.textContent = old; }
-    function fallback(){
-      var ta = document.createElement('textarea');
-      ta.value = addr;
-      ta.style.position = 'fixed'; ta.style.top = '-1000px';
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); ok(); } catch (err) {}
-      document.body.removeChild(ta);
-      setTimeout(back, 1600);
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(addr).then(function(){ ok(); setTimeout(back, 1600); }, fallback);
-    } else { fallback(); }
-  });
 })();

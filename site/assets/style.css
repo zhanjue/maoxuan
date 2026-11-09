@@ -113,15 +113,30 @@ body {
 /* 6 个入口：定死 3 列，排成 3+3。用 auto-fit 会出现 4+1，右下留一块空。 */
 .entries { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 /* 四种读法：四张卡片排 2×2，比 3+1 的残行稳 */
-.entries.e4 { grid-template-columns: repeat(2, 1fr); }
+.entries.e4 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .entry {
-  display: block; padding: 20px 18px; background: #fff;
-  border: 1px solid var(--line); border-radius: 6px;
-  text-decoration: none; color: var(--ink); transition: border-color .15s, transform .15s;
+  position: relative; overflow: hidden;
+  display: block; padding: 42px 20px 20px 22px; background: #fff;
+  border: 1px solid var(--line); border-radius: 4px;
+  text-decoration: none; color: var(--ink); transition: border-color .15s, background-color .24s, transform .15s;
 }
-.entry:hover { border-color: var(--teal); transform: translateY(-1px); }
-.entry .t { font-family: var(--display); font-size: 17px; font-weight: 700; }
-.entry .d { font-size: 12.5px; color: var(--ink-3); margin-top: 6px; line-height: 1.6; }
+/* 左上角一枚墨色序号牌（01–04）：四张卡因此有了同一个"钉"，排成 2×2 时
+   编号在左上、箭头在右下，读者知道从哪进、往哪走 */
+.entry .no {
+  position: absolute; top: 0; left: 0;
+  width: 30px; height: 30px;
+  background: var(--ink); color: #fff;
+  font-family: var(--mono); font-size: 11.5px; font-weight: 700;
+  line-height: 30px; text-align: center; letter-spacing: .04em;
+  transition: background-color .26s;
+}
+/* 右下角一枚细箭头：卡片的"出口"，悬停时向右探出去 */
+.entry .go {
+  position: absolute; right: 18px; bottom: 14px;
+  font-size: 15px; line-height: 1; color: var(--line-2);
+}
+.entry .t { font-family: var(--display); font-size: 18px; font-weight: 700; padding-right: 30px; }
+.entry .d { font-size: 13px; color: var(--ink-3); margin-top: 6px; line-height: 1.6; padding-right: 40px; }
 .today { display: flex; gap: 20px; align-items: flex-start; background: var(--paper-2); border-radius: 6px; padding: 24px; }
 .today .k { font-size: 11px; color: var(--ink-3); letter-spacing: 0.2em; flex-shrink: 0; padding-top: 8px; }
 .today .t { font-family: var(--display); font-size: 22px; font-weight: 700; text-decoration: none; color: var(--ink); }
@@ -166,30 +181,11 @@ body {
 
 .footer { padding: 36px 0 48px; color: var(--ink-3); font-size: 12.5px; line-height: 1.9; }
 .footer .bd { border-top: 1px solid var(--line); padding-top: 24px; max-width: 1000px; }
-/* 纠错信箱：不把 @ 印在页面上，显示成「数字 艾特 域名」，点一下复制地址。
-   用 button 而不是 a：它不跳转，只做复制，语义上本来就不是链接 */
-.mailcopy {
-  font: inherit; font-family: var(--mono); font-size: .96em;
-  color: var(--teal); background: none; border: 0;
-  border-bottom: 1px dotted var(--teal);
-  padding: 0 1px; margin: 0; cursor: pointer; line-height: 1.6;
-  transition: background .18s, color .18s;
-}
-.mailcopy b { font-family: inherit; font-weight: 400; padding: 0 .18em; opacity: .72; }
-/* 光看一串数字读者不知道能点，补一句人话；不在正文里写，避免被复制进正文 */
-.mailcopy::after {
-  content: "（点一下复制）"; font-family: var(--ui, system-ui, -apple-system, "Microsoft YaHei", sans-serif);
-  font-size: 11.5px; opacity: .5; border-bottom: 0;
-}
-.mailcopy.ok::after { content: ""; }
-.mailcopy:hover { background: var(--teal-soft); border-bottom-style: solid; }
-.mailcopy.ok { color: #fff; background: var(--teal); border-bottom-color: transparent; }
 
 /* ---------- 篇目库 ---------- */
 .period-group { margin-bottom: 40px; }
 .period-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 1px solid var(--line-2); padding-bottom: 10px; margin-bottom: 4px; }
 .period-head .pn { font-family: var(--display); font-size: 20px; font-weight: 700; }
-.period-head .pr { font-size: 12px; color: var(--ink-3); }
 /* 概念图谱分组头：只用标题+节点数作分组标记，不加分割线——
    通栏细线与下方卡片自有边框形成一宽一窄两条平行线，视觉必乱 */
 .cat-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px; }
@@ -226,14 +222,28 @@ body {
 }
 .intro-box .lb { font-size: 11px; color: var(--teal); letter-spacing: 0.2em; display: block; margin-bottom: 4px; }
 .article { padding: 0 0 40px; }
-.para { position: relative; padding: 10px 56px 10px 0; }
+/* 正文按中文书版排：两端对齐 + 行距/字距各松一档。
+   不做首行缩进——原文里「农民问题的严重性」这类小标题和正文混在同一套 div 里，
+   靠「短、无标点」判标题会误伤《反对本本主义》里「工业无产阶级」「贫农」那种列举行，
+   判不准就干脆不缩进，用段间距分段落，标题照样靠 .para.sec 单独成行 */
+.para {
+  position: relative; padding: 10px 56px 10px 0;
+  text-align: justify; text-justify: inter-ideograph;
+  line-height: 2.05;
+  letter-spacing: 0.01em;
+  overflow-wrap: break-word;
+}
 .para .pno {
-  position: absolute; right: 0; top: 14px;
+  position: absolute; right: 0; top: 16px;
   font-family: var(--mono); font-size: 11px; color: #C8C5BB;
   text-decoration: none; padding: 2px 4px; border-radius: 3px;
 }
 .para .pno:hover { color: var(--teal); background: var(--teal-soft); }
-.para.sec { font-family: var(--display); font-weight: 700; font-size: 19px; padding-top: 34px; }
+/* 小标题（「一　…」「组织起来」这类）不缩进、不齐行、不加字距 */
+.para.sec {
+  font-family: var(--display); font-weight: 700; font-size: 19px; padding-top: 34px;
+  text-indent: 0; text-align: left; letter-spacing: 0; line-height: 1.7;
+}
 .para.sec .pno { top: 40px; }
 a.term { color: var(--teal); text-decoration: none; border-bottom: 1px solid rgba(15, 118, 110, 0.35); }
 a.term:hover { border-bottom-color: var(--teal); }
@@ -247,17 +257,19 @@ a.term:hover { border-bottom-color: var(--teal); }
 .notes-toggle summary::before { content: "▸ "; color: var(--ink-3); }
 .notes-toggle[open] summary::before { content: "▾ "; }
 .notes-body { padding: 16px 4px 0; }
-.note-item { font-size: 13px; color: var(--ink-2); line-height: 1.9; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.note-item { font-size: 13px; color: var(--ink-2); line-height: 1.9; padding: 6px 0; border-bottom: 1px dashed var(--line);
+  text-align: justify; text-justify: inter-ideograph; }
 .note-item:last-child { border-bottom: none; }
-/* 原版注释：正文里的〔N〕变成可点的上标，点开就地问，不跳页底 */
+/* 原版注释：〔N〕做印刷式上标——不铺底色、不加内边距，
+   底色块会把一行字撑出一段空白，两端对齐后那段空白更明显 */
 .nref { line-height: 0; }
 .nref a {
-  display: inline-block; font-family: var(--mono); font-size: 10px; line-height: 1;
-  padding: 2px 3px; margin: 0 1px; border-radius: 3px; text-decoration: none;
-  color: var(--teal); background: var(--teal-soft); border: 1px solid transparent;
-  cursor: pointer;
+  display: inline; vertical-align: super;
+  font-family: var(--mono); font-size: 10px; line-height: 0;
+  margin-left: 1px; padding: 0; text-decoration: none;
+  color: var(--teal); opacity: .72; cursor: pointer;
 }
-.nref a:hover { border-color: var(--teal); }
+.nref a:hover { opacity: 1; text-decoration: underline; }
 .note-pop {
   position: fixed; z-index: 90; max-height: 46vh; overflow: auto;
   background: #fff; border: 1px solid var(--line-2); border-radius: 8px;
@@ -318,7 +330,8 @@ a.term:hover { border-bottom-color: var(--teal); }
   margin: 18px 0; padding: 18px 20px; background: #fff;
   border: 1px solid var(--line); border-radius: 6px;
 }
-.quote .qt { font-family: var(--quote); font-size: 16px; line-height: 2.05; color: var(--ink); }
+.quote .qt { font-family: var(--quote); font-size: 16px; line-height: 2.05; color: var(--ink);
+  text-align: justify; text-justify: inter-ideograph; }
 .quote .qt mark { background: var(--teal-soft); color: var(--teal); padding: 0 2px; }
 .quote .qm { margin-top: 10px; font-size: 12px; color: var(--ink-3); display: flex; justify-content: space-between; gap: 12px; }
 .quote .qm a { color: var(--teal); text-decoration: none; }
@@ -354,7 +367,7 @@ a.term:hover { border-bottom-color: var(--teal); }
 .tool-legend { display: flex; flex-direction: column; gap: 9px; font-size: 13px; color: var(--ink-2); margin: 20px 0 22px; padding: 16px 20px; background: var(--paper-2); border-radius: 8px; }
 .tool-legend .k { display: flex; align-items: baseline; gap: 10px; line-height: 1.75; }
 .tool-legend .sw { width: 13px; height: 13px; border-radius: 3px; display: inline-block; flex-shrink: 0; position: relative; top: 1px; }
-.tool-legend b { color: var(--ink); font-weight: 700; }
+.tool-legend b { color: var(--ink); font-weight: 700; white-space: nowrap; }
 .tool-explain { font-size: 14px; color: var(--ink-2); background: var(--paper-2); border-radius: 6px; padding: 16px 18px; margin-top: 16px; line-height: 1.95; }
 .tool-explain b { color: var(--teal); }
 /* 怎么看这一页 */
@@ -386,8 +399,26 @@ a.term:hover { border-bottom-color: var(--teal); }
 .md-sec { flex: 1 1 320px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
 .md-sec-card { padding: 12px 16px; background: #F4F3EF; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; color: var(--ink-2); }
 .md-sec-note { font-size: 12px; color: var(--ink-3); margin-top: 14px; }
+/* 原文没逐条列次要矛盾的那几格：空着并说明，不用史料叙述填空。
+   描边虚线表示「这里本来就是空的」，不是漏画 */
+.md-sec.md-sec-empty { display: block; flex: 1 1 320px; padding: 14px 18px; background: #FBFAF6; border: 1px dashed var(--line-2); border-radius: 6px; }
+.md-sec-hd { font-size: 11px; color: var(--ink-3); letter-spacing: 0.14em; margin-bottom: 7px; }
+.md-sec-tx { font-size: 12.5px; color: var(--ink-3); line-height: 1.95; }
+/* 原文举的例子：用原文自己的年份写法，独立一行，不混进正文 */
+.md-egs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 16px; font-size: 11.5px; color: var(--ink-3); }
+.md-egs .lb { letter-spacing: 0.06em; margin-right: 2px; }
+.md-egs .eg { background: #fff; border: 1px solid #CFE3DF; border-radius: 3px; padding: 2px 8px; font-size: 12px; color: var(--ink-2); }
+.tool-hint { font-size: 12.5px; color: var(--ink-3); line-height: 1.9; margin: 0 0 18px; }
 .tool-change { font-size: 13.5px; color: var(--ink-2); line-height: 1.9; margin-top: 14px; padding: 12px 16px; background: #fff; border: 1px dashed var(--line-2); border-radius: 6px; }
 .tool-change b { color: var(--teal); margin-right: 10px; }
+/* 脚注：1931 与 1937 这类口径问题不塞进正文，压到块末，正文里只留一个「注 1」的角标 */
+.fn-ref { font-size: 10.5px; color: var(--teal); text-decoration: none; vertical-align: super;
+  border-bottom: 1px dotted var(--teal); margin-left: 2px; }
+.tool-fn { margin-top: 24px; padding: 16px 20px; background: var(--paper-2); border-radius: 6px;
+  font-size: 12px; color: var(--ink-3); line-height: 2; }
+.tool-fn p { margin: 0 0 12px; }
+.tool-fn p:last-child { margin-bottom: 0; }
+.tool-fn b { color: var(--ink-2); margin-right: 4px; }
 
 /* ---------- 检索页 ---------- */
 .search-input {
@@ -457,7 +488,10 @@ a.term:hover { border-bottom-color: var(--teal); }
    它本来是独立一页，并入概念页后只能是一件附录：不另起 h1、不再占一个导航项，
    靠一条粗线 + 「附录」二字与上半页分开。类名统一 nb- 前缀——
    .ev 已被概念演变时间线占用（.evo-item 等），复用会串味 */
-.nb { margin-top: 66px; padding-top: 40px; border-top: 1px solid var(--line-2); }
+.nb { margin-top: 44px; padding-top: 40px; border-top: 1px solid var(--line-2); }
+/* 附录顶端已经有一条线，紧挨着的上一节就不要再画底边——中间隔着 66px 空白，
+   两条平行线看着像画错了 */
+.section.sec-end { border-bottom: none; }
 .nb-kind { font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.3em; }
 .nb h2 { font-family: var(--display); font-size: 27px; font-weight: 700; margin-top: 10px; }
 .nb-lede { font-size: 13.5px; color: var(--ink-2); max-width: 660px; margin-top: 14px; line-height: 2.05; }
@@ -477,7 +511,16 @@ a.term:hover { border-bottom-color: var(--teal); }
 .nb-pp-tx.open { display: block; -webkit-line-clamp: unset; }
 .nb-pp-ft { font-size: 11.5px; color: var(--ink-3); margin-top: 6px; }
 .nb-pp-ft a, .nb-ev a, .nb-tm a { color: var(--teal); text-decoration: none; }
-.nb-pp[data-multi] .nb-pp-nm::after { content: " ×" attr(data-multi); font-size: 10.5px; color: var(--teal); font-family: var(--text); }
+/* 这条小传在几处注释里都出现 → 一枚小标签「2 处」。
+   原来写的是「×2」，像删除按钮或乘号，读不出意思；而且原来是 CSS ::after
+   取 attr(data-multi)，属性挂在父节点上取不到值，页面上只剩一个孤零零的叉 */
+.nb-pp-cnt {
+  display: inline-block;
+  font-family: var(--text); font-size: 10px; font-weight: 500;
+  letter-spacing: .02em; color: var(--teal);
+  background: var(--teal-soft); padding: 1px 5px 1.5px; border-radius: 999px;
+  white-space: nowrap;
+}
 .nb-ev { border-left: 2px solid var(--line-2); padding-left: 18px; }
 .nb-ev details { padding: 5px 0; }
 .nb-ev summary { cursor: pointer; font-size: 13px; color: var(--ink-2); list-style: none; }
@@ -636,14 +679,24 @@ a.term:hover { border-bottom-color: var(--teal); }
     box-shadow: 0 12px 22px -12px rgba(26, 26, 26, .45);
   }
 
-  /* 入口卡 / 概念卡：上浮 + 一层浅投影，标题跟着变绿 */
-  .entry, .cc { transition: border-color .24s, transform .3s cubic-bezier(.22, .68, .3, 1), box-shadow .3s; }
+  /* 入口卡 / 概念卡：上浮 + 一层浅投影，标题跟着变绿。
+     入口卡是纸色底，悬停时转白——像被抽出来的一张纸 */
+  .entry, .cc { transition: border-color .24s, transform .3s cubic-bezier(.22, .68, .3, 1), box-shadow .3s, background-color .24s; }
   .entry:hover, .cc:hover {
     border-color: var(--teal); transform: translateY(-4px);
     box-shadow: 0 12px 26px -16px rgba(26, 26, 26, .34);
   }
+  /* 悬停底色不动：白卡转灰在这套暖纸底上会显脏，靠边框+投影+上浮就够 */
+  .entry:hover { background: #fff; }
   .entry .t, .cc .nm { transition: color .24s; }
   .entry:hover .t, .cc:hover .nm { color: var(--teal); }
+  /* 顶部那截线向右长成整条，同时变 teal：卡片被"划开"的那一下 */
+  .entry::before { transition: transform .42s cubic-bezier(.22, .68, .3, 1), background-color .3s; }
+  .entry:hover::before { transform: scaleX(1); background: var(--teal); }
+  /* 序号牌：悬停时整块转 teal */
+  .entry:hover .no { background: var(--teal); }
+  .entry .go { transition: color .24s, transform .34s cubic-bezier(.22, .68, .3, 1); }
+  .entry:hover .go { color: var(--teal); transform: translateX(4px); }
 
   /* 篇目行：整行淡底 + 左边一根竖条。不做平移，行会跟手抖 */
   .work-row { transition: background .18s, box-shadow .18s; }

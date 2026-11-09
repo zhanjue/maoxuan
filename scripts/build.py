@@ -25,17 +25,10 @@ NW = len(WORKS)
 # 阅读时长估算：370 字/分钟。这个数不是拍的——金字塔路线四站
 # （3780/10、6288/18、9267/25、22937/60）反推是 349~382 字/分，取中位 370。
 WPM = 370
-# 纠错信箱：页面上不直写完整地址（省得被爬虫收走），显示成「1035775998 艾特 qq.com」，
-# 点一下复制到剪贴板。@ 由 app.js 在点击时拼回去，HTML 里没有连续可读的地址。
-MAIL_USER = "1035775998"
-MAIL_DOMAIN = "qq.com"
-MAIL = MAIL_USER + "@" + MAIL_DOMAIN
-
-
-def mail_html():
-    return ('<button type="button" class="mailcopy" data-u="%s" data-d="%s" '
-            'title="点击复制邮箱地址">%s<b>艾特</b>%s</button>') % (
-        MAIL_USER, MAIL_DOMAIN, MAIL_USER, MAIL_DOMAIN)
+# 纠错联络：就写「1035775998 at qq.com」——纯文本，不做 mailto、不做复制按钮。
+# 用户 2026-11-08 两次明确：既不要可点的超链接（等于把地址白送爬虫），
+# 也不要 GitHub issue 那种绕路；读者能看见、能自己抄下来就行。
+CONTACT = "1035775998 at qq.com"
 
 def read_minutes(chars):
     """字数 → 分钟（向上取到整数分钟，最少 1 分钟）。"""
@@ -229,7 +222,7 @@ def page(title, body, depth, active=""):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>%s · 知行录</title>
 <meta name="description" content="%s">
-<link rel="stylesheet" href="%sassets/style.css?v=63">
+<link rel="stylesheet" href="%sassets/style.css?v=91">
 </head>
 <body>
 <header class="topbar"><div class="topbar-in">
@@ -241,11 +234,11 @@ def page(title, body, depth, active=""):
 <footer class="footer"><div class="wrap"><div class="bd">
 <p><b>知行录</b>——文献检索与阅读工具。正文与引文依据%s，电子文本核自求是网（qstheory.cn），逐字收录、未作改写；概念释义、导语、导读问题与页内说明文字为本站整理，不属原版文字。</p>
 <p>不作历史评价与政治表达。文中「段号」为本库段落编号，非纸质版页码；引文可点出处核对原文。</p>
-<p>概念释义、导读问题、金字塔答句等整理文字若与原文不合，欢迎来信指正：%s。</p>
+<p>概念释义、导读问题、金字塔答句等整理文字若与原文不合，欢迎指正：%s。</p>
 </div></div></footer>
 <script src="%sassets/app.js"></script>
 </body>
-</html>""" % (title, DESC, p, p, "".join(nav), p, body, SRC, mail_html(), p)
+</html>""" % (title, DESC, p, p, "".join(nav), p, body, SRC, CONTACT, p)
 
 def write(path, content):
     full = os.path.join(SITE, path)
@@ -276,10 +269,10 @@ def build_index():
 <h2>从这里进</h2>
 <p class="desc">四种读法：按结构看金字塔，按年代看时期轴，按关键词看概念图谱，回原文核对看语录。</p>
 <div class="entries e4">
-<a class="entry" href="pyramid.html"><div class="t">金字塔</div><div class="d">全卷其实只答一个问题，答案底下三根支柱。先看清骨架，再进原文，细节不会散</div></a>
-<a class="entry" href="works.html"><div class="t">时期轴</div><div class="d">十八篇按写作时间排开，分两个时期，每篇标了字数和读完要多长；页末看主要矛盾怎么换人</div></a>
-<a class="entry" href="concepts.html"><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个关键词都有出处和演变</div></a>
-<a class="entry" href="quotes.html"><div class="t">经典语录</div><div class="d">%d 句原文，一字未改；读着对不上原文，就点回去核对上下文</div></a>
+<a class="entry" href="pyramid.html"><span class="no">01</span><span class="go" aria-hidden="true">→</span><div class="t">金字塔</div><div class="d">全卷其实只答一个问题，答案底下三根支柱。先看清骨架，再进原文，细节不会散</div></a>
+<a class="entry" href="works.html"><span class="no">02</span><span class="go" aria-hidden="true">→</span><div class="t">时期轴</div><div class="d">十八篇按写作时间排开，分两个时期，每篇标了字数和读完要多长；页末看主要矛盾在各阶段的样子</div></a>
+<a class="entry" href="concepts.html"><span class="no">03</span><span class="go" aria-hidden="true">→</span><div class="t">概念图谱</div><div class="d">实践 · 矛盾 · 调查研究 · 工农武装割据……每个关键词都有出处和演变</div></a>
+<a class="entry" href="quotes.html"><span class="no">04</span><span class="go" aria-hidden="true">→</span><div class="t">经典语录</div><div class="d">%d 句原文，一字未改；读着对不上原文，就点回去核对上下文</div></a>
 </div>
 </section>
 
@@ -302,7 +295,7 @@ def build_index():
     body += '<script>window.__TODAY__=%s;</script>' % json.dumps(brief, ensure_ascii=False)
     write("index.html", page("首页", body, 0, "index"))
 
-# ---------- 2. 时期轴（篇目清单 + 页末主要矛盾换人） ----------
+# ---------- 2. 时期轴（篇目清单 + 页末各阶段的主要矛盾） ----------
 def dk_disp(dk):
     """1925-12-01 -> 1925.12.01；只到月份的写成 1925.12"""
     return (dk or "—").replace("-", ".")
@@ -318,13 +311,12 @@ def build_works():
         for w in ws:
             rows.append("""<a class="work-row" href="works/%s.html"><span class="no">%03d</span><span class="tt">%s</span><span class="dt">%s</span><span class="ct">%s 字 · 约 %s</span></a>""" % (
                 w["id"], w["order"], esc(w["title"]), esc(date_disp(w)), "{:,}".format(w["charCount"]), read_time(w["charCount"])))
-        # 时期头不只写区间和篇数：带上两段的合计字数与读完时长，两段的轻重才看得出
-        chars = sum(w["charCount"] for w in ws)
-        span = "%s — %s" % (dk_disp(ws[0]["dateKey"]), dk_disp(ws[-1]["dateKey"]))
-        groups.append("""<div class="period-group"><div class="period-head"><span class="pn">%s</span><span class="pr">%s · %d 篇 · %s 字 · 读完约 %s</span></div>%s</div>""" % (
-            esc(period), span, len(ws), "{:,}".format(chars), read_time(chars), "".join(rows)))
+        # 时期头只留时期名。原先后面挂「始—末 · N 篇 · N 字 · 读完约 N」一串，
+        # 与每行右端的字数、时长重复，且灰字挤在标题旁读着累，去掉
+        groups.append("""<div class="period-group"><div class="period-head"><span class="pn">%s</span></div>%s</div>""" % (
+            esc(period), "".join(rows)))
     body = """<div class="wrap" style="padding-top:40px">
-<h1 style="font-family:var(--display);font-size:30px;font-weight:700">时期轴 · 第一卷全量</h1>
+<h1 style="font-family:var(--display);font-size:30px;font-weight:700">时期轴</h1>
 <p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px;line-height:1.9">%d 篇按写作时间排，分两个时期——从 1925 年《中国社会各阶级的分析》到 1937 年《矛盾论》。点篇名进阅读页：正文段落全部编号，段号即锚点。</p>
 %s
 %s</div>""" % (NW, "".join(groups), tool_section())
@@ -512,13 +504,13 @@ def note_book():
     # --- 谁是谁 ---
     ppl = []
     for name, p in sorted(people.items(), key=lambda kv: (-len(kv[1]["items"]), kv[1]["born"])):
-        multi = ' data-multi="%d"' % len(p["items"]) if len(p["items"]) > 1 else ""
+        multi = '<span class="nb-pp-cnt">%d 处</span>' % len(p["items"]) if len(p["items"]) > 1 else ""
         srcs = "、".join("《%s》<a href=\"works/%s.html#p%d\">p%d</a>" % (esc(w["title"]), w["id"], para, para)
                         for w, para in p["items"] if para) or "正文中未找到对应标记"
-        ppl.append("""<div class="nb-pp"%s>
-<div class="nb-pp-hd"><span class="nb-pp-nm">%s</span><span class="nb-pp-yr">%d—%d</span></div>
+        ppl.append("""<div class="nb-pp">
+<div class="nb-pp-hd"><span class="nb-pp-nm">%s</span>%s<span class="nb-pp-yr">%d—%d</span></div>
 <div class="nb-pp-tx" onclick="this.classList.toggle('open')">%s</div>
-<div class="nb-pp-ft">%s</div></div>""" % (multi, esc(name), p["born"], p["died"], esc(p["tail"]), srcs))
+<div class="nb-pp-ft">%s</div></div>""" % (esc(name), multi, p["born"], p["died"], esc(p["tail"]), srcs))
 
     # --- 年份分布（内联 SVG，颜色走 CSS 变量，不烤死色值） ---
     bars = [(y, c) for y, c in sorted(yearh.items()) if 1921 <= y <= 1939 and c >= 2]
@@ -638,8 +630,8 @@ def build_concepts_index():
         blocks.append("""<div style="margin-bottom:34px"><div class="cat-head"><span class="pn">%s</span><span class="pr">%d 个节点</span></div><div class="concept-grid">%s</div></div>""" % (esc(cat), len(cs), items))
     body = """<div class="wrap" style="padding-top:40px">
 <h1 style="font-family:var(--display);font-size:30px;font-weight:700">概念图谱</h1>
-<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">%d 个概念节点，按 %d 个领域归类。每个节点 = 一句话定义 + 核心要义 + 原话精选（逐字引文，精确到段）+ 演变时间线 + 自问自答。<a href="#notes" style="color:var(--teal);text-decoration:none;margin-left:6px">↓ 页末另有「注释里的另一本书」</a></p>
-%s<div class="section" style="border-top:1px solid var(--line);margin-top:10px">
+<p style="font-size:13.5px;color:var(--ink-3);margin:10px 0 28px">%d 个概念节点，按 %d 个领域归类。点进去是一个概念的单独一页：一句话定义，几条核心要义，逐字原话（精确到段，可点回原文核对），演变时间线，最后是几个常见疑问的解答。<a href="#notes" style="color:var(--teal);text-decoration:none;margin-left:6px">↓ 页末另有「注释里的另一本书」</a></p>
+%s<div class="section sec-end" style="border-top:1px solid var(--line);margin-top:10px">
 <h2>概念演变链</h2>
 <p class="desc">同一个概念在不同篇里的提法变化，按写作时间串成一条线。点概念名进那一页看逐条说明。</p>
 <div class="evo">%s</div>
@@ -669,13 +661,13 @@ def build_concept(c):
 <div class="concept-head">
 <div class="cat">%s</div>
 <h1>%s</h1>
-<div class="oneliner">%s</div>
+<div class="oneliner">%s<span class="guide-src">本站整理</span></div>
 </div>
 <div class="section"><h2>核心要义<span class="guide-src">本站概括</span></h2><ul class="essence">%s</ul></div>
 <div class="section"><h2>原话精选</h2><p class="desc">逐字引文，点击出处跳到原文段落核对。</p>%s</div>
 <div class="section"><h2>思想演变</h2><div class="evo">%s</div></div>
 <div class="section"><h2>关联篇目</h2><div class="related-concepts">%s</div></div>
-<div class="section"><h2>问与答<span class="guide-src">本站整理</span></h2><div class="qa">%s</div></div>
+<div class="section"><h2>常见疑问<span class="guide-src">本站整理</span></h2><div class="qa">%s</div></div>
 </div>""" % (esc(c["category"]), esc(c["name"]), esc(c["oneliner"]), essence, "".join(quotes), "".join(evo), "".join(related), qa)
     write("concepts/%s.html" % c["id"], page(c["name"], body, 1, "concepts"))
 
@@ -685,7 +677,7 @@ def build_redirects():
     现在内容合进 works.html，这两个地址只留跳转，别让老链接 404。"""
     pages = [
         ("timeline.html", "时期轴", "旧地址：时期轴已移到", "时期轴", "works.html", ""),
-        ("tool-maodun.html", "主要矛盾换人", "主要矛盾换人已并入", "时期轴页末", "works.html", "#maodun"),
+        ("tool-maodun.html", "各阶段的主要矛盾", "这一节已并入", "时期轴", "works.html", "#maodun"),
     ]
     for fn, title, label, dest, url, anchor in pages:
         write(fn, """<!DOCTYPE html>
@@ -703,43 +695,55 @@ def build_redirects():
 </html>
 """ % (title, url, anchor, url, anchor, label, url, anchor, dest))
 
-# ---------- 7. 主要矛盾换人（时期轴页末，旧地址留跳转） ----------
-def md_para(n):
-    """《矛盾论》第 n 段原文（1 起算，与阅读页 #pn 锚点同一套编号）。"""
-    ps = [p if isinstance(p, str) else p.get("text", "") for p in WORK_BY_TITLE["矛盾论"]["paragraphs"]]
+# ---------- 7. 各阶段的主要矛盾（时期轴页末，旧地址留跳转） ----------
+# 这一块的规矩（2026-11-09 用户定，别改回去）：只写原文说过的话。
+# 原文没下的判断——哪一年算转折、哪一次事变之后主要矛盾变了——不进卡片，
+# 只进块末的注；注里要写清「现在通行的说法是什么、出处是哪本书」。
+# 宁可少写一格，也不替原文下判断。卡片名也照原文的说法起，不套党史分期。
+def para_of(title, n):
+    """某篇第 n 段原文（1 起算，与阅读页 #pn 锚点同一套编号）。"""
+    ps = [p if isinstance(p, str) else p.get("text", "") for p in WORK_BY_TITLE[title]["paragraphs"]]
     return ps[n - 1]
 
 
 def tool_section():
-    """主要矛盾怎么随阶段换人。讲完就落到原文：下面几段能按阶段点亮，指示「这段在给谁作证」。"""
-    md = WORK_BY_TITLE["矛盾论"]["id"]
+    """同一批矛盾在不同阶段，主要的那一对会变。每一格都落到原文：下面几段能按格点亮。"""
     quotes = []
     for q in TOOL_QUOTES:
-        quotes.append("""<a class="quote yj-q" data-for="%s" href="works/%s.html#p%d"><div class="qt">%s</div><div class="qm"><span>矛盾论 · 第 %d 段 ↗</span><span>%s</span></div></a>""" % (
-            ",".join(q["for"]), md, q["para"], quote_snippet(md_para(q["para"]), q["kw"], 52), q["para"], esc(q["note"])))
-    nums = sorted(q["para"] for q in TOOL_QUOTES)
+        title = q.get("work", "矛盾论")
+        wid = WORK_BY_TITLE[title]["id"]
+        quotes.append("""<a class="quote yj-q" data-for="%s" href="works/%s.html#p%d"><div class="qt">%s</div><div class="qm"><span>《%s》第 %d 段 ↗</span><span>%s</span></div></a>""" % (
+            ",".join(q["for"]), wid, q["para"], quote_snippet(para_of(title, q["para"]), q["kw"], 52),
+            esc(title), q["para"], esc(q["note"])))
     html = """<div class="section" id="maodun" style="border-top:1px solid var(--line);margin-top:44px;padding-top:30px">
-<h2>主要矛盾换人</h2>
-<p class="desc">上面按年份排，这里按阶段排——每个阶段拉扯的两方不一样，主要矛盾会换人。</p>
-<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">「矛盾」在这里的意思是：一个事物内部互相拉扯、又互相依赖的两方——它们你进我退，推动整个事物变化。一个社会里同时存在好几对这样的矛盾，<b>其中必有一种是主要的</b>：捉住了它，其余问题就有了头绪。</p>
+<h2>各阶段的主要矛盾</h2>
+<p class="desc">上面按年份排，这里按原文排：每个阶段里互相拉扯的两方不一样，主要的那一对也会变。</p>
+<p style="font-size:13.5px;color:var(--ink-2);margin:12px 0 4px;line-height:1.9">「矛盾」在这里的意思是：一个事物内部互相拉扯、又互相依赖的两方——它们你进我退，推动整个事物变化。一个社会里同时存在好几对这样的矛盾，<b>其中必有一种是主要的</b>：捉住了它，其余问题就有了头绪（《矛盾论》第 58、65 段）。</p>
+<p style="font-size:13.5px;color:var(--ink-2);margin:8px 0 4px;line-height:1.9">下面五格全部按《矛盾论》第四节的原话组织：一格是贯穿全程的<b>根本矛盾</b>（第 45 段），三格是原文给半殖民地中国列出的三种情形（第 61—63 段），最后一格是原文拿来做对照的资本主义社会（第 59 段）。<b>原文没写的年份和事变，本站一律不补</b>——那些放在块末的注里，注里写明通行说法与出处。</p>
 <div class="tool-legend">
 <span class="k"><span class="sw" style="background:#0F766E"></span><b>主要矛盾</b>　它规定这一阶段整个过程的性质，谁说话算数看它</span>
-<span class="k"><span class="sw" style="background:#C8C5BB"></span><b>次要矛盾</b>　被主要矛盾规定，暂时让位</span>
+<span class="k"><span class="sw" style="background:#C8C5BB"></span><b>次要矛盾</b>　被主要矛盾规定，暂时让位（让位不等于消失）</span>
 <span class="k"><span class="sw" style="background:#fff;border:1px solid #0F766E"></span><b>矛盾主要方面</b>　一对矛盾内部占上风的那一方</span>
 </div>
+<p class="tool-hint">卡片名用的是原文的说法，不是党史分期。切换看每一格：原文点了哪些例子，哪些矛盾被让到次要。</p>
 <div class="tool-stage">
 <div class="tool-tabs" id="tabs"></div>
 <div id="scene"></div>
 </div>
 <div class="tool-explain" id="explain"></div>
-<div class="tool-quote">《矛盾论》第四节：「任何过程如果有多数矛盾存在的话，其中必定有一种是主要的，起着领导的、决定的作用，其他则处于次要和服从的地位。」<a href="works/@MD@.html#p65" style="color:var(--teal);text-decoration:none">第 65 段 ↗</a>　三个场景，换一次阶段，主要矛盾就换一组人。</div>
+<div class="tool-quote">《矛盾论》第四节：「任何过程如果有多数矛盾存在的话，其中必定有一种是主要的，起着领导的、决定的作用，其他则处于次要和服从的地位。」<a href="works/@MD@.html#p65" style="color:var(--teal);text-decoration:none">第 65 段 ↗</a>　五格都有原文，段号可点。</div>
+<div class="tool-fn">
+<p id="fn1"><b>注 1　这一块为什么不按「大革命 / 土地革命 / 抗战」分期。</b>因为那是党史著作的分期，不是《矛盾论》原文的分法。本卷原文自己列过这二十多年的大事变——「辛亥革命失败和北洋军阀统治，第一次民族统一战线的建立和一九二四年至一九二七年的革命，统一战线破裂和资产阶级转入反革命，新的军阀战争，土地革命战争，第二次民族统一战线建立和抗日战争等等大事变」（第 45 段）；《毛泽东选集》第一卷也据此把篇目分成「第一次国内革命战争时期」「第二次国内革命战争时期」（见「时期轴」）。通行党史著作分得更细：大革命（国民革命）1924—1927、土地革命战争 1927—1937、全民族抗日战争 1937—1945，见中共中央党史研究室《中国共产党历史》第一卷（中共党史出版社，2011）、《中国共产党简史》（人民出版社，2021）。本站不把两套分期混用：卡片照原文，年份差异只在这里交代。</p>
+<p id="fn2"><b>注 2　1931、1935、1937 是三个不同的年份，原文只说了其中一个。</b>第 61 段把「目前的中日战争」（1937 年全面抗战）当作民族战争成主要矛盾的例子，全段没有提 1931 年九一八，也没有提 1935 年。通行党史的表述是：九一八事变（1931）后中日民族矛盾急剧上升，1935 年华北事变后中日民族矛盾成为主要矛盾（见《中国共产党历史》第一卷、《中国共产党简史》）。<b>后一句在本卷原文里没有直接对应</b>；本卷能引的只有两处较近的话——1935 年 12 月《论反对日本帝国主义的策略》「在日本帝国主义打进中国本部来了这一个基本的变化上面，变化了中国各阶级之间的相互关系」；1937 年 5 月《中国共产党在抗日时期的任务》第 2 段「由于中日矛盾成为主要的矛盾、国内矛盾降到次要和服从的地位」。所以本站既不写「1931 年民族矛盾成为主要矛盾」，也不把 1935 年当成原文的判断。</p>
+<p id="fn3"><b>注 3　「帝国主义和封建阶级的同盟」是原文，教科书写作「北洋军阀」。</b>第 62 段的原话是「去反对帝国主义和封建阶级的同盟」；通行教科书讲大革命时期，写作「中国人民同帝国主义支持的北洋军阀的矛盾」。差别只在称呼——北洋军阀是封建阶级当时的具体代表。本站从原文，因为原文正是用「同盟」把「一九二四年至一九二七年的革命战争」和「一九二七年以后的十年土地革命战争」放进同一格：变的只是代表，同盟没变。</p>
+</div>
 <div class="yj" id="yuju-wrap">
 <h2>原文依据</h2>
-<p class="desc" id="yuju-cap">切换上面的阶段，下面标亮的几段就是那一段的原文；点段号回原文核对。全部出自《矛盾论》第 %s 段。</p>
+<p class="desc" id="yuju-cap">切换上面的格子，下面标亮的几段就是那一格的原文；点段号回原文核对。</p>
 <div id="yuju">%s</div>
 </div>
-</div>""" % ("—".join(str(n) for n in (nums[0], nums[-1])) if len(nums) > 2 else "、".join(str(n) for n in nums), "".join(quotes))
-    html = html.replace("@MD@", md)
+</div>""" % "".join(quotes)
+    html = html.replace("@MD@", WORK_BY_TITLE["矛盾论"]["id"])
     return html + '<script>window.__TOOL__=%s;</script>' % json.dumps(TOOL_SCENES, ensure_ascii=False)
 
 
@@ -748,35 +752,79 @@ def build_tool():
     pass
 
 
+# 五格＝《矛盾论》第四节原文的五处：第 45 段（根本矛盾，贯穿全程）、第 61 段（侵略战争）、
+# 第 62 段（温和形式压迫＋统治阶级投降结盟）、第 63 段（阵线公开分成两极）、第 59 段（资本主义原例）。
+# 每一格的 main / secondary / egs 都能在该段原文里找到对应词句；找不到的就不写，
+# 宁可让「次要矛盾」空着，用 secnote 说明原文没列——不拿通行的史学叙述来填空。
 TOOL_SCENES = [
-    {"key": "a", "name": "阶段一 · 半殖民地的中国", "group": "中国：主要矛盾的转化",
-     "phase": "阶段一",
-     "main": "帝国主义和中华民族的矛盾", "sides": ["帝国主义", "中华民族"], "aspectMain": "",
-     "secondary": ["封建主义和人民大众的矛盾", "工人阶级和资产阶级的矛盾", "农民阶级和地主阶级的矛盾"],
-     "change": "起点：中国同时有好几对矛盾在拉扯。先看清这一堆里都有谁。",
-     "note": "两大根本矛盾并存，民族矛盾居于主导——统一战线策略的总依据。"},
-    {"key": "b", "name": "阶段二 · 抗日战争爆发", "group": "中国：主要矛盾的转化",
-     "phase": "阶段二",
-     "main": "日本帝国主义和中华民族的矛盾", "sides": ["日本帝国主义", "中华民族"], "aspectMain": "",
-     "secondary": ["国内阶级矛盾降为次要矛盾", "封建主义和人民大众的矛盾", "反动势力内部的矛盾"],
-     "change": "九一八之后：主要矛盾没有消失，但更尖锐——侵略者具体化为日本帝国主义；国内阶级矛盾降到次要和服从的地位，右边灰框的阵容跟着换。",
-     "note": "当着日本帝国主义发动侵略，民族矛盾上升为主要矛盾，国内阶级矛盾降为次要和服从的地位——这正是《论反对日本帝国主义的策略》的形势判断。"},
-    {"key": "c", "name": "对照例 · 资本主义社会", "group": "《矛盾论》原例（对照，不是中国的阶段）",
-     "phase": "阶段对照",
-     "main": "无产阶级和资产阶级的矛盾", "sides": ["资产阶级", "无产阶级"], "aspectMain": "资产阶级",
-     "secondary": ["独占资本和自由资本的矛盾（帝国主义阶段新发生）", "宗主国和殖民地的矛盾", "生产社会化和占有私人性的矛盾"],
-     "change": "换一套参照系：资本主义社会里，主要矛盾是无产阶级和资产阶级的矛盾——资产阶级占矛盾主要方面，所以社会性质是资本主义的。",
-     "note": "根本矛盾（性质）未变，但在不同阶段采取了逐渐激化的形式，并激化/发生新的大小矛盾——过程显出阶段性。"},
+    {"key": "a", "name": "根本矛盾 · 贯穿全程", "group": "中国 · 根本矛盾与三种情形",
+     "phase": "《矛盾论》第 45 段",
+     "tag": "根本矛盾 · 性质不变的那一层",
+     "main": "反帝反封建的民主革命　对　半殖民地半封建的旧中国",
+     "sides": ["反帝反封建的民主革命", "半殖民地半封建的旧中国"], "aspectMain": "",
+     "secondary": [],
+     "secnote": "原文：「整个过程中根本矛盾的性质，过程之反帝反封建的民主革命的性质（其反面是半殖民地半封建的性质），并没有变化」——它不随阶段换人，换的是下面三种情形。",
+     "change": "二十多年里经过的大事变，原文自己数了一遍：辛亥革命失败和北洋军阀统治、第一次民族统一战线的建立和一九二四年至一九二七年的革命、统一战线破裂和资产阶级转入反革命、新的军阀战争、土地革命战争、第二次民族统一战线建立和抗日战争。阶段一直在换，这一层的性质没换。",
+     "egs": [],
+     "note": "这一格是底线：下面三格讲的「主要矛盾」都是阶段性的；反帝反封建这个性质从头到尾没变（第 45 段）。原文还点了这些阶段里矛盾怎么变：有的激化了（土地革命战争、日本侵入东北四省），有的部分或暂时解决了（北洋军阀被消灭、没收地主土地），有的又重新发生（新军阀之间的斗争）。",
+     "fn": "1"},
+    {"key": "b", "name": "情形一 · 侵略战争", "group": "中国 · 根本矛盾与三种情形",
+     "phase": "《矛盾论》第 61 段",
+     "main": "帝国主义　对　中国",
+     "sides": ["帝国主义", "中国（内部各阶级暂时团结）"], "aspectMain": "",
+     "secondary": ["这种国家内部各阶级的一切矛盾", "包括封建制度和人民大众之间那个主要矛盾"],
+     "secnote": "原文：这些矛盾「便都暂时地降到次要和服从的地位」——不是消失了，是让位。",
+     "change": "原文的写法：当着帝国主义举行侵略战争的时候，这种国家的内部各阶级，除开一些叛国分子以外，能够暂时地团结起来举行民族战争去反对帝国主义。",
+     "egs": ["鸦片战争（一八四○）", "中日战争（一八九四）", "义和团战争（一九○○）", "目前的中日战争（一九三七）"],
+     "note": "第 61 段。本卷另有一处说得更直接：《中国共产党在抗日时期的任务》第 2 段「由于中日矛盾成为主要的矛盾、国内矛盾降到次要和服从的地位」；第 9 段还补了一句，国内阶级间的矛盾「本身依然存在着，并没有减少或消灭」。",
+     "fn": "2"},
+    {"key": "c", "name": "情形二 · 温和压迫", "group": "中国 · 根本矛盾与三种情形",
+     "phase": "《矛盾论》第 62 段",
+     "main": "人民大众　对　帝国主义和封建阶级的同盟",
+     "sides": ["帝国主义和封建阶级的同盟", "人民大众"], "aspectMain": "",
+     "secondary": [],
+     "secnote": "原文没有逐条列这种情形下的次要矛盾，只说帝国主义「往往采取间接的方式去援助半殖民地国家的反动派压迫人民，而不采取直接行动，显出了内部矛盾的特别尖锐性」。",
+     "change": "帝国主义不用战争，改用政治、经济、文化等比较温和的形式压迫；半殖民地国家的统治阶级向它投降，二者结成同盟，共同压迫人民大众。这时候，人民大众往往采取国内战争的形式，去反对这个同盟。",
+     "egs": ["辛亥革命战争", "一九二四年至一九二七年的革命战争", "一九二七年以后的十年土地革命战争", "军阀战争（原文归入这一类）"],
+     "note": "第 62 段。注意原文点的是「十年土地革命战争」，从一九二七年算起，中间不再切刀——本卷的《中国社会各阶级的分析》《湖南农民运动考察报告》落在前一段，《中国的红色政权为什么能够存在？》以后各篇落在后一段。",
+     "fn": "3"},
+    {"key": "d", "name": "情形三 · 阵线分裂", "group": "中国 · 根本矛盾与三种情形",
+     "phase": "《矛盾论》第 63 段",
+     "main": "外国帝国主义和国内反动派　对　人民大众",
+     "sides": ["外国帝国主义和国内反动派", "人民大众"], "aspectMain": "",
+     "secondary": [],
+     "secnote": "原文在这种情形下只说「其他矛盾」受它规定或影响，没有逐条列举。",
+     "change": "国内革命战争发展到从根本上威胁帝国主义及其走狗国内反动派的存在时，帝国主义就换手法：或者分化革命阵线的内部，或者直接出兵援助国内反动派。两边于是完全公开地站成两极。",
+     "egs": ["十月革命后各资本主义国家援助俄国反动派（武装干涉）", "一九二七年蒋介石的叛变（分化革命阵线）"],
+     "note": "第 63 段。原文举的两个例子都在这里：一个讲武装干涉，一个讲分化阵线。",
+     "fn": ""},
+    {"key": "e", "name": "对照 · 资本主义社会", "group": "《矛盾论》原例（对照，不是中国的阶段）",
+     "phase": "《矛盾论》第 59 段",
+     "tag": "主要矛盾 · 原文拿来对照的一格",
+     "main": "无产阶级　对　资产阶级",
+     "sides": ["资产阶级", "无产阶级"], "aspectMain": "资产阶级",
+     "secondary": ["残存的封建阶级和资产阶级", "农民小资产者和资产阶级", "无产阶级和农民小资产者", "自由资产阶级和垄断资产阶级", "资产阶级的民主主义和资产阶级的法西斯主义", "资本主义国家相互间", "帝国主义和殖民地"],
+     "secnote": "这七对都是原文第 59 段自己列的，说它们「都为这个主要的矛盾力量所规定、所影响」。",
+     "change": "换一套参照系。原文的顺序是：先指认无产阶级和资产阶级是主要矛盾，再说明社会性质由矛盾的主要方面规定——资产阶级占主要方面，所以是资本主义社会（第 66、69 段）。",
+     "egs": [],
+     "note": "原文只讲到这里：用资本主义社会作对照，说明主要矛盾规定其他矛盾；没有把中国的情形套进这个框子。",
+     "fn": ""},
 ]
 
-# 原文依据：段号 + 摘句关键词 + 对应哪个阶段（a/b/c 见 TOOL_SCENES 的 key）。
+# 原文依据：篇名 + 段号 + 摘句关键词 + 对应哪一格（a–e 见 TOOL_SCENES 的 key）。
 # 段号一律 1 起算，与阅读页 #pn 锚点同源，点进去就是这一句所在的那一段。
 TOOL_QUOTES = [
-    {"para": 63, "kw": "成为一个主要矛盾", "for": ["b"], "note": "主要矛盾怎么重新组合"},
-    {"para": 65, "kw": "必定有一种是主要的", "for": ["a", "b"], "note": "方法：先找出主要矛盾"},
-    {"para": 66, "kw": "事物的性质，主要地是由取得支配地位的矛盾的主要方面所规定的", "for": ["c"], "note": "主要方面决定性质"},
-    {"para": 69, "kw": "在资本主义社会中", "for": ["c"], "note": "《矛盾论》原例"},
-    {"para": 70, "kw": "帝国主义处在形成半殖民地这种矛盾的主要地位", "for": ["a"], "note": "中国：半殖民地是怎么形成的"},
+    {"work": "矛盾论", "para": 45, "kw": "根本矛盾的性质", "for": ["a"], "note": "根本矛盾：二十多年不变"},
+    {"work": "矛盾论", "para": 58, "kw": "必有一种是主要的矛盾", "for": ["a", "b", "c", "d", "e"], "note": "方法：多数矛盾里先找出主要的"},
+    {"work": "矛盾论", "para": 64, "kw": "只有一种主要的矛盾", "for": ["a", "b", "c", "d", "e"], "note": "各阶段只有一种主要矛盾"},
+    {"work": "矛盾论", "para": 61, "kw": "目前的中日战争", "for": ["b"], "note": "侵略战争：民族矛盾成主要"},
+    {"work": "矛盾论", "para": 62, "kw": "帝国主义和封建阶级的同盟", "for": ["c"], "note": "温和压迫：反对帝国主义与封建阶级的同盟"},
+    {"work": "矛盾论", "para": 63, "kw": "分化革命阵线", "for": ["d"], "note": "阵线公开分成两极"},
+    {"work": "矛盾论", "para": 59, "kw": "无产阶级和资产阶级这两个矛盾着的力量是主要的矛盾", "for": ["e"], "note": "资本主义社会的主要矛盾与原例"},
+    {"work": "矛盾论", "para": 66, "kw": "矛盾的主要方面", "for": ["e"], "note": "主要方面决定性质"},
+    {"work": "矛盾论", "para": 69, "kw": "在资本主义社会中", "for": ["e"], "note": "性质随主要方面变化"},
+    {"work": "中国共产党在抗日时期的任务", "para": 2, "kw": "中日矛盾成为主要的矛盾", "for": ["b"], "note": "1937：中日矛盾成主要"},
+    {"work": "中国共产党在抗日时期的任务", "para": 9, "kw": "本身依然存在着", "for": ["b"], "note": "次要矛盾不等于消失"},
 ]
 
 # ---------- 7.5 金字塔（先问，再答，三根柱子） ----------
@@ -884,7 +932,7 @@ def build_pyramid():
             # 这句是本库自己概括的，不是原文；页面必须把"可被指正"的口子开着，
             # 读者拿原文一对就能发现偏差，所以要留一个直接可点的信箱
             apex_note = esc(PYRAMID["apex"]["note"]) + \
-                '概括如有不对，请来信指正：%s。' % mail_html()
+                '概括如有不对，欢迎指正：%s。' % CONTACT
             blocks.append(layer_block(L["level"], "", inner, apex_note, raw_note=True))
         else:  # branches——不用大白卡罩住三张卡：层题与注释放页面上，三张卡独立并排
             # 不设层标题问句：三张卡各自的问句已经在回答上一层的「凭什么成立」，再来一行总问句是重复
@@ -1018,6 +1066,12 @@ APP_JS = r"""
   if (window.__TOOL__) {
     var scenes = window.__TOOL__, tabs = document.getElementById('tabs'), stage = document.getElementById('scene'), ex = document.getElementById('explain');
     function esc(s){ var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+    // 阶段文案里要挂脚注时，scene.fn 给注号，跳页末「注 1 / 注 2」
+    function fnRef(s) {
+      if (!s.fn) return '';
+      var n = esc(s.fn);
+      return ' <a class="fn-ref" href="#fn' + n + '" title="见注 ' + n + '">注 ' + n + '</a>';
+    }
     function render(i) {
       var s = scenes[i];
       // 按 group 分块：每块＝组名 + 该组按钮。之前把组名与按钮平铺在同一层，
@@ -1037,25 +1091,35 @@ APP_JS = r"""
       Array.prototype.forEach.call(tabs.querySelectorAll('button'), function(b){
         b.addEventListener('click', function(){ render(+b.getAttribute('data-i')); });
       });
-      var sec = s.secondary.map(function(x){
-        return '<div class="md-sec-card">' + esc(x) + '</div>';
-      }).join('');
       var sideChips = s.sides.map(function(x){
         var m = s.aspectMain && x === s.aspectMain;
         return '<span class="md-chip' + (m ? ' md-chip-main' : '') + '">' + esc(x) + (m ? '<em>矛盾主要方面</em>' : '') + '</span>';
       }).join('<span class="md-vs">对</span>');
+      // 原文举的例子单独成行，用原文的年份写法（「一八四○」），不换成通行纪年
+      var egs = (s.egs && s.egs.length)
+        ? '<div class="md-egs"><span class="lb">原文举的例子</span>' +
+          s.egs.map(function(x){ return '<span class="eg">' + esc(x) + '</span>'; }).join('') + '</div>'
+        : '';
+      // 原文没逐条列次要矛盾的那几格，就空着并说明；不拿史学叙述来填空
+      var secBox = s.secondary.length
+        ? '<div class="md-sec">' + s.secondary.map(function(x){
+            return '<div class="md-sec-card">' + esc(x) + '</div>';
+          }).join('') + '</div>' +
+          '<div class="md-sec-note">' + esc(s.secnote || '次要矛盾 · 被主要矛盾规定和影响，随阶段相互转化') + '</div>'
+        : '<div class="md-sec md-sec-empty"><div class="md-sec-hd">次要矛盾 · 原文未逐条列出</div>' +
+          '<div class="md-sec-tx">' + esc(s.secnote || '') + '</div></div>';
       stage.innerHTML =
         '<div class="md-phase">' + esc(s.phase) + '</div>' +
         '<div class="md-grid">' +
           '<div class="md-main">' +
-            '<div class="md-tag">主要矛盾 · 现阶段谁说话算数</div>' +
+            '<div class="md-tag">' + esc(s.tag || '主要矛盾 · 现阶段谁说话算数') + '</div>' +
             '<div class="md-title">' + esc(s.main) + '</div>' +
             '<div class="md-sides">矛盾双方　' + sideChips + '</div>' +
+            egs +
           '</div>' +
-          '<div class="md-sec">' + sec + '</div>' +
+          secBox +
         '</div>' +
-        '<div class="md-sec-note">次要矛盾 · 被主要矛盾规定和影响，随阶段相互转化</div>' +
-        '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + '</div>';
+        '<div class="tool-change"><b>变的是什么</b>' + esc(s.change) + fnRef(s) + '</div>';
       ex.innerHTML = '<b>读法</b>　' + esc(s.note);
       syncQuotes(s.key);
     }
@@ -1072,7 +1136,7 @@ APP_JS = r"""
         if (hit) n++;
       });
       var cap = document.getElementById('yuju-cap');
-      if (cap) cap.textContent = '当前这一阶段，给「' + scenes[
+      if (cap) cap.textContent = '当前这一格，给「' + scenes[
         (function(){ for (var j = 0; j < scenes.length; j++) { if (scenes[j].key === key) return j; } return 0; })()
       ].name + '」作证的原文有 ' + n + ' 段，已点亮；点段号回原文核对。';
     }
@@ -1215,28 +1279,6 @@ APP_JS = r"""
     paint();
   })();
 
-  // 纠错信箱：页面上只有「1035775998 艾特 qq.com」，真地址在点击时才拼出来，
-  // 一是别让爬虫直接收走，二是读者不用自己把艾特改回 @
-  document.addEventListener('click', function(e){
-    var b = e.target && e.target.closest ? e.target.closest('.mailcopy') : null;
-    if (!b) return;
-    var addr = b.getAttribute('data-u') + '@' + b.getAttribute('data-d');
-    var old = b.textContent;
-    function ok(){ b.classList.add('ok'); b.textContent = '已复制，去粘贴'; }
-    function back(){ b.classList.remove('ok'); b.textContent = old; }
-    function fallback(){
-      var ta = document.createElement('textarea');
-      ta.value = addr;
-      ta.style.position = 'fixed'; ta.style.top = '-1000px';
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); ok(); } catch (err) {}
-      document.body.removeChild(ta);
-      setTimeout(back, 1600);
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(addr).then(function(){ ok(); setTimeout(back, 1600); }, fallback);
-    } else { fallback(); }
-  });
 })();
 """
 os.makedirs(os.path.join(SITE, "assets"), exist_ok=True)
