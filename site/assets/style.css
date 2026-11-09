@@ -115,13 +115,13 @@ body {
 /* 四种读法：四张卡片排 2×2，比 3+1 的残行稳 */
 .entries.e4 { grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .entry {
-  position: relative; overflow: hidden;
-  display: block; padding: 42px 20px 20px 22px; background: #fff;
+  position: relative;
+  display: block; padding: 42px 20px 20px 30px; background: #fff;
   border: 1px solid var(--line); border-radius: 4px;
   text-decoration: none; color: var(--ink); transition: border-color .15s, background-color .24s, transform .15s;
 }
-/* 左上角一枚墨色序号牌（01–04）：四张卡因此有了同一个"钉"，排成 2×2 时
-   编号在左上、箭头在右下，读者知道从哪进、往哪走 */
+/* 序号牌压在左上角（四张卡共用一个"钉"）。文字左边缘退到 30px，
+   正好和牌子的右边缘站在同一条竖线上——原来 22px 落在牌子底下，看着像压着一列字 */
 .entry .no {
   position: absolute; top: 0; left: 0;
   width: 30px; height: 30px;
@@ -136,7 +136,7 @@ body {
   font-size: 15px; line-height: 1; color: var(--line-2);
 }
 .entry .t { font-family: var(--display); font-size: 18px; font-weight: 700; padding-right: 30px; }
-.entry .d { font-size: 13px; color: var(--ink-3); margin-top: 6px; line-height: 1.6; padding-right: 40px; }
+.entry .d { font-size: 13px; color: var(--ink-3); margin-top: 8px; line-height: 1.65; padding-right: 26px; }
 .today { display: flex; gap: 20px; align-items: flex-start; background: var(--paper-2); border-radius: 6px; padding: 24px; }
 .today .k { font-size: 11px; color: var(--ink-3); letter-spacing: 0.2em; flex-shrink: 0; padding-top: 8px; }
 .today .t { font-family: var(--display); font-size: 22px; font-weight: 700; text-decoration: none; color: var(--ink); }
@@ -644,7 +644,13 @@ a.term:hover { border-bottom-color: var(--teal); }
 /* 470px 以下：13 字的副题一行放不下，先断成「变成一本可检索的 / 知识笔记」，
    比让它自动折成「……的知 / 识笔记」好看 */
 @media (max-width: 620px) {
-  .entries.e4 { grid-template-columns: 1fr; }
+  /* 目录条在窄屏折两行：章号 + 标题 + 箭头占第一行，提要掉到下面跟标题左对齐 */
+  .entry { grid-template-columns: 26px 1fr 18px; column-gap: 12px; row-gap: 5px; padding: 18px 4px 18px 12px; }
+  .entry .no { grid-column: 1; grid-row: 1; }
+  .entry .t { grid-column: 2; grid-row: 1; }
+  .entry .go { grid-column: 3; grid-row: 1; }
+  .entry .d { grid-column: 2 / 4; grid-row: 2; }
+  .entry::before { top: 13px; bottom: 13px; }
 }
 
 @media (max-width: 470px) {
@@ -679,20 +685,15 @@ a.term:hover { border-bottom-color: var(--teal); }
     box-shadow: 0 12px 22px -12px rgba(26, 26, 26, .45);
   }
 
-  /* 入口卡 / 概念卡：上浮 + 一层浅投影，标题跟着变绿。
-     入口卡是纸色底，悬停时转白——像被抽出来的一张纸 */
-  .entry, .cc { transition: border-color .24s, transform .3s cubic-bezier(.22, .68, .3, 1), box-shadow .3s, background-color .24s; }
+  /* 入口卡 / 概念卡：上浮 + 一层浅投影，标题跟着变绿 */
+  .entry, .cc { transition: border-color .24s, transform .3s cubic-bezier(.22, .68, .3, 1), box-shadow .3s; }
   .entry:hover, .cc:hover {
     border-color: var(--teal); transform: translateY(-4px);
     box-shadow: 0 12px 26px -16px rgba(26, 26, 26, .34);
   }
-  /* 悬停底色不动：白卡转灰在这套暖纸底上会显脏，靠边框+投影+上浮就够 */
-  .entry:hover { background: #fff; }
+  /* 悬停底色不动：白卡转灰在这套纸白底上会显脏，靠边框 + 投影 + 上浮就够 */
   .entry .t, .cc .nm { transition: color .24s; }
   .entry:hover .t, .cc:hover .nm { color: var(--teal); }
-  /* 顶部那截线向右长成整条，同时变 teal：卡片被"划开"的那一下 */
-  .entry::before { transition: transform .42s cubic-bezier(.22, .68, .3, 1), background-color .3s; }
-  .entry:hover::before { transform: scaleX(1); background: var(--teal); }
   /* 序号牌：悬停时整块转 teal */
   .entry:hover .no { background: var(--teal); }
   .entry .go { transition: color .24s, transform .34s cubic-bezier(.22, .68, .3, 1); }
